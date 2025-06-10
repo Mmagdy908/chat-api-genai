@@ -4,7 +4,6 @@ import catchAsync from '../util/catchAsync';
 import * as authService from '../services/authService';
 import * as userMapper from '../mappers/userMapper';
 import checkRequiredFields from '../util/checkRequiredFields';
-import user from '../models/user';
 
 export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {

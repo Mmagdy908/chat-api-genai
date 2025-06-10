@@ -1,4 +1,6 @@
 import { createClient } from 'redis';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const client = createClient({
   username: process.env.REDIS_USERNAME,
@@ -9,16 +11,16 @@ const client = createClient({
   },
 });
 
-(async () => {
-  try {
-    client.on('error', (err) => console.log('Redis Client Error', err));
+client.on('error', (err) => console.log('Redis Client Error', err));
 
+export const redisConfig = async () => {
+  try {
     await client.connect();
 
     console.log('Connected successfully to Redis');
   } catch (error) {
     console.log('Redis Client Error', error);
   }
-})();
+};
 
 export default client;

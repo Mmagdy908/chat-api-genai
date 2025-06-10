@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
-export default async () => {
+export const mongoConfig = async () => {
   try {
-    const DB = process.env.DB?.replace('<db_password>', process.env.DB_PASSWORD || '');
+    const DB = process.env.DB?.replace('<db_password>', process.env.DB_PASSWORD as string);
 
-    await mongoose.connect(DB || '');
+    await mongoose.connect(DB as string);
 
     console.log('Connected successfully to MongoDB');
   } catch (err) {
