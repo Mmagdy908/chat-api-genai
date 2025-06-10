@@ -10,24 +10,21 @@ import {
   storeOTP,
   verifyOTP,
 } from '../util/authUtil';
-import sendEmail from '../util/email';
-import {
-  generateResetPasswordEmailTemplate,
-  generateVerifyEmailTemplate,
-} from '../util/emailTemplate';
+import Email from '../util/email';
+
 import { User } from '../interfaces/models/user';
 import { LoginRequest } from '../interfaces/requests/user';
 import * as userRepository from '../repositories/userRepository';
 
 import AppError from '../util/appError';
 
-const sendVerificationEmail = async (userEmail: string, verifyEmailOTP: string) => {
-  await sendEmail(
-    userEmail,
-    'Verify Email OTP (valid for 10 mins)',
-    generateVerifyEmailTemplate(verifyEmailOTP)
-  );
-};
+// const sendVerificationEmail = async (userEmail: string, verifyEmailOTP: string) => {
+//   await sendEmail(
+//     userEmail,
+//     'Verify Email OTP (valid for 10 mins)',
+//     generateVerifyEmailTemplate(verifyEmailOTP)
+//   );
+// };
 export const userRegister = async (userData: Partial<User>): Promise<User> => {
   // 1) create user
   const user = await userRepository.create(userData);
@@ -38,7 +35,7 @@ export const userRegister = async (userData: Partial<User>): Promise<User> => {
   await storeOTP(user.id, 'verifyOTP', verifyEmailOTP);
 
   // 3) send verification email
-  await sendVerificationEmail(user.email, verifyEmailOTP);
+  await new Email(user, verifyEmailOTP).sendVerificationEmail();
 
   return user;
 };
@@ -100,7 +97,7 @@ export const userLogin = async (
     await storeOTP(user.id, 'verifyOTP', verifyEmailOTP);
 
     //  send verification email
-    await sendVerificationEmail(user.email, verifyEmailOTP);
+    await new Email(user, verifyEmailOTP).sendVerificationEmail();
 
     throw new AppError(401, 'This email is not verified. An OTP is sent to your email');
   }
@@ -185,11 +182,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
 
   // 3) send email
 
-  await sendEmail(
-    user.email,
-    'Reset Password OTP (valid for 10 mins)',
-    generateResetPasswordEmailTemplate(resetOTP)
-  );
+  await new Email(user, resetOTP).sendResetPasswordEmail();
 };
 
 export const resetPassword = async (
