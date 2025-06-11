@@ -4,10 +4,9 @@ import * as userRepository from '../../src/repositories/userRepository';
 import * as authUtil from '../../src/util/authUtil';
 import Email from '../../src/util/email';
 import { User } from '../../src/interfaces/models/user';
-import user from '../../src/models/user';
-// jest.mock('../../repositories/userRepository');
-// jest.mock('../../services/otpService');
-// jest.mock('../../services/emailService');
+import userModel from '../../src/models/user';
+import AppError from '../../src/util/appError';
+// jest.mock('../../src/repositories/userRepository');
 
 describe('authService - userRegister', () => {
   beforeEach(() => {
@@ -22,20 +21,17 @@ describe('authService - userRegister', () => {
       email: 'john@example.com',
       password: 'password123',
     };
-    const createdUser = new user(userData);
+    const createdUser = new userModel(userData);
     const verifyEmailOTP = '123456';
+
+    // ## alternative way for mocking
+    // const mockedUserRepository = jest.mocked(userRepository);
+    // mockedUserRepository.create.mockResolvedValue(createdUser);
 
     jest.spyOn(userRepository, 'create').mockResolvedValue(createdUser);
     jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(verifyEmailOTP);
     jest.spyOn(authUtil, 'storeOTP').mockResolvedValue(undefined);
     jest.spyOn(Email.prototype, 'sendVerificationEmail').mockResolvedValue(undefined);
-    // jest.spyOn(authUtil, 'create').mockResolvedValue(createdUser as User);
-    // (userRepository.create as jest.MockedFunction<typeof userRepository.create>).mockResolvedValue(
-    //   createdUser as User
-    // );
-    // (otpService.generateOTP as jest.Mock).mockResolvedValue(verifyEmailOTP);
-    // (otpService.storeOTP as jest.Mock).mockResolvedValue(undefined);
-    // (emailService.sendVerificationEmail as jest.Mock).mockResolvedValue(undefined);
 
     // Act
     const result = await userRegister(userData);
@@ -48,20 +44,23 @@ describe('authService - userRegister', () => {
     expect(result).toEqual(createdUser);
   });
 
-  // test('should throw error if user creation fails', async () => {
-  //   // Arrange
-  //   const userData = {
-  //     firstName: 'John',
-  //     lastName: 'Doe',
-  //     email: 'john@example.com',
-  //     password: 'password123',
-  //   };
-  //   (userRepository.create as jest.Mock).mockRejectedValue(new Error('Email already exists'));
+  test('should throw error if user creation fails', async () => {
+    // Arrange
+    const userData = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      password: 'password123',
+    };
 
-  //   // Act & Assert
-  //   await expect(userRegister(userData)).rejects.toThrow('Email already exists');
-  //   expect(otpService.generateOTP).not.toHaveBeenCalled();
-  //   expect(otpService.storeOTP).not.toHaveBeenCalled();
-  //   expect(emailService.sendVerificationEmail).not.toHaveBeenCalled();
-  // });
+    jest
+      .spyOn(userRepository, 'create')
+      .mockRejectedValue(new AppError(400, 'Email already exists'));
+
+    // Act & Assert
+    await expect(userRegister(userData)).rejects.toThrow('Email already exists');
+    expect(authUtil.generateOTP).not.toHaveBeenCalled();
+    expect(authUtil.storeOTP).not.toHaveBeenCalled();
+    expect(Email.prototype.sendVerificationEmail).not.toHaveBeenCalled();
+  });
 });

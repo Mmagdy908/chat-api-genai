@@ -1,17 +1,10 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import { mongoConfig } from './config/mongo';
-import { redisConfig } from './config/redis';
+
 import authRouter from './routes/authRoutes';
 import globalErrorHandler from './controllers/errorController';
 import AppError from './util/appError';
-
-dotenv.config();
-
-mongoConfig();
-redisConfig();
 
 const app = express();
 
@@ -36,6 +29,4 @@ app.use('/{*splat}', (req, res, next) => {
 
 app.use(globalErrorHandler);
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+export default app;

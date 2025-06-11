@@ -11,3 +11,21 @@ export const mongoConfig = async () => {
     console.log('Failed to connect to MongoDB', err);
   }
 };
+
+export const clearMongoDB = async () => {
+  try {
+    await mongoose.connection.db?.dropDatabase();
+    console.log('MongoDB is cleared successfully');
+  } catch (err) {
+    console.log('Failed to clear MongoDB', err);
+  }
+};
+
+export const disconnectMongoDB = async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('MongoDB is disconnected successfully');
+  } catch (err) {
+    console.log('Failed to disconnect MongoDB', err);
+  }
+};
