@@ -1,14 +1,13 @@
 import JWT, { Secret, SignOptions } from 'jsonwebtoken';
-import { Request, Response, NextFunction, CookieOptions } from 'express';
-import redis from '../config/redis';
+import { Response, CookieOptions } from 'express';
 import { User } from '../interfaces/models/user';
 import * as userMapper from '../mappers/userMapper';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
-import appError from './appError';
+import * as redis from './redisUtil';
 
 export const generateAccessToken = (userId: string) => {
-  const secret: Secret = process.env.JWT_SECRET || '';
+  const secret: Secret = process.env.JWT_SECRET as string;
 
   const signOptions = { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN } as SignOptions;
 
@@ -16,7 +15,7 @@ export const generateAccessToken = (userId: string) => {
 };
 
 export const generateRefreshToken = (userId: string, deviceId: string) => {
-  const secret: Secret = process.env.JWT_SECRET || '';
+  const secret: Secret = process.env.JWT_SECRET as string;
 
   const signOptions = { expiresIn: process.env.Refresh_TOKEN_EXPIRES_IN } as SignOptions;
 
@@ -24,24 +23,23 @@ export const generateRefreshToken = (userId: string, deviceId: string) => {
 };
 
 export const storeRefreshToken = async (userId: string, deviceId: string, refreshToken: string) => {
-  await redis.hSet(`${userId}:${deviceId}`, { refreshToken });
+  await redis.setField(`${userId}:${deviceId}`, { refreshToken });
 
   const expireAt = parseInt(process.env.Refresh_TOKEN_EXPIRES_IN?.slice(0, -1) || '30'); // in days
 
-  await redis.expire(`${userId}:${deviceId}`, expireAt * 24 * 60 * 60);
+  await redis.setExpiryDate(`${userId}:${deviceId}`, expireAt * 24 * 60 * 60);
 };
 
 export const retrieveRefreshToken = async (userId: string, deviceId: string): Promise<string> => {
-  return (await redis.hGet(`${userId}:${deviceId}`, 'refreshToken')) || '';
+  return (await redis.getField(`${userId}:${deviceId}`, 'refreshToken')) as string;
 };
 
 export const deleteRefreshToken = async (userId: string, deviceId: string): Promise<void> => {
-  await redis.hDel(`${userId}:${deviceId}`, 'refreshToken');
+  await redis.deleteField(`${userId}:${deviceId}`, 'refreshToken');
 };
 
 export const deleteAllRefreshTokens = async (userId: string): Promise<void> => {
-  const keys = await redis.keys(`${userId}:*`);
-  await Promise.all(keys.map((key) => redis.hDel(key, 'refreshToken')));
+  await redis.deleteAllFieldsWithPattern(`${userId}:*`, 'refreshToken');
 };
 
 export const generateOTP = async (): Promise<string> => {
@@ -52,19 +50,19 @@ export const generateOTP = async (): Promise<string> => {
 export const storeOTP = async (userId: string, type: 'verifyOTP' | 'resetOTP', OTP: string) => {
   const hash = await bcrypt.hash(OTP, Number(process.env.SALT));
 
-  await redis.hSet(userId, { [type]: hash });
+  await redis.setField(userId, { [type]: hash });
 
   const expiresAt = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_AT?.slice(0, -1)); // in mins
 
-  await redis.expire(userId, expiresAt * 60);
+  await redis.setExpiryDate(userId, expiresAt * 60);
 };
 
 export const verifyOTP = async (userId: string, type: 'verifyOTP' | 'resetOTP', OTP: string) => {
-  const hash = await redis.hGet(userId, type);
+  const hash = await redis.getField(userId, type);
 
   if (!hash || !(await bcrypt.compare(OTP, hash))) return false;
 
-  await redis.hDel(userId, type);
+  await redis.deleteField(userId, type);
 
   return true;
 };
