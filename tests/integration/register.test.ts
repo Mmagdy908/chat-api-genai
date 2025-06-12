@@ -1,8 +1,8 @@
 import { jest, describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
-import mongoose from 'mongoose';
 import app from '../../src/app';
 import { mongoConfig, disconnectMongoDB, clearMongoDB } from '../../src/config/mongo';
+import { redisConfig, disconnectRedis } from '../../src/config/redis';
 import User from '../../src/models/user';
 import * as authUtil from '../../src/util/authUtil';
 import Email from '../../src/util/email';
@@ -13,6 +13,7 @@ jest.mock('../../src/util/email');
 describe('Register API Integration Tests', () => {
   beforeAll(async () => {
     await mongoConfig(); // Start in-memory MongoDB
+    await redisConfig();
   });
 
   beforeEach(async () => {
@@ -22,6 +23,7 @@ describe('Register API Integration Tests', () => {
 
   afterAll(async () => {
     await disconnectMongoDB(); // Stop MongoDB
+    await disconnectRedis();
   });
 
   describe('POST /register', () => {
@@ -36,8 +38,8 @@ describe('Register API Integration Tests', () => {
       const verifyEmailOTP = '123456';
 
       jest.mocked(authUtil.generateOTP).mockResolvedValue(verifyEmailOTP);
-      jest.mocked(authUtil.storeOTP).mockResolvedValue(undefined);
-      jest.mocked(Email.prototype.sendVerificationEmail).mockResolvedValue(undefined);
+      jest.mocked(authUtil.storeOTP);
+      jest.mocked(Email.prototype.sendVerificationEmail);
 
       // Act
       const response = await request(app).post('/api/v1/register').send(userData).expect(201);
@@ -55,7 +57,11 @@ describe('Register API Integration Tests', () => {
 
       // Verify OTP and email calls
       expect(authUtil.generateOTP).toHaveBeenCalled();
-      expect(authUtil.storeOTP).toHaveBeenCalledWith(expect.any(String), 'verifyOTP', '123456');
+      expect(authUtil.storeOTP).toHaveBeenCalledWith(
+        expect.any(String),
+        'verifyOTP',
+        verifyEmailOTP
+      );
       expect(Email.prototype.sendVerificationEmail).toHaveBeenCalled();
     });
 
@@ -67,6 +73,7 @@ describe('Register API Integration Tests', () => {
         email: 'john@example.com',
         password: '123456789',
       });
+
       const userData = {
         firstName: 'John',
         lastName: 'Doe',

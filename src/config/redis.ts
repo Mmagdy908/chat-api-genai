@@ -23,4 +23,13 @@ export const redisConfig = async () => {
   }
 };
 
+export const disconnectRedis = async () => {
+  try {
+    await client.close();
+    console.log('Redis is disconnected successfully ');
+  } catch (error) {
+    console.log('Redis Client Disconnection Error', error);
+  }
+};
+
 export default client;
