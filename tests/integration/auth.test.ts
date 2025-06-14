@@ -1,5 +1,4 @@
 import { jest, describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
-import dotenv from 'dotenv';
 import request from 'supertest';
 import app from '../../src/app';
 import { mongoConfig, disconnectMongoDB, clearMongoDB } from '../../src/config/mongo';
@@ -12,7 +11,6 @@ jest.mock('../../src/util/email');
 
 describe('Auth API Integration Tests', () => {
   beforeAll(async () => {
-    dotenv.config();
     await mongoConfig(); // Start in-memory MongoDB
     await redisConfig();
   });

@@ -1,13 +1,11 @@
-import dotenv from 'dotenv';
 import { mongoConfig } from './config/mongo';
 import { redisConfig } from './config/redis';
 import app from './app';
-
-dotenv.config();
+import ENV_VAR from './config/envConfig';
 
 mongoConfig();
 redisConfig();
 
-const port = process.env.PORT || 3000;
+const port = ENV_VAR.PORT || 3000;
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));

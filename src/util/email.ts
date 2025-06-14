@@ -1,15 +1,16 @@
 import nodemailer from 'nodemailer';
 import { User } from '../interfaces/models/user';
 import { generateResetPasswordEmailTemplate, generateVerifyEmailTemplate } from './emailTemplate';
+import ENV_VAR from '../config/envConfig';
 
 // export default async (email: string, subject: string, html: string) => {
 //   // 1) create transport
 //   const transport = nodemailer.createTransport({
-//     host: process.env.EMAIL_HOST,
-//     port: Number(process.env.EMAIL_PORT),
+//     host: ENV_VAR.EMAIL_HOST,
+//     port: Number(ENV_VAR.EMAIL_PORT),
 //     auth: {
-//       user: process.env.EMAIL_USERNAME,
-//       pass: process.env.EMAIL_PASSWORD,
+//       user: ENV_VAR.EMAIL_USERNAME,
+//       pass: ENV_VAR.EMAIL_PASSWORD,
 //     },
 //   });
 
@@ -42,22 +43,22 @@ export default class Email {
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === 'production') {
+    if (ENV_VAR.NODE_ENV === 'production') {
       return nodemailer.createTransport({
         service: 'SendGrid',
         auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD,
+          user: ENV_VAR.SENDGRID_USERNAME,
+          pass: ENV_VAR.SENDGRID_PASSWORD,
         },
       });
     }
 
     return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
+      host: ENV_VAR.EMAIL_HOST,
+      port: Number(ENV_VAR.EMAIL_PORT),
       auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
+        user: ENV_VAR.EMAIL_USERNAME,
+        pass: ENV_VAR.EMAIL_PASSWORD,
       },
     });
   }

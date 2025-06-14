@@ -6,19 +6,20 @@ import * as userMapper from '../mappers/userMapper';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import * as redis from './redisUtil';
+import ENV_VAR from '../config/envConfig';
 
 export const generateAccessToken = (userId: string) => {
-  const secret: Secret = process.env.JWT_SECRET as string;
+  const secret: Secret = ENV_VAR.JWT_SECRET as string;
 
-  const signOptions = { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN } as SignOptions;
+  const signOptions = { expiresIn: ENV_VAR.ACCESS_TOKEN_EXPIRES_IN } as SignOptions;
 
   return JWT.sign({ userId }, secret, signOptions);
 };
 
 export const generateRefreshToken = (userId: string, deviceId: string) => {
-  const secret: Secret = process.env.JWT_SECRET as string;
+  const secret: Secret = ENV_VAR.JWT_SECRET as string;
 
-  const signOptions = { expiresIn: process.env.Refresh_TOKEN_EXPIRES_IN } as SignOptions;
+  const signOptions = { expiresIn: ENV_VAR.REFRESH_TOKEN_EXPIRES_IN } as SignOptions;
 
   return JWT.sign({ userId, deviceId }, secret, signOptions);
 };
@@ -26,7 +27,7 @@ export const generateRefreshToken = (userId: string, deviceId: string) => {
 export const storeRefreshToken = async (userId: string, deviceId: string, refreshToken: string) => {
   await redis.setField(`${userId}:${deviceId}`, { refreshToken });
 
-  const expireAt = parseInt(process.env.Refresh_TOKEN_EXPIRES_IN?.slice(0, -1) || '30'); // in days
+  const expireAt = parseInt(ENV_VAR.REFRESH_TOKEN_EXPIRES_IN?.slice(0, -1) || '30'); // in days
 
   await redis.setExpiryDate(`${userId}:${deviceId}`, expireAt * 24 * 60 * 60);
 };
@@ -49,11 +50,11 @@ export const generateOTP = async (): Promise<string> => {
 };
 
 export const storeOTP = async (userId: string, type: 'verifyOTP' | 'resetOTP', OTP: string) => {
-  const hash = await bcrypt.hash(OTP, Number(process.env.SALT));
+  const hash = await bcrypt.hash(OTP, Number(ENV_VAR.SALT));
 
   await redis.setField(userId, { [type]: hash });
 
-  const expiresAt = Number(process.env.PASSWORD_RESET_OTP_EXPIRES_AT?.slice(0, -1)); // in mins
+  const expiresAt = Number(ENV_VAR.PASSWORD_RESET_OTP_EXPIRES_AT?.slice(0, -1)); // in mins
 
   await redis.setExpiryDate(userId, expiresAt * 60);
 };
@@ -76,10 +77,10 @@ export const storeRefreshTokenToCookie = async (
     httpOnly: true,
     secure: false,
     sameSite: 'strict',
-    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN || '30') * 24 * 60 * 60 * 1000,
+    maxAge: parseInt(ENV_VAR.JWT_COOKIE_EXPIRES_IN || '30') * 24 * 60 * 60 * 1000,
   };
 
-  if (process.env.NODE_ENV === 'production') {
+  if (ENV_VAR.NODE_ENV === 'production') {
     cookieOptions.secure = true;
     cookieOptions.sameSite = 'none';
   }
@@ -97,7 +98,7 @@ const asyncJwtVerify = (token: string, secretOrPublicKey: Secret): Promise<any> 
 };
 
 export const verifyToken = async (token: string): Promise<any> => {
-  const secret: Secret = process.env.JWT_SECRET as string;
+  const secret: Secret = ENV_VAR.JWT_SECRET as string;
   const payload = await asyncJwtVerify(token, secret);
   return payload;
 };

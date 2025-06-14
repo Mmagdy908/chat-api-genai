@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import AppError from '../util/appError';
+import ENV_VAR from '../config/envConfig';
 
 const sendDevError = (err: any, res: Response) => {
   res
@@ -33,7 +34,7 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
   } else if (err.name === 'JsonWebTokenError') error = new AppError(401, 'Invalid Access Token');
   else if (err.name === 'TokenExpiredError') error = new AppError(401, 'Expired Access Token');
 
-  if (process.env.NODE_ENV === 'development') sendDevError(error, res);
+  if (ENV_VAR.NODE_ENV === 'development') sendDevError(error, res);
   else {
     sendProdError(error, res);
   }

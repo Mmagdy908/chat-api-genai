@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import { User } from '../interfaces/models/user';
 import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcrypt';
+import ENV_VAR from '../config/envConfig';
 
 const userSchema = new Schema<User>(
   {
@@ -49,7 +50,7 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   // encrypt password
-  const salt = process.env.SALT || 12;
+  const salt = ENV_VAR.SALT || 12;
   this.password = await bcrypt.hash(this.password, +salt);
 
   next();

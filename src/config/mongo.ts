@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import ENV_VAR from './envConfig';
 
 export const mongoConfig = async () => {
   try {
-    const DB = process.env.DB?.replace('<db_password>', process.env.DB_PASSWORD as string);
+    const DB = ENV_VAR.DB?.replace('<db_password>', ENV_VAR.DB_PASSWORD as string);
 
     await mongoose.connect(DB as string);
 

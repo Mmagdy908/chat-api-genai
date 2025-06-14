@@ -1,7 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-
+import ENV_VAR from './config/envConfig';
 import authRouter from './routes/authRoutes';
 import globalErrorHandler from './controllers/errorController';
 import AppError from './util/appError';
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //development loggings
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+if (ENV_VAR.NODE_ENV === 'development') app.use(morgan('dev'));
 
 // routers
 app.use('/api/v1', authRouter);
