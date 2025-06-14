@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   generateAccessToken,
   verifyToken,
@@ -9,6 +8,7 @@ import {
   generateOTP,
   storeOTP,
   verifyOTP,
+  login,
 } from '../util/authUtil';
 import Email from '../util/email';
 
@@ -40,23 +40,6 @@ export const userRegister = async (userData: Partial<User>): Promise<User> => {
   return user;
 };
 
-const login = async (userId: string): Promise<{ accessToken: string; refreshToken: string }> => {
-  // 1) generate access token
-  const accessToken = generateAccessToken(userId);
-
-  // 2) generate refresh token
-  const deviceId = uuidv4();
-  const refreshToken = generateRefreshToken(userId, deviceId);
-
-  // 3) save refresh token to redis
-  await storeRefreshToken(userId, deviceId, refreshToken);
-
-  return {
-    accessToken,
-    refreshToken,
-  };
-};
-
 export const verifyEmail = async (id: string, verifyEmailOTP: string) => {
   // 1) get user
   const user = await userRepository.getById(id);
@@ -64,7 +47,7 @@ export const verifyEmail = async (id: string, verifyEmailOTP: string) => {
 
   // 2) verify otp
   if (!(await verifyOTP(id, 'verifyOTP', verifyEmailOTP)))
-    throw new AppError(400, 'Invalid verification OTP ');
+    throw new AppError(400, 'Invalid verification OTP');
 
   // 3) set user as verified
   const newUser = (await userRepository.updateById(id, { isVerified: true })) as User;

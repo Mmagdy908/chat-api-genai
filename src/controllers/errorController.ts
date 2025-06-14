@@ -24,7 +24,6 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
   err.statusCode ??= 500;
 
   let error = err;
-
   if (err.cause?.code === 11000) error = new AppError(400, err.message);
   else if (err.name === 'ValidationError') {
     const msg = Object.values(err.errors)

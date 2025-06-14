@@ -1,5 +1,6 @@
 import JWT, { Secret, SignOptions } from 'jsonwebtoken';
 import { Response, CookieOptions } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { User } from '../interfaces/models/user';
 import * as userMapper from '../mappers/userMapper';
 import crypto from 'crypto';
@@ -99,6 +100,25 @@ export const verifyToken = async (token: string): Promise<any> => {
   const secret: Secret = process.env.JWT_SECRET as string;
   const payload = await asyncJwtVerify(token, secret);
   return payload;
+};
+
+export const login = async (
+  userId: string
+): Promise<{ accessToken: string; refreshToken: string }> => {
+  // 1) generate access token
+  const accessToken = generateAccessToken(userId);
+
+  // 2) generate refresh token
+  const deviceId = uuidv4();
+  const refreshToken = generateRefreshToken(userId, deviceId);
+
+  // 3) save refresh token to redis
+  await storeRefreshToken(userId, deviceId, refreshToken);
+
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const sendLoginResponse = (

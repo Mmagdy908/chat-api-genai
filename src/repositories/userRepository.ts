@@ -16,25 +16,11 @@ export const getById = async (
 };
 
 export const getByEmail = async (email: string): Promise<User | null> => {
-  return await userModel.findOne({ email }).populate({ path: 'workspaces', select: 'title' });
+  return await userModel.findOne({ email });
 };
 
 export const updateById = async (id: string, newUserData: Partial<User>): Promise<User | null> => {
-  return await userModel
-    .findByIdAndUpdate(id, newUserData, { new: true })
-    .populate({ path: 'workspaces', select: 'title' });
-};
-
-export const addWorkspace = async (id: string, workspaceId: string): Promise<User | null> => {
-  return await userModel
-    .findByIdAndUpdate(id, { $push: { workspaces: workspaceId } }, { new: true })
-    .populate({ path: 'workspaces', select: 'title' });
-};
-
-export const removeWorkspace = async (id: string, workspaceId: string): Promise<User | null> => {
-  return await userModel
-    .findByIdAndUpdate(id, { $pull: { workspaces: workspaceId } }, { new: true })
-    .populate({ path: 'workspaces', select: 'title' });
+  return await userModel.findByIdAndUpdate(id, newUserData, { new: true });
 };
 
 export const saveUser = async (user: User): Promise<void> => {
