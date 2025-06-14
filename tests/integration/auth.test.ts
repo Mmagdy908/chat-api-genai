@@ -18,7 +18,7 @@ describe('Register API Integration Tests', () => {
     });
 
     beforeEach(async () => {
-      await userModel.deleteMany(); // Reset database
+      await clearMongoDB(); // Reset database
       jest.clearAllMocks();
     });
 
@@ -115,7 +115,7 @@ describe('Verify Email API Integration Tests', () => {
     });
 
     beforeEach(async () => {
-      await userModel.deleteMany(); // Reset database
+      await clearMongoDB(); // Reset database
       jest.clearAllMocks();
     });
 
