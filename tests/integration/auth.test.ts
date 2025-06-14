@@ -1,4 +1,5 @@
 import { jest, describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import dotenv from 'dotenv';
 import request from 'supertest';
 import app from '../../src/app';
 import { mongoConfig, disconnectMongoDB, clearMongoDB } from '../../src/config/mongo';
@@ -6,26 +7,27 @@ import { redisConfig, disconnectRedis } from '../../src/config/redis';
 import userModel from '../../src/models/user';
 import * as authUtil from '../../src/util/authUtil';
 import Email from '../../src/util/email';
-
 jest.mock('../../src/util/authUtil');
 jest.mock('../../src/util/email');
 
-describe('Register API Integration Tests', () => {
+describe('Auth API Integration Tests', () => {
+  beforeAll(async () => {
+    dotenv.config();
+    await mongoConfig(); // Start in-memory MongoDB
+    await redisConfig();
+  });
+
+  beforeEach(async () => {
+    await clearMongoDB(); // Reset database
+    jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await disconnectMongoDB(); // Stop MongoDB
+    await disconnectRedis();
+  });
+
   describe('POST /register', () => {
-    beforeAll(async () => {
-      await mongoConfig(); // Start in-memory MongoDB
-      await redisConfig();
-    });
-
-    beforeEach(async () => {
-      await clearMongoDB(); // Reset database
-      jest.clearAllMocks();
-    });
-
-    afterAll(async () => {
-      await disconnectMongoDB(); // Stop MongoDB
-      await disconnectRedis();
-    });
     test('should register user, save to database, and trigger OTP/email', async () => {
       // Arrange
       const userData = {
@@ -105,25 +107,8 @@ describe('Register API Integration Tests', () => {
       expect(users).toHaveLength(0);
     });
   });
-});
 
-describe('Verify Email API Integration Tests', () => {
   describe('POST /verify-email', () => {
-    beforeAll(async () => {
-      await mongoConfig(); // Start in-memory MongoDB
-      await redisConfig();
-    });
-
-    beforeEach(async () => {
-      await clearMongoDB(); // Reset database
-      jest.clearAllMocks();
-    });
-
-    afterAll(async () => {
-      await disconnectMongoDB(); // Stop MongoDB
-      await disconnectRedis();
-    });
-
     test('should verify user email, set user as verified in database, and send back auth tokens', async () => {
       // Arrange
       const userMock = await userModel.create({
