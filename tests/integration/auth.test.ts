@@ -6,7 +6,6 @@ import { redisConfig, disconnectRedis } from '../../src/config/redis';
 import userModel from '../../src/models/user';
 import * as authUtil from '../../src/util/authUtil';
 import Email from '../../src/util/email';
-jest.mock('../../src/util/authUtil');
 jest.mock('../../src/util/email');
 
 describe('Auth API Integration Tests', () => {
@@ -36,8 +35,8 @@ describe('Auth API Integration Tests', () => {
       };
       const verifyEmailOTP = '123456';
 
-      jest.mocked(authUtil.generateOTP).mockResolvedValue(verifyEmailOTP);
-      jest.mocked(authUtil.storeOTP);
+      jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(verifyEmailOTP);
+      jest.spyOn(authUtil, 'storeOTP');
       jest.mocked(Email.prototype.sendVerificationEmail);
 
       // Act
@@ -117,23 +116,10 @@ describe('Auth API Integration Tests', () => {
       });
       const verifyEmailOTP = '123456';
 
-      jest.mocked(authUtil.verifyOTP).mockResolvedValue(true);
+      jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(true);
       jest
-        .mocked(authUtil.login)
+        .spyOn(authUtil, 'login')
         .mockResolvedValue({ accessToken: 'accessToken', refreshToken: 'refreshToken' });
-
-      jest.mocked(authUtil.sendLoginResponse).mockImplementation((res, loggedUserData) => {
-        res.status(200).json({
-          status: 'success',
-          data: {
-            user: {
-              ...userMock.toObject(),
-              accessToken: 'accessToken',
-              refreshToken: 'refreshToken',
-            },
-          },
-        });
-      });
 
       // Act
       const response = await request(app)
@@ -163,7 +149,8 @@ describe('Auth API Integration Tests', () => {
       });
       const verifyEmailOTP = '123456';
 
-      jest.mocked(authUtil.verifyOTP).mockResolvedValue(false);
+      jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(false);
+      jest.spyOn(authUtil, 'sendLoginResponse');
 
       // Act
       const response = await request(app)
