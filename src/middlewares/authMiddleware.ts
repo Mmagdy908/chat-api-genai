@@ -12,7 +12,6 @@ export const protect = catchAsync(
 
     const accessToken = req.headers.authorization?.split(' ')[1] as string;
     // 2) verify access token
-
     const payload = await verifyToken(accessToken);
 
     // 3) check if user exists

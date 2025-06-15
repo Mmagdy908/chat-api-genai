@@ -1,5 +1,13 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
-import { userRegister, verifyEmail, userLogin, refreshToken } from '../../src/services/authService';
+import {
+  userRegister,
+  verifyEmail,
+  userLogin,
+  refreshToken,
+  updatePassword,
+  forgotPassword,
+  resetPassword,
+} from '../../src/services/authService';
 import * as userRepository from '../../src/repositories/userRepository';
 import * as authUtil from '../../src/util/authUtil';
 import Email from '../../src/util/email';
@@ -439,5 +447,229 @@ describe('authService - refreshToken', () => {
     expect(authUtil.retrieveRefreshToken).toHaveBeenCalledWith(userId, deviceId);
     expect(userRepository.getById).toHaveBeenCalledWith(userId);
     expect(authUtil.generateAccessToken).not.toHaveBeenCalled();
+  });
+});
+
+describe('authService - updatePassword', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should update password successfully and return new tokens', async () => {
+    // Arrange
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      password: 'oldPassword123',
+    });
+
+    const oldPassword = 'oldPassword123';
+    const newPassword = 'newPassword123';
+    const updatedUser = { ...userMock.toObject(), password: newPassword };
+
+    jest.spyOn(userMock, 'checkPassword').mockResolvedValue(true);
+    jest.spyOn(userRepository, 'create').mockResolvedValue(updatedUser as any);
+    jest.spyOn(authUtil, 'deleteAllRefreshTokens').mockResolvedValue(undefined);
+    jest.spyOn(authUtil, 'login').mockResolvedValue({
+      accessToken: 'newAccessToken',
+      refreshToken: 'newRefreshToken',
+    });
+
+    // Act
+    const result = await updatePassword(userMock, oldPassword, newPassword);
+
+    // Assert
+    expect(userMock.checkPassword).toHaveBeenCalledWith(oldPassword);
+    expect(userRepository.create).toHaveBeenCalledWith(userMock);
+    expect(authUtil.deleteAllRefreshTokens).toHaveBeenCalledWith(updatedUser.id);
+    expect(authUtil.login).toHaveBeenCalledWith(userMock.id);
+
+    expect(result.user).toEqual(updatedUser);
+    expect(result.accessToken).toBe('newAccessToken');
+    expect(result.refreshToken).toBe('newRefreshToken');
+  });
+
+  test('should throw error if old password is incorrect', async () => {
+    // Arrange
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      password: 'oldPassword123',
+    });
+
+    const oldPassword = 'wrongPassword';
+    const newPassword = 'newPassword123';
+
+    jest.spyOn(userMock, 'checkPassword').mockResolvedValue(false);
+
+    // Act & Assert
+    await expect(updatePassword(userMock, oldPassword, newPassword)).rejects.toThrow(
+      new AppError(400, 'Wrong old password')
+    );
+
+    expect(userMock.checkPassword).toHaveBeenCalledWith(oldPassword);
+    expect(userRepository.create).not.toHaveBeenCalled();
+    expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
+    expect(authUtil.login).not.toHaveBeenCalled();
+  });
+
+  test('should throw error if new password is same as old password', async () => {
+    // Arrange
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      password: 'password123',
+    });
+
+    const oldPassword = 'password123';
+    const newPassword = 'password123';
+
+    jest.spyOn(userMock, 'checkPassword').mockResolvedValue(true);
+
+    // Act & Assert
+    await expect(updatePassword(userMock, oldPassword, newPassword)).rejects.toThrow(
+      new AppError(400, "New password can't be the same as your current password")
+    );
+
+    expect(userMock.checkPassword).toHaveBeenCalledWith(oldPassword);
+    expect(userRepository.create).not.toHaveBeenCalled();
+    expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
+    expect(authUtil.login).not.toHaveBeenCalled();
+  });
+});
+
+describe('authService - forgotPassword', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should generate OTP and send reset email for existing user', async () => {
+    // Arrange
+    const email = 'john@example.com';
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: email,
+      password: 'password123',
+    });
+    const resetOTP = '123456';
+
+    jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(userMock);
+    jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(resetOTP);
+    jest.spyOn(authUtil, 'storeOTP').mockResolvedValue(undefined);
+    jest.spyOn(Email.prototype, 'sendResetPasswordEmail').mockResolvedValue(undefined);
+
+    // Act
+    await forgotPassword(email);
+
+    // Assert
+    expect(userRepository.getByEmail).toHaveBeenCalledWith(email);
+    expect(authUtil.generateOTP).toHaveBeenCalled();
+    expect(authUtil.storeOTP).toHaveBeenCalledWith(userMock.id, 'resetOTP', resetOTP);
+    expect(Email.prototype.sendResetPasswordEmail).toHaveBeenCalled();
+  });
+
+  test('should not throw error for non-existent user (prevent email enumeration)', async () => {
+    // Arrange
+    const email = 'nonexistent@example.com';
+
+    jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(null);
+    jest.spyOn(authUtil, 'generateOTP');
+    jest.spyOn(authUtil, 'storeOTP');
+    jest.spyOn(Email.prototype, 'sendResetPasswordEmail');
+
+    // Act
+    await forgotPassword(email);
+
+    // Assert
+    expect(userRepository.getByEmail).toHaveBeenCalledWith(email);
+    expect(authUtil.generateOTP).not.toHaveBeenCalled();
+    expect(authUtil.storeOTP).not.toHaveBeenCalled();
+    expect(Email.prototype.sendResetPasswordEmail).not.toHaveBeenCalled();
+  });
+});
+
+describe('authService - resetPassword', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should reset password successfully and logout all devices', async () => {
+    // Arrange
+    const email = 'john@example.com';
+    const resetOTP = '123456';
+    const newPassword = 'newPassword123';
+
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: email,
+      password: 'oldPassword123',
+    });
+
+    jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(userMock);
+    jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(true);
+    jest.spyOn(userRepository, 'saveUser');
+    jest.spyOn(authUtil, 'deleteAllRefreshTokens').mockResolvedValue(undefined);
+
+    // Act
+    await resetPassword(email, resetOTP, newPassword);
+
+    // Assert
+    expect(userRepository.getByEmail).toHaveBeenCalledWith(email);
+    expect(authUtil.verifyOTP).toHaveBeenCalledWith(userMock.id, 'resetOTP', resetOTP);
+    expect(userMock.password).toBe(newPassword);
+    expect(userMock.passwordUpdatedAt).toBeInstanceOf(Date);
+    expect(userRepository.saveUser).toHaveBeenCalledWith(userMock);
+    expect(authUtil.deleteAllRefreshTokens).toHaveBeenCalledWith(userMock.id);
+  });
+
+  test('should throw error if user not found', async () => {
+    // Arrange
+    const email = 'nonexistent@example.com';
+    const resetOTP = '123456';
+    const newPassword = 'newPassword123';
+
+    jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(null);
+
+    // Act & Assert
+    await expect(resetPassword(email, resetOTP, newPassword)).rejects.toThrow(
+      new AppError(400, 'Invalid reset password OTP ')
+    );
+
+    expect(userRepository.getByEmail).toHaveBeenCalledWith(email);
+    expect(authUtil.verifyOTP).not.toHaveBeenCalled();
+    expect(userRepository.saveUser).not.toHaveBeenCalled();
+    expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
+  });
+
+  test('should throw error if OTP is invalid', async () => {
+    // Arrange
+    const email = 'john@example.com';
+    const resetOTP = 'wrongOTP';
+    const newPassword = 'newPassword123';
+
+    const userMock = new userModel({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: email,
+      password: 'oldPassword123',
+    });
+
+    jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(userMock);
+    jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(false);
+
+    // Act & Assert
+    await expect(resetPassword(email, resetOTP, newPassword)).rejects.toThrow(
+      new AppError(400, 'Invalid reset password OTP ')
+    );
+
+    expect(userRepository.getByEmail).toHaveBeenCalledWith(email);
+    expect(authUtil.verifyOTP).toHaveBeenCalledWith(userMock.id, 'resetOTP', resetOTP);
+    expect(userRepository.saveUser).not.toHaveBeenCalled();
+    expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
   });
 });

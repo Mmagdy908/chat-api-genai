@@ -140,6 +140,8 @@ export const updatePassword = async (
 
   // 3) update password
   user.password = newPassword;
+  user.passwordUpdatedAt = new Date();
+
   const newUser = await userRepository.create(user);
 
   // 4) log out from all devices

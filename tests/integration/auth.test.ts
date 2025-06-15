@@ -18,6 +18,7 @@ describe('Auth API Integration Tests', () => {
     await clearMongoDB(); // Reset database
     await clearRedis();
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -78,6 +79,11 @@ describe('Auth API Integration Tests', () => {
         email: 'john@example.com',
         password: 'password123',
       };
+
+      jest.spyOn(authUtil, 'generateOTP');
+      jest.spyOn(authUtil, 'storeOTP');
+      jest.mocked(Email.prototype.sendVerificationEmail);
+
       // Act
       const response = await request(app).post('/api/v1/register').send(userData).expect(400);
       // Assert
@@ -478,6 +484,349 @@ describe('Auth API Integration Tests', () => {
       // Assert
       expect(response.body.status).toBe('fail');
       expect(response.body.message).toContain('Missing required field: userId');
+    });
+  });
+
+  describe('POST /change-password', () => {
+    test('should change password successfully for authenticated user', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+        isVerified: true,
+      };
+
+      const user = await userModel.create(userData);
+      const { accessToken } = await authUtil.login(user.id);
+
+      const changePasswordData = {
+        oldPassword: 'oldPassword123',
+        newPassword: 'newPassword123',
+      };
+
+      jest.spyOn(authUtil, 'login').mockResolvedValue({
+        accessToken: 'newAccessToken',
+        refreshToken: 'newRefreshToken',
+      });
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/change-password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(changePasswordData)
+        .expect(200);
+
+      // Assert
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.user.email).toBe('john@example.com');
+      expect(response.body.data.user.accessToken).toBe('newAccessToken');
+      expect(response.body.data.user.refreshToken).toBe('newRefreshToken');
+
+      // Verify password was changed in database
+      const updatedUser = await userModel.findById(user.id);
+      expect(updatedUser?.passwordUpdatedAt).toBeDefined();
+    });
+
+    test('should return 400 if old password is incorrect', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+        isVerified: true,
+      };
+
+      const user = await userModel.create(userData);
+      const { accessToken } = await authUtil.login(user.id);
+
+      const changePasswordData = {
+        oldPassword: 'wrongPassword',
+        newPassword: 'newPassword123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/change-password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(changePasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Wrong old password');
+    });
+
+    test('should return 400 if new password is same as old password', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'password123',
+        isVerified: true,
+      };
+
+      const user = await userModel.create(userData);
+      const { accessToken } = await authUtil.login(user.id);
+
+      const changePasswordData = {
+        oldPassword: 'password123',
+        newPassword: 'password123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/change-password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(changePasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain(
+        "New password can't be the same as your current password"
+      );
+    });
+
+    test('should return 401 if user is not authenticated', async () => {
+      // Arrange
+      const changePasswordData = {
+        oldPassword: 'oldPassword123',
+        newPassword: 'newPassword123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/change-password')
+        .send(changePasswordData)
+        .expect(401);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('You are not logged in');
+    });
+
+    test('should return 400 if required fields are missing', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+        isVerified: true,
+      };
+
+      const user = await userModel.create(userData);
+      const { accessToken } = await authUtil.login(user.id);
+
+      const changePasswordData = {
+        oldPassword: 'oldPassword123',
+        // newPassword missing
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/change-password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(changePasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Missing required field: newPassword');
+    });
+  });
+
+  describe('POST /forgot-password', () => {
+    test('should send reset password email for existing user', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'password123',
+        isVerified: true,
+      };
+
+      await userModel.create(userData);
+      const resetOTP = '123456';
+
+      jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(resetOTP);
+      jest.spyOn(authUtil, 'storeOTP').mockResolvedValue(undefined);
+      jest.spyOn(Email.prototype, 'sendResetPasswordEmail').mockResolvedValue(undefined);
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/forgot-password')
+        .send({ email: 'john@example.com' })
+        .expect(200);
+
+      // Assert
+      expect(response.body.status).toBe('success');
+      expect(response.body.message).toBe('A link is sent to your email');
+
+      // Verify OTP generation and email sending
+      expect(authUtil.generateOTP).toHaveBeenCalled();
+      expect(authUtil.storeOTP).toHaveBeenCalledWith(expect.any(String), 'resetOTP', resetOTP);
+      expect(Email.prototype.sendResetPasswordEmail).toHaveBeenCalled();
+    });
+
+    test('should return success even for non-existent user (prevent email leakage)', async () => {
+      // Arrange
+      jest.spyOn(authUtil, 'generateOTP');
+      jest.spyOn(authUtil, 'storeOTP');
+      jest.spyOn(Email.prototype, 'sendResetPasswordEmail');
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/forgot-password')
+        .send({ email: 'nonexistent@example.com' })
+        .expect(200);
+
+      // Assert
+      expect(response.body.status).toBe('success');
+      expect(response.body.message).toBe('A link is sent to your email');
+
+      // Verify no OTP or email operations
+      expect(authUtil.generateOTP).not.toHaveBeenCalled();
+      expect(authUtil.storeOTP).not.toHaveBeenCalled();
+      expect(Email.prototype.sendResetPasswordEmail).not.toHaveBeenCalled();
+    });
+
+    test('should return 400 if email is missing', async () => {
+      // Act
+      const response = await request(app).post('/api/v1/forgot-password').send({}).expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Missing required field: email');
+    });
+  });
+
+  describe('POST /reset-password', () => {
+    test('should reset password successfully with valid OTP', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+        isVerified: true,
+      };
+
+      const user = await userModel.create(userData);
+      const resetOTP = '123456';
+
+      jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(true);
+      jest.spyOn(authUtil, 'deleteAllRefreshTokens').mockResolvedValue(undefined);
+
+      const resetPasswordData = {
+        email: 'john@example.com',
+        resetOTP: resetOTP,
+        newPassword: 'newPassword123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/reset-password')
+        .send(resetPasswordData)
+        .expect(200);
+
+      // Assert
+      expect(response.body.status).toBe('success');
+      expect(response.body.message).toBe('Password is reset successfuly. Please Log in');
+
+      // Verify OTP verification and token cleanup
+      expect(authUtil.verifyOTP).toHaveBeenCalledWith(user.id, 'resetOTP', resetOTP);
+      expect(authUtil.deleteAllRefreshTokens).toHaveBeenCalledWith(user.id);
+
+      // Verify password was updated in database
+      const updatedUser = await userModel.findById(user.id);
+      expect(updatedUser?.password).not.toBe(user.password);
+      expect(updatedUser?.passwordUpdatedAt).toBeDefined();
+    });
+
+    test('should return 400 if OTP is invalid', async () => {
+      // Arrange
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+        isVerified: true,
+      };
+
+      await userModel.create(userData);
+
+      jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(false);
+      jest.spyOn(authUtil, 'deleteAllRefreshTokens');
+
+      const resetPasswordData = {
+        email: 'john@example.com',
+        resetOTP: 'wrongOTP',
+        newPassword: 'newPassword123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/reset-password')
+        .send(resetPasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Invalid reset password OTP');
+
+      // Verify no token cleanup occurred
+      expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
+    });
+
+    test('should return 400 if user does not exist', async () => {
+      // Arrange
+      jest.spyOn(authUtil, 'verifyOTP');
+      jest.spyOn(authUtil, 'deleteAllRefreshTokens');
+
+      const resetPasswordData = {
+        email: 'nonexistent@example.com',
+        resetOTP: '123456',
+        newPassword: 'newPassword123',
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/reset-password')
+        .send(resetPasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Invalid reset password OTP');
+
+      // Verify no OTP verification or token cleanup
+      expect(authUtil.verifyOTP).not.toHaveBeenCalled();
+      expect(authUtil.deleteAllRefreshTokens).not.toHaveBeenCalled();
+    });
+
+    test('should return 400 if required fields are missing', async () => {
+      // Arrange
+      const resetPasswordData = {
+        email: 'john@example.com',
+        resetOTP: '123456',
+        // newPassword missing
+      };
+
+      // Act
+      const response = await request(app)
+        .post('/api/v1/reset-password')
+        .send(resetPasswordData)
+        .expect(400);
+
+      // Assert
+      expect(response.body.status).toBe('fail');
+      expect(response.body.message).toContain('Missing required field: newPassword');
     });
   });
 });

@@ -1,6 +1,14 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { getMockReq, getMockRes } from '@jest-mock/express';
-import { register, verifyEmail, login, refreshToken } from '../../src/controllers/authController';
+import {
+  register,
+  verifyEmail,
+  login,
+  refreshToken,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+} from '../../src/controllers/authController';
 import userModel from '../../src/models/user';
 import * as userMapper from '../../src/mappers/userMapper';
 import * as authService from '../../src/services/authService';
@@ -465,5 +473,215 @@ describe('refreshToken controller', () => {
     expect(authUtil.storeRefreshTokenToCookie).not.toHaveBeenCalled();
     expect(authUtil.sendLoginResponse).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith(expect.any(AppError));
+  });
+});
+
+describe('changePassword controller', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: NextFunction;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = getMockReq({
+      body: {
+        oldPassword: 'oldPassword123',
+        newPassword: 'newPassword123',
+      },
+      user: new userModel({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'oldPassword123',
+      }),
+    });
+    ({ res, next } = getMockRes());
+    next = jest.fn();
+  });
+
+  test('should change password and return login response', async () => {
+    // Arrange
+    const userMock = req.user as User;
+    const loggedUserData = {
+      user: userMock,
+      accessToken: 'newAccessToken',
+      refreshToken: 'newRefreshToken',
+    };
+
+    (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(authService.updatePassword).mockResolvedValue(loggedUserData);
+    jest
+      .mocked(authUtil.sendLoginResponse)
+      .mockImplementation(mockedSendLoginResponseImplementation);
+
+    // Act
+    await changePassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'oldPassword', 'newPassword');
+    expect(authService.updatePassword).toHaveBeenCalledWith(
+      userMock,
+      'oldPassword123',
+      'newPassword123'
+    );
+    expect(authUtil.sendLoginResponse).toHaveBeenCalledWith(res as Response, loggedUserData);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test('should call next with error if required fields are missing', async () => {
+    // Arrange
+    (checkRequiredFields as jest.Mock).mockImplementation(() => {
+      throw new Error('Missing required fields');
+    });
+
+    // Act
+    await changePassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalled();
+    expect(authService.updatePassword).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  test('should call next with error if service throws error', async () => {
+    // Arrange
+    const error = new AppError(400, 'Wrong old password');
+
+    (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(authService.updatePassword).mockImplementation(() => {
+      throw error;
+    });
+
+    // Act
+    await changePassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(authService.updatePassword).toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(error);
+  });
+});
+
+describe('forgotPassword controller', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: NextFunction;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = getMockReq({
+      body: {
+        email: 'john@example.com',
+      },
+    });
+    ({ res, next } = getMockRes());
+    next = jest.fn();
+  });
+
+  test('should send forgot password email and return success response', async () => {
+    // Arrange
+    (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(authService.forgotPassword).mockResolvedValue(undefined);
+
+    // Act
+    await forgotPassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'email');
+    expect(authService.forgotPassword).toHaveBeenCalledWith('john@example.com');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'success',
+      message: 'A link is sent to your email',
+    });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test('should call next with error if required fields are missing', async () => {
+    // Arrange
+    (checkRequiredFields as jest.Mock).mockImplementation(() => {
+      throw new Error('Missing required field: email');
+    });
+
+    // Act
+    await forgotPassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalled();
+    expect(authService.forgotPassword).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+});
+
+describe('resetPassword controller', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: NextFunction;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = getMockReq({
+      body: {
+        email: 'john@example.com',
+        resetOTP: '123456',
+        newPassword: 'newPassword123',
+      },
+    });
+    ({ res, next } = getMockRes());
+    next = jest.fn();
+  });
+
+  test('should reset password and return success response', async () => {
+    // Arrange
+    (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(authService.resetPassword).mockResolvedValue(undefined);
+
+    // Act
+    await resetPassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'email', 'resetOTP', 'newPassword');
+    expect(authService.resetPassword).toHaveBeenCalledWith(
+      'john@example.com',
+      '123456',
+      'newPassword123'
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'success',
+      message: 'Password is reset successfuly. Please Log in',
+    });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test('should call next with error if required fields are missing', async () => {
+    // Arrange
+    (checkRequiredFields as jest.Mock).mockImplementation(() => {
+      throw new Error('Missing required fields');
+    });
+
+    // Act
+    await resetPassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(checkRequiredFields).toHaveBeenCalled();
+    expect(authService.resetPassword).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  test('should call next with error if service throws error', async () => {
+    // Arrange
+    const error = new AppError(400, 'Invalid reset password OTP');
+
+    (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
+    jest.mocked(authService.resetPassword).mockImplementation(() => {
+      throw error;
+    });
+
+    // Act
+    await resetPassword(req as Request, res as Response, next);
+
+    // Assert
+    expect(authService.resetPassword).toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(error);
   });
 });
