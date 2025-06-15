@@ -11,7 +11,6 @@ export const protect = catchAsync(
       return next(new AppError(401, 'You are not logged in'));
 
     const accessToken = req.headers.authorization?.split(' ')[1] as string;
-
     // 2) verify access token
 
     const payload = await verifyToken(accessToken);

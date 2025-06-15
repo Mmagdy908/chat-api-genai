@@ -9,19 +9,19 @@ import * as redis from './redisUtil';
 import ENV_VAR from '../config/envConfig';
 
 export const generateAccessToken = (userId: string) => {
-  const secret: Secret = ENV_VAR.JWT_SECRET as string;
+  const secret: Secret = ENV_VAR.JWT_SECRET;
 
   const signOptions = { expiresIn: ENV_VAR.ACCESS_TOKEN_EXPIRES_IN } as SignOptions;
 
-  return JWT.sign({ userId }, secret, signOptions);
+  return JWT.sign({ userId, uid: uuidv4() }, secret, signOptions);
 };
 
 export const generateRefreshToken = (userId: string, deviceId: string) => {
-  const secret: Secret = ENV_VAR.JWT_SECRET as string;
+  const secret: Secret = ENV_VAR.JWT_SECRET;
 
   const signOptions = { expiresIn: ENV_VAR.REFRESH_TOKEN_EXPIRES_IN } as SignOptions;
 
-  return JWT.sign({ userId, deviceId }, secret, signOptions);
+  return JWT.sign({ userId, deviceId, uid: uuidv4() }, secret, signOptions);
 };
 
 export const storeRefreshToken = async (userId: string, deviceId: string, refreshToken: string) => {

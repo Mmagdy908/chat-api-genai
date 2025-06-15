@@ -31,8 +31,8 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
       .map((e: any) => e.message)
       .join(' & ');
     error = new AppError(400, msg);
-  } else if (err.name === 'JsonWebTokenError') error = new AppError(401, 'Invalid Access Token');
-  else if (err.name === 'TokenExpiredError') error = new AppError(401, 'Expired Access Token');
+  } else if (err.name === 'JsonWebTokenError') error = new AppError(401, 'Invalid JWT Token');
+  else if (err.name === 'TokenExpiredError') error = new AppError(401, 'Expired JWT Token');
 
   if (ENV_VAR.NODE_ENV === 'development') sendDevError(error, res);
   else {

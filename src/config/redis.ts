@@ -22,6 +22,15 @@ export const redisConfig = async () => {
   }
 };
 
+export const clearRedis = async () => {
+  try {
+    await client.flushDb();
+    console.log('Redis is cleared successfully');
+  } catch (err) {
+    console.log('Failed to clear Redis', err);
+  }
+};
+
 export const disconnectRedis = async () => {
   try {
     await client.close();
