@@ -1,6 +1,6 @@
-import { jest, describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { jest, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { mongoConfig, disconnectMongoDB, clearMongoDB } from '../../src/config/mongo';
-import { redisConfig, clearRedis, disconnectRedis } from '../../src/config/redis';
+import { redisConfig, disconnectRedis, clearRedis } from '../../src/config/redis';
 
 export const setupIntegrationTests = () => {
   beforeAll(async () => {

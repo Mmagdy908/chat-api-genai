@@ -1,17 +1,6 @@
-import {
-  jest,
-  describe,
-  expect,
-  test,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-} from '@jest/globals';
+import { jest, describe, expect, test, beforeEach, beforeAll, afterAll } from '@jest/globals';
 import { mongoConfig, clearMongoDB, disconnectMongoDB } from '../../src/config/mongo';
-import bcrypt from 'bcrypt';
 import userModel from '../../src/models/user';
-import { User } from '../../src/interfaces/models/user';
 
 describe('User Model', () => {
   beforeAll(async () => {

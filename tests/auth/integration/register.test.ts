@@ -5,7 +5,7 @@ import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
-jest.mock('../../src/util/email');
+jest.mock('../../../src/util/email');
 
 describe('POST /register', () => {
   setupIntegrationTests();
