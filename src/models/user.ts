@@ -50,7 +50,7 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   // encrypt password
-  const salt = ENV_VAR.SALT || 12;
+  const salt = ENV_VAR.SALT;
   this.password = await bcrypt.hash(this.password, +salt);
 
   next();
