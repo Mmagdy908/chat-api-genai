@@ -1,19 +1,22 @@
+import { Schema } from 'mongoose';
+
 export interface RegisterResponse {
-  id: string;
+  id: Schema.Types.ObjectId;
   firstName: string;
   lastName: string;
+  username: string;
   fullName: string;
   email: string;
   createdAt: Date;
 }
 
 export interface LoginResponse {
-  id: string;
+  id: Schema.Types.ObjectId;
   firstName: string;
   lastName: string;
+  username: string;
   fullName: string;
   email: string;
-  // workspaces: Partial<Workspace>[] | string[];
   accessToken: string;
   refreshToken: string;
   createdAt: Date;

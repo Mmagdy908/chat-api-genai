@@ -14,6 +14,7 @@ describe('POST /register', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -28,6 +29,7 @@ describe('POST /register', () => {
 
     // Assert
     expect(response.body.status).toBe('success');
+    expect(response.body.data.user.username).toBe('johndoe');
     expect(response.body.data.user.email).toBe('john@example.com');
     expect(response.body.message).toBe('Please verify your email');
     expect(response.body.data.user.password).toBeUndefined();
@@ -48,12 +50,14 @@ describe('POST /register', () => {
     await userModel.create({
       firstName: 'Jane',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: '123456789',
     });
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'john_doe',
       email: 'john@example.com',
       password: 'password123',
     };

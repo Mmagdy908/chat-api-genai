@@ -23,6 +23,7 @@ describe('User Model', () => {
       const validUserData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -45,6 +46,7 @@ describe('User Model', () => {
       // Arrange
       const invalidUserData = {
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -58,6 +60,7 @@ describe('User Model', () => {
       // Arrange
       const invalidUserData = {
         firstName: 'John',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -67,11 +70,26 @@ describe('User Model', () => {
       await expect(user.save()).rejects.toThrow('A user must have a last name');
     });
 
+    test('should fail validation when username is missing', async () => {
+      // Arrange
+      const invalidUserData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        password: 'password123',
+      };
+
+      // Act & Assert
+      const user = new userModel(invalidUserData);
+      await expect(user.save()).rejects.toThrow('A user must have a username');
+    });
+
     test('should fail validation when email is missing', async () => {
       // Arrange
       const invalidUserData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         password: 'password123',
       };
 
@@ -85,6 +103,7 @@ describe('User Model', () => {
       const invalidUserData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'invalid-email',
         password: 'password123',
       };
@@ -99,6 +118,7 @@ describe('User Model', () => {
       const invalidUserData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'short',
       };
@@ -113,6 +133,7 @@ describe('User Model', () => {
       const userDataWithWhitespace = {
         firstName: '  John  ',
         lastName: '  Doe  ',
+        username: 'JohnDoe123',
         email: '  john.doe@example.com  ',
         password: '  password123  ',
       };
@@ -128,11 +149,12 @@ describe('User Model', () => {
       // Note: password will be hashed, so we can't directly check trimming
     });
 
-    test('should enforce unique email constraint', async () => {
+    test('should enforce unique username constraint', async () => {
       // Arrange
       const userData1 = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -140,6 +162,35 @@ describe('User Model', () => {
       const userData2 = {
         firstName: 'Jane',
         lastName: 'Smith',
+        username: 'JohnDoe123',
+        email: 'john.smith@example.com',
+        password: 'password456',
+      };
+
+      // Act
+      const user1 = new userModel(userData1);
+      await user1.save();
+
+      const user2 = new userModel(userData2);
+
+      // Assert
+      await expect(user2.save()).rejects.toThrow('This username already exists');
+    });
+
+    test('should enforce unique email constraint', async () => {
+      // Arrange
+      const userData1 = {
+        firstName: 'John',
+        lastName: 'Doe',
+        username: 'JohnDoe123',
+        email: 'john.doe@example.com',
+        password: 'password123',
+      };
+
+      const userData2 = {
+        firstName: 'Jane',
+        lastName: 'Smith',
+        username: 'JohnSmith123',
         email: 'john.doe@example.com', // Same email
         password: 'password456',
       };
@@ -151,7 +202,7 @@ describe('User Model', () => {
       const user2 = new userModel(userData2);
 
       // Assert
-      await expect(user2.save()).rejects.toThrow();
+      await expect(user2.save()).rejects.toThrow('This email already exists');
     });
   });
 
@@ -161,6 +212,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -178,6 +230,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -196,6 +249,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -216,6 +270,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -234,6 +289,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -255,6 +311,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -280,6 +337,7 @@ describe('User Model', () => {
         const userData = {
           firstName: 'John',
           lastName: 'Doe',
+          username: 'JohnDoe123',
           email: 'john.doe@example.com',
           password: 'password123',
         };
@@ -299,6 +357,7 @@ describe('User Model', () => {
         const userData = {
           firstName: 'John',
           lastName: 'Doe',
+          username: 'JohnDoe123',
           email: 'john.doe@example.com',
           password: 'password123',
         };
@@ -321,6 +380,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -338,6 +398,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
         isVerified: true,
@@ -358,6 +419,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -378,6 +440,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -404,6 +467,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
       };
@@ -422,6 +486,7 @@ describe('User Model', () => {
       const userData = {
         firstName: 'John',
         lastName: 'Doe',
+        username: 'JohnDoe123',
         email: 'john.doe@example.com',
         password: 'password123',
         passwordUpdatedAt,

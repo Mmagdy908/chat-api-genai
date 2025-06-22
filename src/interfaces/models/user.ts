@@ -1,7 +1,7 @@
 import { User_Status } from '../../enums/userEnums';
-
+import { Schema } from 'mongoose';
 export interface User {
-  id: string;
+  id: Schema.Types.ObjectId;
   firstName: string;
   lastName: string;
   fullName: string;

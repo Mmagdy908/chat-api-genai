@@ -14,6 +14,7 @@ describe('POST /forgot-password', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
       isVerified: true,

@@ -14,6 +14,7 @@ describe('POST /login', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -61,6 +62,7 @@ describe('POST /login', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -85,6 +87,7 @@ describe('POST /login', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };

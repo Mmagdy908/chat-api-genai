@@ -40,7 +40,7 @@ describe('authService - userRegister', () => {
     // Assert
     expect(userRepository.create).toHaveBeenCalledWith(userData);
     expect(authUtil.generateOTP).toHaveBeenCalled();
-    expect(authUtil.storeOTP).toHaveBeenCalledWith(result.id, 'verifyOTP', '123456');
+    expect(authUtil.storeOTP).toHaveBeenCalledWith(result.id.toString(), 'verifyOTP', '123456');
     expect(Email.prototype.sendVerificationEmail).toHaveBeenCalled();
     expect(result).toEqual(createdUser);
   });

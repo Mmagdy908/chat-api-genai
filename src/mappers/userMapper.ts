@@ -3,15 +3,15 @@ import { RegisterRequest, LoginRequest } from '../interfaces/requests/user';
 import { RegisterResponse, LoginResponse } from '../interfaces/responses/user';
 
 export const mapRegisterRequest = (userData: User): RegisterRequest => {
-  const { firstName, lastName, email, password } = userData;
+  const { firstName, lastName, username, email, password } = userData;
 
-  return { firstName, lastName, email, password };
+  return { firstName, lastName, username, email, password };
 };
 
 export const mapRegisterResponse = (userData: User): RegisterResponse => {
-  const { id, firstName, lastName, fullName, email, createdAt } = userData;
+  const { id, firstName, lastName, username, fullName, email, createdAt } = userData;
 
-  return { id, firstName, lastName, fullName, email, createdAt };
+  return { id, firstName, lastName, username, fullName, email, createdAt };
 };
 
 export const mapLoginRequest = (userData: User): LoginRequest => {
@@ -25,13 +25,14 @@ export const mapLoginResponse = (
   accessToken: string,
   refreshToken: string
 ): LoginResponse => {
-  const { id, firstName, lastName, fullName, email, createdAt } = userData;
+  const { id, firstName, lastName, username, fullName, email, createdAt } = userData;
   // const workspaces = userData.workspaces as Workspace[];
   return {
     id,
     firstName,
     lastName,
     fullName,
+    username,
     email,
     // workspaces: workspaces.map((workspace) =>
     //   workspaceMapper.mapCreateWorkspaceResponse(workspace)

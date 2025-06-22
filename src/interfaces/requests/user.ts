@@ -5,4 +5,5 @@ export interface LoginRequest {
 export interface RegisterRequest extends LoginRequest {
   firstName: string;
   lastName: string;
+  username: string;
 }

@@ -13,6 +13,7 @@ describe('POST /verify-email', () => {
     const userMock = await userModel.create({
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     });
@@ -46,6 +47,7 @@ describe('POST /verify-email', () => {
     const userMock = await userModel.create({
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     });

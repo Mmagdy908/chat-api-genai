@@ -32,7 +32,7 @@ export const userRegister = async (userData: Partial<User>): Promise<User> => {
   // 2) generate verify OTP
   const verifyEmailOTP = await generateOTP();
 
-  await storeOTP(user.id, 'verifyOTP', verifyEmailOTP);
+  await storeOTP(user.id.toString(), 'verifyOTP', verifyEmailOTP);
 
   // 3) send verification email
   await new Email(user, verifyEmailOTP).sendVerificationEmail();
@@ -77,7 +77,7 @@ export const userLogin = async (
     //  generate verify OTP
     const verifyEmailOTP = await generateOTP();
 
-    await storeOTP(user.id, 'verifyOTP', verifyEmailOTP);
+    await storeOTP(user.id.toString(), 'verifyOTP', verifyEmailOTP);
 
     //  send verification email
     await new Email(user, verifyEmailOTP).sendVerificationEmail();
@@ -86,7 +86,7 @@ export const userLogin = async (
   }
 
   // 4) login
-  const { accessToken, refreshToken } = await login(user.id);
+  const { accessToken, refreshToken } = await login(user.id.toString());
 
   return {
     user,
@@ -145,10 +145,10 @@ export const updatePassword = async (
   const newUser = await userRepository.create(user);
 
   // 4) log out from all devices
-  await deleteAllRefreshTokens(newUser.id);
+  await deleteAllRefreshTokens(newUser.id.toString());
 
   // 5) log in user
-  const { accessToken, refreshToken } = await login(user.id);
+  const { accessToken, refreshToken } = await login(user.id.toString());
   return { user: newUser, accessToken, refreshToken };
 };
 
@@ -161,7 +161,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   // 2) generate reset OTP
   const resetOTP = await generateOTP();
 
-  await storeOTP(user.id, 'resetOTP', resetOTP);
+  await storeOTP(user.id.toString(), 'resetOTP', resetOTP);
 
   // 3) send email
 
@@ -178,7 +178,7 @@ export const resetPassword = async (
 
   // 2) verify reset token
 
-  if (!user || !(await verifyOTP(user?.id, 'resetOTP', resetOTP)))
+  if (!user || !(await verifyOTP(user?.id.toString(), 'resetOTP', resetOTP)))
     throw new AppError(400, 'Invalid reset password OTP ');
 
   // 3) reset password
@@ -188,5 +188,5 @@ export const resetPassword = async (
   await userRepository.saveUser(user);
 
   // 4) log out from all devices
-  await deleteAllRefreshTokens(user.id);
+  await deleteAllRefreshTokens(user.id.toString());
 };

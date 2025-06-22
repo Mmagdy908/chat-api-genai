@@ -40,7 +40,7 @@ describe('authService - updatePassword', () => {
     // Assert
     expect(userMock.checkPassword).toHaveBeenCalledWith(oldPassword);
     expect(userRepository.create).toHaveBeenCalledWith(userMock);
-    expect(authUtil.deleteAllRefreshTokens).toHaveBeenCalledWith(updatedUser.id);
+    expect(authUtil.deleteAllRefreshTokens).toHaveBeenCalledWith(updatedUser.id.toString());
     expect(authUtil.login).toHaveBeenCalledWith(userMock.id);
 
     expect(result.user).toEqual(updatedUser);

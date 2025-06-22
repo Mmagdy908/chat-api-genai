@@ -12,6 +12,7 @@ describe('POST /refresh-token', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -53,6 +54,7 @@ describe('POST /refresh-token', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -91,6 +93,7 @@ describe('POST /refresh-token', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };
@@ -115,6 +118,7 @@ describe('POST /refresh-token', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'password123',
     };

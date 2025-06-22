@@ -12,6 +12,7 @@ describe('POST /reset-password', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'oldPassword123',
       isVerified: true,
@@ -54,6 +55,7 @@ describe('POST /reset-password', () => {
     const userData = {
       firstName: 'John',
       lastName: 'Doe',
+      username: 'johndoe',
       email: 'john@example.com',
       password: 'oldPassword123',
       isVerified: true,
