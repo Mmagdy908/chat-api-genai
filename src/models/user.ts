@@ -3,6 +3,7 @@ import { User } from '../interfaces/models/user';
 import isEmail from 'validator/lib/isEmail';
 import bcrypt from 'bcrypt';
 import ENV_VAR from '../config/envConfig';
+import { User_Status } from '../enums/userEnums';
 
 const userSchema = new Schema<User>(
   {
@@ -14,6 +15,12 @@ const userSchema = new Schema<User>(
     lastName: {
       type: String,
       required: [true, 'A user must have a last name'],
+      trim: true,
+    },
+    username: {
+      type: String,
+      required: [true, 'A user must have a username'],
+      unique: [true, 'This username already exists'],
       trim: true,
     },
     email: {
@@ -36,6 +43,14 @@ const userSchema = new Schema<User>(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ['Online', 'Offline'],
+        message: 'User status must be either Online or Offline',
+      },
+      default: User_Status.Offline,
     },
   },
   { timestamps: true, toObject: { virtuals: true }, toJSON: { virtuals: true } }
