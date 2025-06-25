@@ -22,12 +22,13 @@ describe('changePassword controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const userData = userFactory.create({ isVerified: true });
     req = getMockReq({
       body: {
-        oldPassword: 'oldPassword123',
+        oldPassword: userData.password,
         newPassword: 'newPassword123',
       },
-      user: new userModel(userFactory.create()),
+      user: new userModel(userData),
     });
     ({ res, next } = getMockRes());
     next = jest.fn();
@@ -55,7 +56,7 @@ describe('changePassword controller', () => {
     expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'oldPassword', 'newPassword');
     expect(authService.updatePassword).toHaveBeenCalledWith(
       userMock,
-      'oldPassword123',
+      userMock.password,
       'newPassword123'
     );
     expect(authUtil.sendLoginResponse).toHaveBeenCalledWith(res as Response, loggedUserData);
@@ -64,8 +65,10 @@ describe('changePassword controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    delete req.body.newPassword;
+
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
-      throw new Error('Missing required fields');
+      throw new Error('Missing required field: newPassword');
     });
 
     // Act
@@ -80,7 +83,6 @@ describe('changePassword controller', () => {
   test('should call next with error if service throws error', async () => {
     // Arrange
     const error = new AppError(400, 'Wrong old password');
-
     (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
     jest.mocked(authService.updatePassword).mockImplementation(() => {
       throw error;

@@ -9,6 +9,7 @@ import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
 import AppError from '../../../src/util/appError';
 import { mockedSendLoginResponseImplementation } from '../../utils/mocks';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/mappers/userMapper');
 jest.mock('../../../src/services/authService');
@@ -30,19 +31,13 @@ describe('refreshToken controller', () => {
       cookies: {},
     });
     ({ res, next } = getMockRes());
-
     next = jest.fn();
   });
 
   test('should refresh token and return 200 response with new tokens', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    });
+    const userData = userFactory.create({ isVerified: true });
+    const userMock = new userModel(userData);
 
     const loggedUserData = {
       user: userMock,
@@ -60,7 +55,6 @@ describe('refreshToken controller', () => {
     jest.mocked(authService.refreshToken).mockResolvedValue(loggedUserData);
     jest.mocked(authUtil.storeRefreshTokenToCookie).mockResolvedValue(undefined);
     jest.mocked(userMapper.mapLoginResponse).mockReturnValue(mappedResponse);
-
     jest
       .mocked(authUtil.sendLoginResponse)
       .mockImplementation(mockedSendLoginResponseImplementation);
@@ -92,16 +86,11 @@ describe('refreshToken controller', () => {
 
   test('should use refresh token from cookies if not in body', async () => {
     // Arrange
-    req.body = { userId: 'user123' }; // No refreshToken in body
+    req.body = { userId: 'user123' };
     req.cookies = { refreshToken: 'cookie-refresh-token' };
 
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    });
+    const userData = userFactory.create({ isVerified: true });
+    const userMock = new userModel(userData);
 
     const loggedUserData = {
       user: userMock,
@@ -119,7 +108,6 @@ describe('refreshToken controller', () => {
     jest.mocked(authService.refreshToken).mockResolvedValue(loggedUserData);
     jest.mocked(authUtil.storeRefreshTokenToCookie).mockResolvedValue(undefined);
     jest.mocked(userMapper.mapLoginResponse).mockReturnValue(mappedResponse);
-
     jest
       .mocked(authUtil.sendLoginResponse)
       .mockImplementation(mockedSendLoginResponseImplementation);
@@ -141,6 +129,7 @@ describe('refreshToken controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    req.body = { refreshToken: 'valid-refresh-token' };
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
       throw new Error('Missing required field: userId');
     });

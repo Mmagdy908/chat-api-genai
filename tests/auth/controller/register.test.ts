@@ -6,6 +6,7 @@ import * as userMapper from '../../../src/mappers/userMapper';
 import * as authService from '../../../src/services/authService';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/mappers/userMapper');
 jest.mock('../../../src/services/authService');
@@ -18,22 +19,18 @@ describe('register controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const userData = userFactory.create();
     req = getMockReq({
-      body: {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        password: 'password123',
-      },
+      body: userData,
     });
     ({ res, next } = getMockRes());
-
     next = jest.fn();
   });
 
   test('should register user and return 201 response', async () => {
     // Arrange
-    const mappedBody = { ...req.body };
+    const userData = userFactory.create();
+    const mappedBody = { ...userData };
     const createdUser = new userModel(mappedBody);
     const mappedResponse = { id: createdUser.id, email: createdUser.email };
 
@@ -67,9 +64,10 @@ describe('register controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    req.body = userFactory.createWithMissingFields('firstName');
     (userMapper.mapRegisterRequest as jest.Mock).mockReturnValue(req.body);
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
-      throw new Error('Missing required fields');
+      throw new Error('Missing required field: firstName');
     });
 
     // Act

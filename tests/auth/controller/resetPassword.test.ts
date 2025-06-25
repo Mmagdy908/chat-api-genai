@@ -5,6 +5,7 @@ import * as authService from '../../../src/services/authService';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
 import AppError from '../../../src/util/appError';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/services/authService');
 jest.mock('../../../src/util/checkRequiredFields');
@@ -16,9 +17,10 @@ describe('resetPassword controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const userData = userFactory.create();
     req = getMockReq({
       body: {
-        email: 'john@example.com',
+        email: userData.email,
         resetOTP: '123456',
         newPassword: 'newPassword123',
       },
@@ -38,7 +40,7 @@ describe('resetPassword controller', () => {
     // Assert
     expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'email', 'resetOTP', 'newPassword');
     expect(authService.resetPassword).toHaveBeenCalledWith(
-      'john@example.com',
+      req.body.email,
       '123456',
       'newPassword123'
     );
@@ -52,8 +54,10 @@ describe('resetPassword controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    delete req.body.newPassword;
+
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
-      throw new Error('Missing required fields');
+      throw new Error('Missing required field: newPassword');
     });
 
     // Act
@@ -68,7 +72,6 @@ describe('resetPassword controller', () => {
   test('should call next with error if service throws error', async () => {
     // Arrange
     const error = new AppError(400, 'Invalid reset password OTP');
-
     (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
     jest.mocked(authService.resetPassword).mockImplementation(() => {
       throw error;

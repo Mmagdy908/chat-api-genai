@@ -8,6 +8,7 @@ import * as authUtil from '../../../src/util/authUtil';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
 import { mockedSendLoginResponseImplementation } from '../../utils/mocks';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/mappers/userMapper');
 jest.mock('../../../src/services/authService');
@@ -28,18 +29,13 @@ describe('verify email controller', () => {
       },
     });
     ({ res, next } = getMockRes());
-
     next = jest.fn();
   });
 
   test('should verify user email and return 200 response with tokens', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-    });
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
 
     const mappedResponse = {
       ...userMock.toObject(),
@@ -48,15 +44,12 @@ describe('verify email controller', () => {
     };
 
     (checkRequiredFields as jest.Mock).mockReturnValue(undefined);
-
     jest.mocked(authService.verifyEmail).mockResolvedValue({
       user: userMock,
       accessToken: 'accessToken',
       refreshToken: 'refreshToken',
     });
-
     jest.mocked(userMapper.mapLoginResponse).mockReturnValue(mappedResponse);
-
     jest
       .mocked(authUtil.sendLoginResponse)
       .mockImplementation(mockedSendLoginResponseImplementation);
@@ -88,8 +81,10 @@ describe('verify email controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    delete req.body.userId;
+
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
-      throw new Error('Missing required fields');
+      throw new Error('Missing required field: userId');
     });
 
     // Act
@@ -97,7 +92,7 @@ describe('verify email controller', () => {
 
     // Assert
     expect(checkRequiredFields).toHaveBeenCalled();
-    expect(authService.userRegister).not.toHaveBeenCalled();
+    expect(authService.verifyEmail).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 });

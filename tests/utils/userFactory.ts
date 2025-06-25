@@ -2,7 +2,7 @@ import { User_Status } from '../../src/enums/userEnums';
 import userModel from '../../src/models/user';
 import * as authUtil from '../../src/util/authUtil';
 
-interface MockUser {
+export interface MockUser {
   firstName?: string;
   lastName?: string;
   username?: string;

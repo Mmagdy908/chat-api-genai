@@ -4,6 +4,7 @@ import { forgotPassword } from '../../../src/controllers/authController';
 import * as authService from '../../../src/services/authService';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/services/authService');
 jest.mock('../../../src/util/checkRequiredFields');
@@ -15,9 +16,10 @@ describe('forgotPassword controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const userData = userFactory.create();
     req = getMockReq({
       body: {
-        email: 'john@example.com',
+        email: userData.email,
       },
     });
     ({ res, next } = getMockRes());
@@ -34,7 +36,7 @@ describe('forgotPassword controller', () => {
 
     // Assert
     expect(checkRequiredFields).toHaveBeenCalledWith(req.body, 'email');
-    expect(authService.forgotPassword).toHaveBeenCalledWith('john@example.com');
+    expect(authService.forgotPassword).toHaveBeenCalledWith(req.body.email);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       status: 'success',
@@ -45,6 +47,8 @@ describe('forgotPassword controller', () => {
 
   test('should call next with error if required fields are missing', async () => {
     // Arrange
+    delete req.body.email;
+
     (checkRequiredFields as jest.Mock).mockImplementation(() => {
       throw new Error('Missing required field: email');
     });
