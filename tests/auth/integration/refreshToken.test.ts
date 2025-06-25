@@ -80,15 +80,14 @@ describe('POST /refresh-token', () => {
 
   test('should return 400 if refresh token does not exist in Redis', async () => {
     // Arrange
-    const { user, refreshToken } = await setupUser();
+    const user = await userModel.create(userFactory.create({ isVerified: true }));
+
+    const refreshToken = authUtil.generateRefreshToken(user.id, 'test-device-id');
 
     const refreshData = {
       userId: user.id,
       refreshToken,
     };
-
-    // Clear Redis to simulate non-existent token
-    await authUtil.deleteAllRefreshTokens(user.id);
 
     // Act
     const response = await request(app).post('/api/v1/refresh-token').send(refreshData).expect(400);
