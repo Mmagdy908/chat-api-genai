@@ -4,6 +4,7 @@ import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import userModel from '../../../src/models/user';
 import AppError from '../../../src/util/appError';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
@@ -21,13 +22,7 @@ describe('authService - refreshToken', () => {
     const newAccessToken = 'new-access-token';
     const newRefreshToken = 'new-refresh-token';
 
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    });
+    const userMock = new userModel(userFactory.create({ isVerified: true }));
 
     const tokenPayload = {
       userId: userId,

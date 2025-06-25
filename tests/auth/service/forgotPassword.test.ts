@@ -4,6 +4,7 @@ import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
 import userModel from '../../../src/models/user';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
@@ -15,13 +16,9 @@ describe('authService - forgotPassword', () => {
 
   test('should generate OTP and send reset email for existing user', async () => {
     // Arrange
-    const email = 'john@example.com';
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: email,
-      password: 'password123',
-    });
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
+    const email = userMock.email;
     const resetOTP = '123456';
 
     jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(userMock);
@@ -41,7 +38,8 @@ describe('authService - forgotPassword', () => {
 
   test('should not throw error for non-existent user (prevent email enumeration)', async () => {
     // Arrange
-    const email = 'nonexistent@example.com';
+    const userData = userFactory.create();
+    const email = userData.email as string;
 
     jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(null);
     jest.spyOn(authUtil, 'generateOTP');

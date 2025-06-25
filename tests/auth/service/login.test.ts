@@ -5,33 +5,30 @@ import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
 import userModel from '../../../src/models/user';
 import AppError from '../../../src/util/appError';
+import { MockUser, userFactory } from '../../utils/userFactory';
+import { User } from '../../../src/interfaces/models/user';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
 
 describe('authService - userLogin', () => {
+  let userData: MockUser;
+  let userMock: User;
   beforeEach(() => {
     jest.clearAllMocks();
+    userData = userFactory.create({ isVerified: true });
+    userMock = new userModel(userData);
   });
 
   test('should successfully login user with correct credentials', async () => {
     // Arrange
+
     const credentials = {
-      email: 'john@example.com',
-      password: 'password123',
+      email: userMock.email,
+      password: userMock.password,
     };
 
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    });
-
-    // Mock the checkPassword method
     jest.spyOn(userMock, 'checkPassword').mockResolvedValue(true);
-
     jest.mocked(userRepository.getByEmail).mockResolvedValue(userMock);
     jest
       .mocked(authUtil.login)
@@ -43,7 +40,7 @@ describe('authService - userLogin', () => {
     // Assert
     expect(userRepository.getByEmail).toHaveBeenCalledWith(credentials.email);
     expect(userMock.checkPassword).toHaveBeenCalledWith(credentials.password);
-    expect(authUtil.login).toHaveBeenCalledWith(userMock.id);
+    expect(authUtil.login).toHaveBeenCalledWith(userMock.id.toString());
     expect(result).toEqual({
       user: userMock,
       accessToken: 'accessToken',
@@ -54,8 +51,8 @@ describe('authService - userLogin', () => {
   test('should throw 401 error if user does not exist', async () => {
     // Arrange
     const credentials = {
-      email: 'nonexistent@example.com',
-      password: 'password123',
+      email: userMock.email,
+      password: userMock.password,
     };
 
     jest.mocked(userRepository.getByEmail).mockResolvedValue(null);
@@ -72,21 +69,11 @@ describe('authService - userLogin', () => {
   test('should throw 401 error if password is incorrect', async () => {
     // Arrange
     const credentials = {
-      email: 'john@example.com',
+      email: userMock.email,
       password: 'wrongpassword',
     };
 
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    });
-
-    // Mock the checkPassword method to return false
     jest.spyOn(userMock, 'checkPassword').mockResolvedValue(false);
-
     jest.mocked(userRepository.getByEmail).mockResolvedValue(userMock);
 
     // Act & Assert
@@ -101,24 +88,17 @@ describe('authService - userLogin', () => {
 
   test('should throw 401 error and resend verification email if user is not verified', async () => {
     // Arrange
-    const credentials = {
-      email: 'john@example.com',
-      password: 'password123',
-    };
+    userData = userFactory.create({ isVerified: false });
+    userMock = new userModel(userData);
 
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: false,
-    });
+    const credentials = {
+      email: userMock.email,
+      password: userMock.password,
+    };
 
     const verifyEmailOTP = '123456';
 
-    // Mock the checkPassword method
     jest.spyOn(userMock, 'checkPassword').mockResolvedValue(true);
-
     jest.mocked(userRepository.getByEmail).mockResolvedValue(userMock);
     jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(verifyEmailOTP);
     jest.spyOn(authUtil, 'storeOTP').mockResolvedValue(undefined);
@@ -132,7 +112,11 @@ describe('authService - userLogin', () => {
     expect(userRepository.getByEmail).toHaveBeenCalledWith(credentials.email);
     expect(userMock.checkPassword).toHaveBeenCalledWith(credentials.password);
     expect(authUtil.generateOTP).toHaveBeenCalled();
-    expect(authUtil.storeOTP).toHaveBeenCalledWith(userMock.id, 'verifyOTP', verifyEmailOTP);
+    expect(authUtil.storeOTP).toHaveBeenCalledWith(
+      userMock.id.toString(),
+      'verifyOTP',
+      verifyEmailOTP
+    );
     expect(Email.prototype.sendVerificationEmail).toHaveBeenCalled();
     expect(authUtil.login).not.toHaveBeenCalled();
   });

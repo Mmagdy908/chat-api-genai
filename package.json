@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand",
-    "test-specific": "jest tests/auth/controller --runInBand",
+    "test-specific": "jest tests/models --runInBand",
     "start": "nodemon src/server.ts",
     "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts"
   },

@@ -4,6 +4,7 @@ import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import userModel from '../../../src/models/user';
 import AppError from '../../../src/util/appError';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
@@ -15,13 +16,8 @@ describe('authService - verify email', () => {
 
   test('should succeed to verify email', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'Ahmed',
-      lastName: 'Essam',
-      email: 'ahmed@example.com',
-      password: 'password123',
-    });
-
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
     const verifyEmailOTP = '123456';
 
     jest.mocked(userRepository.getById).mockResolvedValue(userMock);
@@ -30,7 +26,6 @@ describe('authService - verify email', () => {
       ...userMock.toObject(),
       isVerified: true,
     });
-
     jest
       .mocked(authUtil.login)
       .mockResolvedValue({ accessToken: 'accessToken', refreshToken: 'refreshToken' });
@@ -40,7 +35,6 @@ describe('authService - verify email', () => {
 
     // Assert
     expect(userMock.isVerified).toBeFalsy();
-
     expect(userRepository.getById).toHaveBeenCalledWith(userMock.id);
     expect(authUtil.verifyOTP).toHaveBeenCalledWith(userMock.id, 'verifyOTP', verifyEmailOTP);
     expect(userRepository.updateById).toHaveBeenCalledWith(userMock.id, { isVerified: true });
@@ -55,13 +49,8 @@ describe('authService - verify email', () => {
 
   test('should throw 400 if otp is incorrect', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'Ahmed',
-      lastName: 'Essam',
-      email: 'ahmed@example.com',
-      password: 'password123',
-    });
-
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
     const verifyEmailOTP = '123456';
 
     jest.mocked(userRepository.getById).mockResolvedValue(userMock);
@@ -80,13 +69,8 @@ describe('authService - verify email', () => {
 
   test('should throw 404 if user is not found', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'Ahmed',
-      lastName: 'Essam',
-      email: 'ahmed@example.com',
-      password: 'password123',
-    });
-
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
     const verifyEmailOTP = '123456';
 
     jest.mocked(userRepository.getById).mockResolvedValue(null);
@@ -95,9 +79,9 @@ describe('authService - verify email', () => {
     await expect(verifyEmail(userMock.id, verifyEmailOTP)).rejects.toThrow(
       new AppError(404, 'User Not Found')
     );
+
     // Assert
     expect(userMock.isVerified).toBeFalsy();
-
     expect(userRepository.getById).toHaveBeenCalledWith(userMock.id);
     expect(authUtil.verifyOTP).not.toHaveBeenCalled();
     expect(userRepository.updateById).not.toHaveBeenCalled();

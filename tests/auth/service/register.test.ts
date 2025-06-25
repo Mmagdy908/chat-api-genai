@@ -5,6 +5,7 @@ import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
 import userModel from '../../../src/models/user';
 import AppError from '../../../src/util/appError';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
@@ -16,12 +17,7 @@ describe('authService - userRegister', () => {
 
   test('should register user and send verification email', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
+    const userData = userFactory.create();
     const createdUser = new userModel(userData);
     const verifyEmailOTP = '123456';
 
@@ -47,12 +43,7 @@ describe('authService - userRegister', () => {
 
   test('should throw error if user creation fails', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
+    const userData = userFactory.create();
 
     jest
       .spyOn(userRepository, 'create')

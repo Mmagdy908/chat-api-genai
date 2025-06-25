@@ -4,6 +4,7 @@ import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import userModel from '../../../src/models/user';
 import AppError from '../../../src/util/appError';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/util/authUtil');
@@ -15,14 +16,9 @@ describe('authService - updatePassword', () => {
 
   test('should update password successfully and return new tokens', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'oldPassword123',
-    });
-
-    const oldPassword = 'oldPassword123';
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
+    const oldPassword = userData.password as string;
     const newPassword = 'newPassword123';
     const updatedUser = { ...userMock.toObject(), password: newPassword };
 
@@ -50,13 +46,8 @@ describe('authService - updatePassword', () => {
 
   test('should throw error if old password is incorrect', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'oldPassword123',
-    });
-
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
     const oldPassword = 'wrongPassword';
     const newPassword = 'newPassword123';
 
@@ -75,15 +66,10 @@ describe('authService - updatePassword', () => {
 
   test('should throw error if new password is same as old password', async () => {
     // Arrange
-    const userMock = new userModel({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: 'password123',
-    });
-
-    const oldPassword = 'password123';
-    const newPassword = 'password123';
+    const userData = userFactory.create();
+    const userMock = new userModel(userData);
+    const oldPassword = userData.password as string;
+    const newPassword = oldPassword;
 
     jest.spyOn(userMock, 'checkPassword').mockResolvedValue(true);
 
