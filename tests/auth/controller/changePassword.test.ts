@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '../../../src/util/appError';
 import { User } from '../../../src/interfaces/models/user';
 import { mockedSendLoginResponseImplementation } from '../../utils/mocks';
+import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/services/authService');
 jest.mock('../../../src/util/authUtil');
@@ -26,12 +27,7 @@ describe('changePassword controller', () => {
         oldPassword: 'oldPassword123',
         newPassword: 'newPassword123',
       },
-      user: new userModel({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        password: 'oldPassword123',
-      }),
+      user: new userModel(userFactory.create()),
     });
     ({ res, next } = getMockRes());
     next = jest.fn();

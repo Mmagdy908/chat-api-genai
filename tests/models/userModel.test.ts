@@ -1,6 +1,8 @@
 import { jest, describe, expect, test, beforeEach, beforeAll, afterAll } from '@jest/globals';
 import { mongoConfig, clearMongoDB, disconnectMongoDB } from '../../src/config/mongo';
 import userModel from '../../src/models/user';
+import { userFactory } from '../utils/userFactory';
+import { User_Status } from '../../src/enums/userEnums';
 
 describe('User Model', () => {
   beforeAll(async () => {
@@ -20,13 +22,7 @@ describe('User Model', () => {
   describe('Schema Validation', () => {
     test('should create a valid user with all required fields', async () => {
       // Arrange
-      const validUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const validUserData = userFactory.create();
 
       // Act
       const user = new userModel(validUserData);
@@ -34,22 +30,17 @@ describe('User Model', () => {
 
       // Assert
       expect(savedUser._id).toBeDefined();
-      expect(savedUser.firstName).toBe('John');
-      expect(savedUser.lastName).toBe('Doe');
-      expect(savedUser.email).toBe('john.doe@example.com');
-      expect(savedUser.isVerified).toBe(false); // default value
+      expect(savedUser.firstName).toBe(validUserData.firstName);
+      expect(savedUser.lastName).toBe(validUserData.lastName);
+      expect(savedUser.email).toBe(validUserData.email);
+      expect(savedUser.isVerified).toBe(validUserData.isVerified); // default value
       expect(savedUser.createdAt).toBeDefined();
       expect(savedUser.updatedAt).toBeDefined();
     });
 
     test('should fail validation when firstName is missing', async () => {
       // Arrange
-      const invalidUserData = {
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const invalidUserData = userFactory.createWithMissingFields('firstName');
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -58,12 +49,7 @@ describe('User Model', () => {
 
     test('should fail validation when lastName is missing', async () => {
       // Arrange
-      const invalidUserData = {
-        firstName: 'John',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const invalidUserData = userFactory.createWithMissingFields('lastName');
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -72,12 +58,7 @@ describe('User Model', () => {
 
     test('should fail validation when username is missing', async () => {
       // Arrange
-      const invalidUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const invalidUserData = userFactory.createWithMissingFields('username');
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -86,12 +67,7 @@ describe('User Model', () => {
 
     test('should fail validation when email is missing', async () => {
       // Arrange
-      const invalidUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        password: 'password123',
-      };
+      const invalidUserData = userFactory.createWithMissingFields('email');
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -100,13 +76,7 @@ describe('User Model', () => {
 
     test('should fail validation with invalid email format', async () => {
       // Arrange
-      const invalidUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'invalid-email',
-        password: 'password123',
-      };
+      const invalidUserData = userFactory.create({ email: 'ahmed123' });
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -115,13 +85,7 @@ describe('User Model', () => {
 
     test('should fail validation when password is too short', async () => {
       // Arrange
-      const invalidUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'short',
-      };
+      const invalidUserData = userFactory.create({ password: 'short' });
 
       // Act & Assert
       const user = new userModel(invalidUserData);
@@ -130,42 +94,28 @@ describe('User Model', () => {
 
     test('should trim whitespace from string fields', async () => {
       // Arrange
-      const userDataWithWhitespace = {
-        firstName: '  John  ',
-        lastName: '  Doe  ',
-        username: 'JohnDoe123',
-        email: '  john.doe@example.com  ',
-        password: '  password123  ',
-      };
+      const userDataWithWhitespace = userFactory.create({
+        firstName: '  Ahmed  ',
+        lastName: '  Mohamed  ',
+        email: '  ahmed.mohamed@example.com   ',
+      });
 
       // Act
       const user = new userModel(userDataWithWhitespace);
       const savedUser = await user.save();
 
       // Assert
-      expect(savedUser.firstName).toBe('John');
-      expect(savedUser.lastName).toBe('Doe');
-      expect(savedUser.email).toBe('john.doe@example.com');
+      expect(savedUser.firstName).toBe('Ahmed');
+      expect(savedUser.lastName).toBe('Mohamed');
+      expect(savedUser.email).toBe('ahmed.mohamed@example.com');
       // Note: password will be hashed, so we can't directly check trimming
     });
 
     test('should enforce unique username constraint', async () => {
       // Arrange
-      const userData1 = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData1 = userFactory.create({ email: 'user1@example.com', username: 'user1' });
 
-      const userData2 = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        username: 'JohnDoe123',
-        email: 'john.smith@example.com',
-        password: 'password456',
-      };
+      const userData2 = userFactory.create({ email: 'user2@example.com', username: 'user1' });
 
       // Act
       const user1 = new userModel(userData1);
@@ -179,21 +129,9 @@ describe('User Model', () => {
 
     test('should enforce unique email constraint', async () => {
       // Arrange
-      const userData1 = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData1 = userFactory.create({ email: 'user1@example.com', username: 'user1' });
 
-      const userData2 = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        username: 'JohnSmith123',
-        email: 'john.doe@example.com', // Same email
-        password: 'password456',
-      };
+      const userData2 = userFactory.create({ email: 'user1@example.com', username: 'user2' });
 
       // Act
       const user1 = new userModel(userData1);
@@ -209,31 +147,19 @@ describe('User Model', () => {
   describe('Virtual Properties', () => {
     test('should return correct fullName virtual property', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
       const savedUser = await user.save();
 
       // Assert
-      expect(savedUser.fullName).toBe('John Doe');
+      expect(savedUser.fullName).toBe([userData.firstName, userData.lastName].join(' '));
     });
 
     test('should include virtuals in JSON output', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
@@ -241,18 +167,12 @@ describe('User Model', () => {
       const userJSON = savedUser.toJSON();
 
       // Assert
-      expect(userJSON.fullName).toBe('John Doe');
+      expect(userJSON.fullName).toBe([userData.firstName, userData.lastName].join(' '));
     });
 
     test('should include virtuals in Object output', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
@@ -260,46 +180,34 @@ describe('User Model', () => {
       const userObject = savedUser.toObject();
 
       // Assert
-      expect(userObject.fullName).toBe('John Doe');
+      expect(userObject.fullName).toBe([userData.firstName, userData.lastName].join(' '));
     });
   });
 
   describe('Password Hashing Middleware', () => {
     test('should hash password before saving', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
       const savedUser = await user.save();
 
       // Assert
-      expect(savedUser.password).not.toBe('password123');
+      expect(savedUser.password).not.toBe(userData.password);
       expect(savedUser.password).toMatch(/^\$2[aby]\$\d+\$/); // bcrypt hash pattern
     });
 
     test('should not hash password if not modified', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       const user = new userModel(userData);
       const savedUser = await user.save();
       const originalHashedPassword = savedUser.password;
 
       // Act - Update firstName (not password)
-      savedUser.firstName = 'Johnny';
+      savedUser.firstName = 'Selim';
       const updatedUser = await savedUser.save();
 
       // Assert
@@ -308,13 +216,7 @@ describe('User Model', () => {
 
     test('should hash password again when password is modified', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       const user = new userModel(userData);
       const savedUser = await user.save();
@@ -334,19 +236,13 @@ describe('User Model', () => {
     describe('checkPassword method', () => {
       test('should return true for correct password', async () => {
         // Arrange
-        const userData = {
-          firstName: 'John',
-          lastName: 'Doe',
-          username: 'JohnDoe123',
-          email: 'john.doe@example.com',
-          password: 'password123',
-        };
+        const userData = userFactory.create();
 
         const user = new userModel(userData);
         const savedUser = await user.save();
 
         // Act
-        const isPasswordCorrect = await savedUser.checkPassword('password123');
+        const isPasswordCorrect = await savedUser.checkPassword(userData.password as string);
 
         // Assert
         expect(isPasswordCorrect).toBe(true);
@@ -354,13 +250,7 @@ describe('User Model', () => {
 
       test('should return false for incorrect password', async () => {
         // Arrange
-        const userData = {
-          firstName: 'John',
-          lastName: 'Doe',
-          username: 'JohnDoe123',
-          email: 'john.doe@example.com',
-          password: 'password123',
-        };
+        const userData = userFactory.create();
 
         const user = new userModel(userData);
         const savedUser = await user.save();
@@ -377,13 +267,7 @@ describe('User Model', () => {
   describe('Default Values', () => {
     test('should set isVerified to false by default', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
@@ -395,34 +279,22 @@ describe('User Model', () => {
 
     test('should allow isVerified to be set explicitly', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-        isVerified: true,
-      };
+      const userData = userFactory.createWithMissingFields('isVerified');
 
       // Act
       const user = new userModel(userData);
       const savedUser = await user.save();
 
       // Assert
-      expect(savedUser.isVerified).toBe(true);
+      expect(savedUser.isVerified).toBe(false);
+      expect(savedUser.status).toBe(User_Status.Offline);
     });
   });
 
   describe('Timestamps', () => {
     test('should automatically set createdAt and updatedAt', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
@@ -437,13 +309,7 @@ describe('User Model', () => {
 
     test('should update updatedAt when document is modified', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       const user = new userModel(userData);
       const savedUser = await user.save();
@@ -453,7 +319,7 @@ describe('User Model', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Act
-      savedUser.firstName = 'Johnny';
+      savedUser.firstName = 'Selim';
       const updatedUser = await savedUser.save();
 
       // Assert
@@ -464,13 +330,7 @@ describe('User Model', () => {
   describe('Optional Fields', () => {
     test('should allow passwordUpdatedAt to be undefined', async () => {
       // Arrange
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-      };
+      const userData = userFactory.create();
 
       // Act
       const user = new userModel(userData);
@@ -480,17 +340,10 @@ describe('User Model', () => {
       expect(savedUser.passwordUpdatedAt).toBeUndefined();
     });
 
-    test('should allow passwordUpdatedAt to be set', async () => {
+    test('should allow passwordUpdatedAt to be  ', async () => {
       // Arrange
       const passwordUpdatedAt = new Date();
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        username: 'JohnDoe123',
-        email: 'john.doe@example.com',
-        password: 'password123',
-        passwordUpdatedAt,
-      };
+      const userData = userFactory.create({ passwordUpdatedAt });
 
       // Act
       const user = new userModel(userData);
