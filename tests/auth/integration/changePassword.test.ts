@@ -4,19 +4,17 @@ import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
+import { userFactory } from '../../utils/userFactory';
 
 describe('POST /change-password', () => {
   setupIntegrationTests();
+
   test('should change password successfully for authenticated user', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
+    const userData = userFactory.create({
       password: 'oldPassword123',
       isVerified: true,
-    };
+    });
 
     const user = await userModel.create(userData);
     const { accessToken } = await authUtil.login(user.id);
@@ -40,7 +38,7 @@ describe('POST /change-password', () => {
 
     // Assert
     expect(response.body.status).toBe('success');
-    expect(response.body.data.user.email).toBe('john@example.com');
+    expect(response.body.data.user.email).toBe(userData.email);
     expect(response.body.data.user.accessToken).toBe('newAccessToken');
     expect(response.body.data.user.refreshToken).toBe('newRefreshToken');
 
@@ -51,14 +49,10 @@ describe('POST /change-password', () => {
 
   test('should return 400 if old password is incorrect', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
+    const userData = userFactory.create({
       password: 'oldPassword123',
       isVerified: true,
-    };
+    });
 
     const user = await userModel.create(userData);
     const { accessToken } = await authUtil.login(user.id);
@@ -82,21 +76,13 @@ describe('POST /change-password', () => {
 
   test('should return 400 if new password is same as old password', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    };
-
+    const userData = userFactory.create({ isVerified: true });
     const user = await userModel.create(userData);
     const { accessToken } = await authUtil.login(user.id);
 
     const changePasswordData = {
-      oldPassword: 'password123',
-      newPassword: 'password123',
+      oldPassword: userData.password,
+      newPassword: userData.password,
     };
 
     // Act
@@ -133,14 +119,10 @@ describe('POST /change-password', () => {
 
   test('should return 400 if required fields are missing', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
+    const userData = userFactory.create({
       password: 'oldPassword123',
       isVerified: true,
-    };
+    });
 
     const user = await userModel.create(userData);
     const { accessToken } = await authUtil.login(user.id);

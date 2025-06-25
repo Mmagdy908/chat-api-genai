@@ -1,4 +1,6 @@
 import { User_Status } from '../../src/enums/userEnums';
+import userModel from '../../src/models/user';
+import * as authUtil from '../../src/util/authUtil';
 
 interface MockUser {
   firstName?: string;
@@ -33,3 +35,10 @@ class UserFactory {
 }
 
 export const userFactory = new UserFactory();
+
+export const setupUser = async (overrides: MockUser = {}) => {
+  const userData = userFactory.create({ isVerified: true, ...overrides });
+  const user = await userModel.create(userData);
+  const { accessToken, refreshToken } = await authUtil.login(user.id);
+  return { user, accessToken, userData, refreshToken };
+};

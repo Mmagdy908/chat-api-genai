@@ -4,29 +4,22 @@ import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
+import { userFactory, setupUser } from '../../utils/userFactory'; // Import UserFactory
 
 describe('POST /reset-password', () => {
   setupIntegrationTests();
+
   test('should reset password successfully with valid OTP', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'oldPassword123',
-      isVerified: true,
-    };
-
-    const user = await userModel.create(userData);
+    const { user, userData } = await setupUser();
     const resetOTP = '123456';
 
     jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(true);
     jest.spyOn(authUtil, 'deleteAllRefreshTokens').mockResolvedValue(undefined);
 
     const resetPasswordData = {
-      email: 'john@example.com',
-      resetOTP: resetOTP,
+      email: userData.email,
+      resetOTP,
       newPassword: 'newPassword123',
     };
 
@@ -46,28 +39,19 @@ describe('POST /reset-password', () => {
 
     // Verify password was updated in database
     const updatedUser = await userModel.findById(user.id);
-    expect(updatedUser?.password).not.toBe(user.password);
+    expect(updatedUser?.password).not.toBe(userData.password);
     expect(updatedUser?.passwordUpdatedAt).toBeDefined();
   });
 
   test('should return 400 if OTP is invalid', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'oldPassword123',
-      isVerified: true,
-    };
-
-    await userModel.create(userData);
+    const { userData } = await setupUser();
 
     jest.spyOn(authUtil, 'verifyOTP').mockResolvedValue(false);
     jest.spyOn(authUtil, 'deleteAllRefreshTokens');
 
     const resetPasswordData = {
-      email: 'john@example.com',
+      email: userData.email,
       resetOTP: 'wrongOTP',
       newPassword: 'newPassword123',
     };
@@ -115,7 +99,7 @@ describe('POST /reset-password', () => {
   test('should return 400 if required fields are missing', async () => {
     // Arrange
     const resetPasswordData = {
-      email: 'john@example.com',
+      email: 'ahmedsamir@example.com',
       resetOTP: '123456',
       // newPassword missing
     };

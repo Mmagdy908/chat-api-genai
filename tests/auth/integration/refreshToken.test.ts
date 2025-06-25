@@ -4,32 +4,20 @@ import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
+import { userFactory, setupUser } from '../../utils/userFactory'; // Import UserFactory
 
 describe('POST /refresh-token', () => {
   setupIntegrationTests();
+
+  // Helper to setup user and tokens
+
   test('should refresh token with valid refresh token in body', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    const user = await userModel.create({ ...userData, isVerified: true });
-
-    // Generate valid tokens
-    const accessToken = authUtil.generateAccessToken(user.id);
-    const deviceId = 'test-device-id';
-    const refreshToken = authUtil.generateRefreshToken(user.id, deviceId);
-
-    // Store refresh token in Redis
-    await authUtil.storeRefreshToken(user.id, deviceId, refreshToken);
+    const { user, userData, accessToken, refreshToken } = await setupUser();
 
     const refreshData = {
       userId: user.id,
-      refreshToken: refreshToken,
+      refreshToken,
     };
 
     // Act
@@ -37,7 +25,7 @@ describe('POST /refresh-token', () => {
 
     // Assert
     expect(response.body.status).toBe('success');
-    expect(response.body.data.user.email).toBe('john@example.com');
+    expect(response.body.data.user.email).toBe(userData.email);
     expect(response.body.data.user.accessToken).toBeDefined();
     expect(response.body.data.user.refreshToken).toBeDefined();
     expect(response.body.data.user.accessToken).not.toBe(accessToken); // Should be new token
@@ -51,22 +39,7 @@ describe('POST /refresh-token', () => {
 
   test('should refresh token with valid refresh token in cookie', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    const user = await userModel.create({ ...userData, isVerified: true });
-
-    // Generate valid tokens
-    const deviceId = 'test-device-id';
-    const refreshToken = authUtil.generateRefreshToken(user.id, deviceId);
-
-    // Store refresh token in Redis
-    await authUtil.storeRefreshToken(user.id, deviceId, refreshToken);
+    const { user, userData, refreshToken } = await setupUser();
 
     const refreshData = {
       userId: user.id,
@@ -82,7 +55,7 @@ describe('POST /refresh-token', () => {
 
     // Assert
     expect(response.body.status).toBe('success');
-    expect(response.body.data.user.email).toBe('john@example.com');
+    expect(response.body.data.user.email).toBe(userData.email);
     expect(response.body.data.user.accessToken).toBeDefined();
     expect(response.body.data.user.refreshToken).toBeDefined();
     expect(response.body.data.user.refreshToken).not.toBe(refreshToken); // Should be rotated
@@ -90,15 +63,7 @@ describe('POST /refresh-token', () => {
 
   test('should return 400 if refresh token is invalid', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    const user = await userModel.create({ ...userData, isVerified: true });
+    const { user, userData } = await setupUser();
 
     const refreshData = {
       userId: user.id,
@@ -115,24 +80,15 @@ describe('POST /refresh-token', () => {
 
   test('should return 400 if refresh token does not exist in Redis', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    const user = await userModel.create({ ...userData, isVerified: true });
-
-    // Generate valid token but don't store it in Redis
-    const deviceId = 'test-device-id';
-    const refreshToken = authUtil.generateRefreshToken(user.id, deviceId);
+    const { user, refreshToken } = await setupUser();
 
     const refreshData = {
       userId: user.id,
-      refreshToken: refreshToken,
+      refreshToken,
     };
+
+    // Clear Redis to simulate non-existent token
+    await authUtil.deleteAllRefreshTokens(user.id);
 
     // Act
     const response = await request(app).post('/api/v1/refresh-token').send(refreshData).expect(400);
@@ -147,13 +103,11 @@ describe('POST /refresh-token', () => {
     const nonExistentUserId = new userModel().id;
     const deviceId = 'test-device-id';
     const refreshToken = authUtil.generateRefreshToken(nonExistentUserId, deviceId);
-
-    // Store refresh token in Redis
     await authUtil.storeRefreshToken(nonExistentUserId, deviceId, refreshToken);
 
     const refreshData = {
       userId: nonExistentUserId,
-      refreshToken: refreshToken,
+      refreshToken,
     };
 
     // Act

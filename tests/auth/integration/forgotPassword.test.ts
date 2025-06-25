@@ -5,22 +5,17 @@ import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
+import { userFactory } from '../../utils/userFactory';
 jest.mock('../../../src/util/email');
 
 describe('POST /forgot-password', () => {
   setupIntegrationTests();
+
   test('should send reset password email for existing user', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-      isVerified: true,
-    };
-
+    const userData = userFactory.create({ isVerified: true });
     await userModel.create(userData);
+
     const resetOTP = '123456';
 
     jest.spyOn(authUtil, 'generateOTP').mockResolvedValue(resetOTP);
@@ -30,7 +25,7 @@ describe('POST /forgot-password', () => {
     // Act
     const response = await request(app)
       .post('/api/v1/forgot-password')
-      .send({ email: 'john@example.com' })
+      .send({ email: userData.email })
       .expect(200);
 
     // Assert

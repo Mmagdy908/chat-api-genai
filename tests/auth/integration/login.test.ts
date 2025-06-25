@@ -5,26 +5,20 @@ import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
+import { userFactory } from '../../utils/userFactory';
 jest.mock('../../../src/util/email');
 
 describe('POST /login', () => {
   setupIntegrationTests();
+
   test('should login user with correct credentials and return tokens', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    // Create and verify user first
-    await userModel.create({ ...userData, isVerified: true });
+    const userData = userFactory.create({ isVerified: true });
+    await userModel.create(userData);
 
     const loginData = {
-      email: 'john@example.com',
-      password: 'password123',
+      email: userData.email,
+      password: userData.password,
     };
 
     // Act
@@ -32,7 +26,7 @@ describe('POST /login', () => {
 
     // Assert
     expect(response.body.status).toBe('success');
-    expect(response.body.data.user.email).toBe('john@example.com');
+    expect(response.body.data.user.email).toBe(userData.email);
     expect(response.body.data.user.accessToken).toBeDefined();
     expect(response.body.data.user.refreshToken).toBeDefined();
     expect(response.body.data.user.password).toBeUndefined();
@@ -59,18 +53,11 @@ describe('POST /login', () => {
 
   test('should return 401 if password is incorrect', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    await userModel.create({ ...userData, isVerified: true });
+    const userData = userFactory.create({ isVerified: true });
+    await userModel.create(userData);
 
     const loginData = {
-      email: 'john@example.com',
+      email: userData.email,
       password: 'wrongpassword',
     };
 
@@ -84,19 +71,12 @@ describe('POST /login', () => {
 
   test('should return 401 and resend verification email if user is not verified', async () => {
     // Arrange
-    const userData = {
-      firstName: 'John',
-      lastName: 'Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password123',
-    };
-
-    await userModel.create({ ...userData, isVerified: false });
+    const userData = userFactory.create({ isVerified: false });
+    await userModel.create(userData);
 
     const loginData = {
-      email: 'john@example.com',
-      password: 'password123',
+      email: userData.email,
+      password: userData.password,
     };
 
     const verifyEmailOTP = '123456';
