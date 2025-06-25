@@ -18,13 +18,6 @@ import * as userRepository from '../repositories/userRepository';
 
 import AppError from '../util/appError';
 
-// const sendVerificationEmail = async (userEmail: string, verifyEmailOTP: string) => {
-//   await sendEmail(
-//     userEmail,
-//     'Verify Email OTP (valid for 10 mins)',
-//     generateVerifyEmailTemplate(verifyEmailOTP)
-//   );
-// };
 export const userRegister = async (userData: Partial<User>): Promise<User> => {
   // 1) create user
   const user = await userRepository.create(userData);
