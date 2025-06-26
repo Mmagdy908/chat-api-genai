@@ -1,16 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import catchAsync from '../util/catchAsync';
 import checkRequiredFields from '../util/checkRequiredFields';
-import * as friendshipMapper from '../mappers/friendshipMapper';
+import * as friendshipSchema from '../schemas/friendshipSchemas';
 import * as friendshipService from '../services/friendshipService';
 
 export const sendFriendRequest = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { recipientId } = friendshipMapper.mapCreateRequest(req.body);
+    const { recipientId } = friendshipSchema.createFriendshipRequestSchema.parse(req.body);
 
-    // checkRequiredFields(body, 'firstName', 'lastName', 'email', 'password');
-
-    const friendship = friendshipMapper.mapCreateResponse(
+    const friendship = friendshipSchema.createFriendshipResponseSchema.parse(
       await friendshipService.createFriendRequest(req.user.id, recipientId)
     );
 
