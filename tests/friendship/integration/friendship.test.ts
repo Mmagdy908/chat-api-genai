@@ -2,7 +2,6 @@ import { jest, describe, expect, test, beforeEach, beforeAll, afterAll } from '@
 import request from 'supertest';
 import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
-import userModel from '../../../src/models/user';
 import friendshipModel from '../../../src/models/friendship';
 import { setupUser, userFactory } from '../../utils/userFactory';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';
@@ -17,6 +16,7 @@ describe('Friendship Routes', () => {
   setupIntegrationTests();
 
   beforeEach(async () => {
+    // Arrange
     ({ user: sender, accessToken: senderToken } = await setupUser({
       username: 'sender',
       email: 'sender@example.com',
@@ -32,21 +32,25 @@ describe('Friendship Routes', () => {
 
   describe('POST /friendships/send', () => {
     test('should fail with 401 if user is not authenticated', async () => {
+      // Act
       const response = await request(app)
         .post('/api/v1/friendships/send')
         .send({ recipientId: recipient.id })
         .expect(401);
 
+      // Assert
       expect(response.body.message).toBe('You are not logged in');
     });
 
     test('should successfully send a friend request and return 201', async () => {
+      // Act
       const response = await request(app)
         .post('/api/v1/friendships/send')
         .set('Authorization', `Bearer ${senderToken}`)
         .send({ recipientId: recipient.id })
         .expect(201);
 
+      // Assert
       expect(response.body.status).toBe('success');
       expect(response.body.data.friendship.sender).toBe(sender.id);
       expect(response.body.data.friendship.recipient).toBe(recipient.id);
@@ -57,24 +61,43 @@ describe('Friendship Routes', () => {
     });
 
     test('should fail with 400 if sending to self', async () => {
+      // Act
       const response = await request(app)
         .post('/api/v1/friendships/send')
         .set('Authorization', `Bearer ${senderToken}`)
         .send({ recipientId: sender.id })
         .expect(400);
 
+      // Assert
       expect(response.body.message).toBe('You cannot send a friend request to yourself');
     });
 
+    test('should fail with 400 if recipientId is missing', async () => {
+      // Act
+      const response = await request(app)
+        .post('/api/v1/friendships/send')
+        .set('Authorization', `Bearer ${senderToken}`)
+        .send({})
+        .expect(400);
+
+      // Assert
+      expect(response.body.message).toBe(
+        '(recipientId) Invalid input: expected string, received undefined'
+      );
+    });
+
     test('should fail with 404 if recipient does not exist', async () => {
+      // Arrange
       const nonExistentId = '605fe2a754a4443834416344';
 
+      // Act
       const response = await request(app)
         .post('/api/v1/friendships/send')
         .set('Authorization', `Bearer ${senderToken}`)
         .send({ recipientId: nonExistentId })
         .expect(404);
 
+      // Assert
       expect(response.body.message).toBe('This recipient is not found');
     });
 
@@ -97,9 +120,10 @@ describe('Friendship Routes', () => {
     });
   });
 
-  describe('PATCH /api/v1/friendships/respond', () => {
+  describe('PATCH /friendships/respond', () => {
     let friendshipRequest: Friendship;
     beforeEach(async () => {
+      // Arrange
       friendshipRequest = await friendshipModel.create({
         sender: sender.id,
         recipient: recipient.id,
@@ -107,30 +131,51 @@ describe('Friendship Routes', () => {
     });
 
     test('should fail with 401 if user is not authenticated', async () => {
-      await request(app)
+      // Act
+      const response = await request(app)
         .patch('/api/v1/friendships/respond')
         .send({ friendshipId: friendshipRequest.id, status: Friendship_Status.Accepted })
         .expect(401);
+
+      // Assert
+      expect(response.body.message).toBe('You are not logged in');
+    });
+
+    test('should fail with 400 if friendshipId is missing', async () => {
+      // Act
+      const response = await request(app)
+        .patch('/api/v1/friendships/respond')
+        .set('Authorization', `Bearer ${senderToken}`)
+        .send({ status: Friendship_Status.Accepted })
+        .expect(400);
+
+      // Assert
+      expect(response.body.message).toBe(
+        '(friendshipId) Invalid input: expected string, received undefined'
+      );
     });
 
     test('should fail with 403 if the wrong user tries to respond', async () => {
-      // Sender tries to respond to their own request
+      // Act
       const response = await request(app)
         .patch('/api/v1/friendships/respond')
         .set('Authorization', `Bearer ${senderToken}`)
         .send({ friendshipId: friendshipRequest.id, status: Friendship_Status.Accepted })
         .expect(403);
 
+      // Assert
       expect(response.body.message).toBe('Current user is not recipient of this friend request');
     });
 
     test('should successfully accept a friend request and return 200', async () => {
+      // Act
       const response = await request(app)
         .patch('/api/v1/friendships/respond')
         .set('Authorization', `Bearer ${recipientToken}`)
         .send({ friendshipId: friendshipRequest.id, status: Friendship_Status.Accepted })
         .expect(200);
 
+      // Assert
       expect(response.body.status).toBe('success');
       expect(response.body.data.friendship.status).toBe(Friendship_Status.Accepted);
       const friendshipInDb = await friendshipModel.findById(friendshipRequest.id);
@@ -161,12 +206,14 @@ describe('Friendship Routes', () => {
     test('should successfully reject a friend request', async () => {
       // Create a new request to test rejection
 
+      // Act
       const response = await request(app)
         .patch('/api/v1/friendships/respond')
         .set('Authorization', `Bearer ${recipientToken}`)
         .send({ friendshipId: friendshipRequest.id, status: Friendship_Status.Rejected })
         .expect(200);
 
+      // Assert
       expect(response.body.status).toBe('success');
       expect(response.body.data.friendship.status).toBe(Friendship_Status.Rejected);
       const friendshipInDb = await friendshipModel.findById(friendshipRequest.id);
