@@ -5,6 +5,9 @@ import AppError from '../util/appError';
 import { Friendship_Status } from '../enums/friendshipEnums';
 
 export const send = async (senderId: string, recipientId: string) => {
+  if (senderId === recipientId)
+    throw new AppError(400, 'You cannot send a friend request to yourself');
+
   const recipient = await userRepository.getById(recipientId);
 
   if (!recipient) throw new AppError(404, 'This recipient is not found');

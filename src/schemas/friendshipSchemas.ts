@@ -1,21 +1,23 @@
 import { z } from 'zod/v4';
 import { Types } from 'mongoose';
 import { Friendship_Status } from '../enums/friendshipEnums';
+import { Friendship } from '../interfaces/models/friendship';
+import friendship from '../models/friendship';
 
-export const sendFriendshipRequestSchema = z.object({
+const sendFriendshipRequestSchema = z.object({
   recipientId: z.string().refine((value) => Types.ObjectId.isValid(value), {
     message: 'Invalid id format',
   }),
 });
 
-export const respondToFriendshipRequestSchema = z.object({
+const respondToFriendshipRequestSchema = z.object({
   friendshipId: z.string().refine((value) => Types.ObjectId.isValid(value), {
     message: 'Invalid id format',
   }),
   status: z.enum([Friendship_Status.Accepted, Friendship_Status.Rejected]),
 });
 
-export const sendFriendshipResponseSchema = z.object({
+const sendFriendshipResponseSchema = z.object({
   id: z.string().refine((value) => Types.ObjectId.isValid(value), {
     message: 'Invalid id format',
   }),
@@ -28,18 +30,27 @@ export const sendFriendshipResponseSchema = z.object({
   status: z.enum(Friendship_Status),
 });
 
-export const respondToFriendshipResponseSchema = sendFriendshipResponseSchema;
+const respondToFriendshipResponseSchema = sendFriendshipResponseSchema;
 
-// export const mapCreateRequest = (friendshipData: z.infer<typeof createFriendshipRequestSchema>) =>
-//   createFriendshipRequestSchema.parse({
-//     senderId: friendshipData.senderId,
-//     recipientId: friendshipData.recipientId,
-//   });
+export const mapSendRequest = (friendshipData: z.infer<typeof sendFriendshipRequestSchema>) =>
+  sendFriendshipRequestSchema.parse({
+    recipientId: friendshipData.recipientId,
+  });
 
-// export const mapCreateResponse = (friendship: Friendship) =>
-//   createFriendshipResponseSchema.parse({
-//     id: friendship.id,
-//     sender: friendship.sender,
-//     recipient: friendship.recipient,
-//     status: friendship.status,
-//   });
+export const mapRespondRequest = (
+  friendshipData: z.infer<typeof respondToFriendshipRequestSchema>
+) =>
+  respondToFriendshipRequestSchema.parse({
+    friendshipId: friendshipData.friendshipId,
+    status: friendshipData.status,
+  });
+
+export const mapSendResponse = (friendship: Friendship) =>
+  respondToFriendshipResponseSchema.parse({
+    id: friendship.id,
+    sender: friendship.sender,
+    recipient: friendship.recipient,
+    status: friendship.status,
+  });
+
+export const mapRespondResponse = mapSendResponse;

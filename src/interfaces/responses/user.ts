@@ -1,7 +1,5 @@
-import { Schema } from 'mongoose';
-
 export interface RegisterResponse {
-  id: Schema.Types.ObjectId;
+  id: string;
   firstName: string;
   lastName: string;
   username: string;
@@ -11,7 +9,7 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-  id: Schema.Types.ObjectId;
+  id: string;
   firstName: string;
   lastName: string;
   username: string;

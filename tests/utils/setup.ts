@@ -4,7 +4,7 @@ import { redisConfig, disconnectRedis, clearRedis } from '../../src/config/redis
 
 export const setupIntegrationTests = () => {
   beforeAll(async () => {
-    await mongoConfig(); // Start in-memory MongoDB
+    await mongoConfig(); // Start  MongoDB
     await redisConfig();
   });
 

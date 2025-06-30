@@ -2,12 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import catchAsync from '../util/catchAsync';
 import * as friendshipSchema from '../schemas/friendshipSchemas';
 import * as friendshipService from '../services/friendshipService';
+import { Friendship } from '../interfaces/models/friendship';
 
 export const sendFriendRequest = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { recipientId } = friendshipSchema.sendFriendshipRequestSchema.parse(req.body);
+    const { recipientId } = friendshipSchema.mapSendRequest(req.body);
 
-    const friendship = friendshipSchema.sendFriendshipResponseSchema.parse(
+    const friendship = friendshipSchema.mapSendResponse(
       await friendshipService.send(req.user.id, recipientId)
     );
 
@@ -19,12 +20,10 @@ export const sendFriendRequest = catchAsync(
 
 export const respondToFriendRequest = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { friendshipId, status } = friendshipSchema.respondToFriendshipRequestSchema.parse(
-      req.body
-    );
+    const { friendshipId, status } = friendshipSchema.mapRespondRequest(req.body);
 
-    const newFriendship = friendshipSchema.respondToFriendshipResponseSchema.parse(
-      await friendshipService.respond(friendshipId, req.user.id, status)
+    const newFriendship = friendshipSchema.mapRespondResponse(
+      (await friendshipService.respond(friendshipId, req.user.id, status)) as Friendship
     );
 
     res.status(200).json({
