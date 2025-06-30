@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import AppError from '../util/appError';
 import ENV_VAR from '../config/envConfig';
+import { ZodError } from 'zod/v4';
 
 const sendDevError = (err: any, res: Response) => {
   res
@@ -33,6 +34,11 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
     error = new AppError(400, msg);
   } else if (err.name === 'JsonWebTokenError') error = new AppError(401, 'Invalid JWT Token');
   else if (err.name === 'TokenExpiredError') error = new AppError(401, 'Expired JWT Token');
+  else if (err instanceof ZodError)
+    error = new AppError(
+      400,
+      `(${JSON.parse(err.message)[0].path[0]}) ${JSON.parse(err.message)[0].message}`
+    );
 
   if (ENV_VAR.NODE_ENV === 'development') sendDevError(error, res);
   else {

@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.use(authMiddleware.protect);
 
-router.route('/').post(friendshipController.sendFriendRequest);
+router.route('/send').post(friendshipController.sendFriendRequest);
+router.route('/respond').patch(friendshipController.respondToFriendRequest);
 
 export default router;
