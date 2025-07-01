@@ -20,7 +20,7 @@ export const getBySenderRecipientId = async (
   recipientId: string,
   ...populateOptions: PopulateOptions[]
 ): Promise<Friendship | null> => {
-  const query = friendshipModel.findOne({ sender: senderId, recipient: recipientId });
+  const query = friendshipModel.findOne({ userPair: { $all: [senderId, recipientId] } });
   populateOptions?.forEach((option) => query.populate(option));
   return await query;
 };

@@ -73,15 +73,21 @@ describe('Friendship Model', () => {
         sender: friendshipData1.sender,
         recipient: friendshipData1.recipient,
       });
+      const friendshipData3 = friendshipFactory.create({
+        sender: friendshipData1.recipient,
+        recipient: friendshipData1.sender,
+      });
 
       // Act
       const friendship1 = new friendshipModel(friendshipData1);
       await friendship1.save();
 
       const friendship2 = new friendshipModel(friendshipData2);
+      const friendship3 = new friendshipModel(friendshipData3);
 
       // Assert
       await expect(friendship2.save()).rejects.toThrow('duplicate key error');
+      await expect(friendship3.save()).rejects.toThrow('duplicate key error');
     });
   });
 

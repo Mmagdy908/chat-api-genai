@@ -109,14 +109,21 @@ describe('Friendship Routes', () => {
       });
 
       // Act
-      const response = await request(app)
+      const response1 = await request(app)
         .post('/api/v1/friendships/send')
         .set('Authorization', `Bearer ${senderToken}`)
         .send({ recipientId: recipient.id })
         .expect(400);
 
+      const response2 = await request(app)
+        .post('/api/v1/friendships/send')
+        .set('Authorization', `Bearer ${recipientToken}`)
+        .send({ recipientId: sender.id })
+        .expect(400);
+
       // Assert
-      expect(response.body.message).toBe('This Friendship already exists');
+      expect(response1.body.message).toBe('This Friendship already exists');
+      expect(response2.body.message).toBe('This Friendship already exists');
     });
   });
 

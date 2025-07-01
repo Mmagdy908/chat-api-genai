@@ -6,6 +6,7 @@ export interface Friendship {
   sender: Types.ObjectId;
   recipient: Types.ObjectId;
   status: Friendship_Status;
+  userPair?: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
