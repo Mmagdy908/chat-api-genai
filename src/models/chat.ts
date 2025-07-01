@@ -1,0 +1,40 @@
+import { model, Schema } from 'mongoose';
+import { Chat } from '../interfaces/models/chat';
+import { Chat_Type } from '../enums/chatEnums';
+
+const chatSchema = new Schema<Chat>(
+  {
+    // only for group chats
+    metaData: {
+      name: {
+        type: String,
+      },
+      description: {
+        type: String,
+      },
+      image: {
+        type: String,
+      },
+    },
+    type: {
+      type: String,
+      enum: {
+        values: ['Private', 'Group'],
+        message: 'Chat type must be either Private or Group',
+      },
+    },
+    members: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    lastMessage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
+    },
+  },
+  { timestamps: true, toObject: { virtuals: true }, toJSON: { virtuals: true } }
+);
+
+export default model<Chat>('Chat', chatSchema);
