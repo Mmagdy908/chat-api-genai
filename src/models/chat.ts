@@ -27,6 +27,7 @@ const chatSchema = new Schema<Chat>(
       {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: [true, 'A chat must have at least one member'],
       },
     ],
     lastMessage: {

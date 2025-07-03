@@ -1,6 +1,8 @@
 import { toObjectId } from '../util/objectIdUtil';
 import * as userRepository from '../repositories/userRepository';
 import * as friendshipRepository from '../repositories/friendshipRepository';
+import * as chatRepository from '../repositories/chatRepository';
+
 import AppError from '../util/appError';
 import { Friendship_Status } from '../enums/friendshipEnums';
 
@@ -36,11 +38,17 @@ export const respond = async (id: string, recipientId: string, status: Friendshi
   if (friendship.status !== Friendship_Status.Pending)
     throw new AppError(400, 'This friendship is not Pending');
 
+  // respond to friendship Request
   const newFriendship = await friendshipRepository.updateById(id, { status });
 
   //TODO send notification to sender in case of acceptance
 
-  //TODO create new chat between sender and recipient in case of acceptance
+  // create new chat between sender and recipient in case of acceptance
+  if (status === Friendship_Status.Accepted)
+    await chatRepository.createPrivateChat([
+      friendship.sender.toString(),
+      friendship.recipient.toString(),
+    ]);
 
   return newFriendship;
 };

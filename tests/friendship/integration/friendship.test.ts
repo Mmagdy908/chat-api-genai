@@ -3,10 +3,12 @@ import request from 'supertest';
 import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
 import friendshipModel from '../../../src/models/friendship';
-import { setupUser, userFactory } from '../../utils/userFactory';
+import chatModel from '../../../src/models/chat';
+import { setupUser } from '../../utils/userFactory';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';
 import { User } from '../../../src/interfaces/models/user';
 import { Friendship } from '../../../src/interfaces/models/friendship';
+import { Chat_Type } from '../../../src/enums/chatEnums';
 
 describe('Friendship Routes', () => {
   let sender: User;
@@ -187,6 +189,15 @@ describe('Friendship Routes', () => {
       expect(response.body.data.friendship.status).toBe(Friendship_Status.Accepted);
       const friendshipInDb = await friendshipModel.findById(friendshipRequest.id);
       expect(friendshipInDb?.status).toBe(Friendship_Status.Accepted);
+
+      // check private chat creation
+      const members = [friendshipRequest.sender, friendshipRequest.recipient];
+      const chatInDb = await chatModel.findOne({
+        members: { $all: members },
+      });
+
+      expect(chatInDb?.type).toBe(Chat_Type.Private);
+      expect(chatInDb?.members.sort()).toEqual(members.sort());
     });
 
     test('should fail with 400 if trying to respond to an already accepted/rejected request', async () => {
@@ -225,6 +236,14 @@ describe('Friendship Routes', () => {
       expect(response.body.data.friendship.status).toBe(Friendship_Status.Rejected);
       const friendshipInDb = await friendshipModel.findById(friendshipRequest.id);
       expect(friendshipInDb?.status).toBe(Friendship_Status.Rejected);
+
+      // check private chat creation
+      const members = [friendshipRequest.sender, friendshipRequest.recipient];
+      const chatInDb = await chatModel.findOne({
+        members: { $all: members },
+      });
+
+      expect(chatInDb).toBeNull();
     });
   });
 });
