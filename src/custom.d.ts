@@ -5,3 +5,9 @@ declare namespace Express {
     user?: User;
   }
 }
+
+declare module 'http' {
+  interface IncomingMessage {
+    user: User;
+  }
+}

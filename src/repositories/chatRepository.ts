@@ -31,3 +31,7 @@ export const getByMembers = async (
 
   return await query;
 };
+
+export const updateById = async (id: string, newChatData: Partial<Chat>): Promise<Chat | null> => {
+  return await chatModel.findByIdAndUpdate(id, newChatData, { new: true });
+};

@@ -23,15 +23,15 @@ const messageSchema = new Schema<Message>(
       default: Message_Status.Sent,
       required: [true, 'A message must have a status'],
     },
-    type: {
-      type: String,
-      enum: {
-        values: ['Text', 'Image', 'Video', 'Audio', 'File'],
-        message: 'Message type must be either Text, Image, Video, Audio or File',
-      },
-      required: [true, 'A message must have a type'],
-    },
     content: {
+      contentType: {
+        type: String,
+        enum: {
+          values: ['Text', 'Image', 'Video', 'Audio', 'File'],
+          message: 'Message type must be either Text, Image, Video, Audio or File',
+        },
+        required: [true, 'A message must have a type'],
+      },
       text: String,
       mediaUrl: String,
     },

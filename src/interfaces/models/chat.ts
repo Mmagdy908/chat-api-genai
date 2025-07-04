@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { Chat_Type } from '../../enums/chatEnums';
+import { Message } from './message';
 
 export interface Chat {
   id: string;
@@ -10,7 +11,7 @@ export interface Chat {
   };
   type: Chat_Type;
   members: Types.ObjectId[];
-  lastMessage: Types.ObjectId;
-  created_at: Date;
-  updated_at: Date;
+  lastMessage: Types.ObjectId | Message;
+  createdAt: Date;
+  updatedAt: Date;
 }

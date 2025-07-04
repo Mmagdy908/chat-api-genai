@@ -2,7 +2,6 @@ import { z } from 'zod/v4';
 import { Types } from 'mongoose';
 import { Friendship_Status } from '../enums/friendshipEnums';
 import { Friendship } from '../interfaces/models/friendship';
-import friendship from '../models/friendship';
 
 const sendFriendshipRequestSchema = z.object({
   recipientId: z.string().refine((value) => Types.ObjectId.isValid(value), {

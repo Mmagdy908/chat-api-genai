@@ -5,7 +5,7 @@ import ENV_VAR from './config/envConfig';
 import authRouter from './routes/authRoutes';
 import friendshipRouter from './routes/friendshipRoutes';
 import globalErrorHandler from './controllers/errorController';
-import AppError from './util/appError';
+import { AppError } from './util/appError';
 import { generateRefreshToken } from './util/authUtil';
 
 const app = express();

@@ -2,8 +2,7 @@ import { toObjectId } from '../util/objectIdUtil';
 import * as userRepository from '../repositories/userRepository';
 import * as friendshipRepository from '../repositories/friendshipRepository';
 import * as chatRepository from '../repositories/chatRepository';
-
-import AppError from '../util/appError';
+import { AppError } from '../util/appError';
 import { Friendship_Status } from '../enums/friendshipEnums';
 
 export const send = async (senderId: string, recipientId: string) => {

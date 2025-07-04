@@ -1,4 +1,4 @@
-import AppError from './appError';
+import { AppError } from './appError';
 
 export default (object: any, ...requiredFields: string[]) => {
   requiredFields.forEach((field) => {

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../util/authUtil';
 import * as userRepository from '../repositories/userRepository';
 import catchAsync from '../util/catchAsync';
-import AppError from '../util/appError';
+import { AppError } from '../util/appError';
 
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -30,10 +30,10 @@ export const protect = catchAsync(
 
 export const checkWorkspaceOwner = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { workspaces } = req.user;
+    // const { workspaces } = req.user;
     const workspace = req.body.workspace || req.params.id;
-    if (workspaces && workspace && !workspaces.includes(workspace))
-      return next(new AppError(401, 'User is not owner of this workspace'));
+    // if (workspaces && workspace && !workspaces.includes(workspace))
+    //   return next(new AppError(401, 'User is not owner of this workspace'));
 
     next();
   }

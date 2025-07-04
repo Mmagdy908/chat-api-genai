@@ -16,7 +16,7 @@ import { User } from '../interfaces/models/user';
 import { LoginRequest } from '../interfaces/requests/user';
 import * as userRepository from '../repositories/userRepository';
 
-import AppError from '../util/appError';
+import { AppError } from '../util/appError';
 
 export const userRegister = async (userData: Partial<User>): Promise<User> => {
   // 1) create user
