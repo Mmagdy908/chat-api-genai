@@ -1,6 +1,6 @@
 export enum SocketEvents {
   Connection = 'connection',
   Message = 'message',
-  Join = 'join',
+  Chat_Join = 'chat_join',
   Disconnect = 'disconnect',
 }
