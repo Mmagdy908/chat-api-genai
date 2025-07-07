@@ -30,6 +30,8 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string(),
   REDIS_HOST: z.string(),
   REDIS_PORT: z.number(),
+
+  SOCKET_HEARTBEAT_RATE: z.number(),
 });
 
 export default envSchema.parse({
@@ -60,4 +62,6 @@ export default envSchema.parse({
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PORT: parseInt(process.env.REDIS_PORT as string),
+
+  SOCKET_HEARTBEAT_RATE: parseInt(process.env.SOCKET_HEARTBEAT_RATE as string),
 });

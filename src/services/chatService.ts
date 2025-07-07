@@ -10,3 +10,7 @@ export const join = async (userId: string, chatId: string) => {
   if (!chat.members.includes(toObjectId(userId)))
     throw new AppError(403, 'User is not a member of this chat');
 };
+
+export const getAllChatsByMember = async (userId: string) => {
+  return await chatRepository.getAllChatsByMember(userId);
+};

@@ -1,0 +1,23 @@
+import { User_Status } from '../enums/userEnums';
+import { User } from '../interfaces/models/user';
+import * as userStatusRepository from '../repositories/userStatusRepository';
+
+export const addOnlineSocket = async (userId: string, socketId: string) => {
+  await userStatusRepository.setOnlineSocket(userId, socketId);
+};
+
+export const removeOnlineSocket = async (userId: string, socketId: string) => {
+  return await userStatusRepository.removeOnlineSocket(userId, socketId);
+};
+
+// export const getOnlineSockets = async (userId: string) => {
+//   return await userStatusRepository.getOnlineSockets(userId);
+// };
+
+export const setUserStatus = async (userId: string, status: User_Status) => {
+  return await userStatusRepository.setStatus(userId, status);
+};
+
+export const getUserStatus = async (userId: string): Promise<User_Status> => {
+  return await userStatusRepository.getStatus(userId);
+};

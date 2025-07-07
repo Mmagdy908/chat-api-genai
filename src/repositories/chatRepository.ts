@@ -32,6 +32,15 @@ export const getByMembers = async (
   return await query;
 };
 
+export const getAllChatsByMember = async (
+  memberId: string,
+  ...selectedFields: string[]
+): Promise<Chat[]> => {
+  return await chatModel
+    .find({ members: { $elemMatch: { $eq: memberId } } })
+    .select(selectedFields);
+};
+
 export const updateById = async (id: string, newChatData: Partial<Chat>): Promise<Chat | null> => {
   return await chatModel.findByIdAndUpdate(id, newChatData, { new: true });
 };
