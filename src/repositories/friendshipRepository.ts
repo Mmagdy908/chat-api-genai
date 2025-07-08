@@ -25,6 +25,10 @@ export const getBySenderRecipientId = async (
   return await query;
 };
 
+export const getAllByUser = async (userId: string): Promise<Friendship[]> => {
+  return await friendshipModel.find({ userPair: { $elemMatch: { $eq: userId } } });
+};
+
 export const updateById = async (
   id: string,
   newfriendshipData: Partial<Friendship>

@@ -4,7 +4,17 @@ import * as chatService from '../../services/chatService';
 import { handleSocketResponse } from '../socketUtils';
 import { handleError } from '../../util/appError';
 
+const joinUserChats = async (socket: Socket, userId: string) => {
+  const userChats = (await chatService.getAllChatsByMember(userId)).map(
+    (chat) => `chat:${chat.id}`
+  );
+  socket.join(userChats);
+};
+
 export const handleChatEvents = (io: Server, socket: Socket) => {
+  // join chats on user connection
+  joinUserChats(socket, socket.request.user.id);
+
   socket.on(SocketEvents.Chat_Join, async (chatId: string, callback) => {
     try {
       await chatService.join(socket.request.user.id, chatId);

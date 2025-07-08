@@ -1,10 +1,15 @@
 import { mongoConfig } from './config/mongo';
-import { redisConfig } from './config/redis';
+import { redisConfig, clearRedis } from './config/redis';
 import app from './app';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { setupSocket } from './socket/socket';
 import ENV_VAR from './config/envConfig';
+
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  process.exit(1);
+});
 
 mongoConfig();
 redisConfig();
@@ -24,3 +29,34 @@ const io = new Server(httpServer, {
 setupSocket(io);
 
 httpServer.listen(port, () => console.log(`Server is running on port ${port}`));
+
+process.on('SIGTERM', async () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  await clearRedis();
+  httpServer.close(() => {
+    console.log('💥 Process terminated!');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  await clearRedis();
+  httpServer.close(() => {
+    console.log('💥 Process terminated!');
+    process.exit(0);
+  });
+});
+
+process.on('SIGUSR2', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  httpServer.close(() => {
+    console.log('💥 Process terminated!');
+    process.exit(0);
+  });
+});
+
+process.on('unhandledRejection', (err: any) => {
+  console.log(err.name, err.message);
+  httpServer.close(() => process.exit(1));
+});
