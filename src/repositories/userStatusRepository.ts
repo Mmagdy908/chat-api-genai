@@ -14,9 +14,16 @@ export const removeOnlineSocket = async (userId: string, socketId: string) => {
 // };
 
 export const setStatus = async (userId: string, status: User_Status) => {
-  await redis.set(`presence:${userId}`, status);
+  await redis.hSet(`presence:${userId}`, { status, lastActive: Date.now() });
 };
 
-export const getStatus = async (userId: string): Promise<User_Status> => {
-  return ((await redis.get(`presence:${userId}`)) as User_Status) || User_Status.Offline;
+export const getStatus = async (
+  userId: string
+): Promise<{ status: User_Status; lastActive: Date }> => {
+  const { status, lastActive } = await redis.hGetAll(`presence:${userId}`);
+
+  return {
+    status: (status as User_Status) || User_Status.Offline,
+    lastActive: new Date(parseInt(lastActive) || Date.now()),
+  };
 };

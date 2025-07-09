@@ -18,6 +18,8 @@ export const setUserStatus = async (userId: string, status: User_Status) => {
   return await userStatusRepository.setStatus(userId, status);
 };
 
-export const getUserStatus = async (userId: string): Promise<User_Status> => {
+export const getUserStatus = async (
+  userId: string
+): Promise<{ status: User_Status; lastActive: Date }> => {
   return await userStatusRepository.getStatus(userId);
 };

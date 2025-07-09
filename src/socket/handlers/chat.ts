@@ -5,10 +5,14 @@ import { handleSocketResponse } from '../socketUtils';
 import { handleError } from '../../util/appError';
 
 const joinUserChats = async (socket: Socket, userId: string) => {
-  const userChats = (await chatService.getAllChatsByMember(userId)).map(
-    (chat) => `chat:${chat.id}`
-  );
-  socket.join(userChats);
+  try {
+    const userChats = (await chatService.getAllChatsByMember(userId)).map(
+      (chat) => `chat:${chat.id}`
+    );
+    socket.join(userChats);
+  } catch (err) {
+    console.log('error jouning user chats', err);
+  }
 };
 
 export const handleChatEvents = (io: Server, socket: Socket) => {
