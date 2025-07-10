@@ -4,6 +4,7 @@
   "description": "A chat app API using Typescript, Express and Mongodb",
   "main": "index.js",
   "scripts": {
+    "tt": "pm2 start dist/app.js -i max",
     "build": "tsc",
     "test": "jest --runInBand",
     "test-specific": "jest tests/friendship/integration --runInBand",

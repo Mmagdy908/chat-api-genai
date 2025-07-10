@@ -5,7 +5,6 @@ import * as userStatusService from '../../services/userStatusService';
 import * as chatService from '../../services/chatService';
 import { User_Status } from '../../enums/userEnums';
 import ENV_VAR from '../../config/envConfig';
-import { subscriber } from '../../config/redis';
 import { handleSocketResponse } from '../socketUtils';
 import { handleError } from '../../util/appError';
 
@@ -48,6 +47,20 @@ const updateAndBroadcastUserStatus = async (io: Server, userId: string, status: 
   }
 };
 
+export const handleKeyExpiredEvent = (io: Server) => async (message: string, channel: string) => {
+  try {
+    if (
+      message.startsWith('heartbeat') &&
+      (await userStatusService.getOnlineSocketsCount(message.split(':')[1])) > 0
+    ) {
+      console.log('EXPIRED KEY EVENT');
+      updateAndBroadcastUserStatus(io, message.split(':')[1], User_Status.Idle);
+    }
+  } catch (err) {
+    console.log('error handling redis key expiration event', err);
+  }
+};
+
 export const handleUserEvents = async (io: Server, socket: Socket) => {
   try {
     // add socket and broadcast if status changes
@@ -67,23 +80,17 @@ export const handleUserEvents = async (io: Server, socket: Socket) => {
       );
     });
 
-    // subscriber.subscribe('__keyevent@0__:expired', async (message, channel) => {
-    //   if (
-    //     message.startsWith('heartbeat') &&
-    //     (await userStatusService.getOnlineSocketsCount(message.split(':')[1])) > 0
-    //   ) {
-    //     console.log('EXPIRED KEY EVENT');
-    //     updateAndBroadcastUserStatus(io, message.split(':')[1], User_Status.Idle);
-    //   }
-    // });
-
     socket.on(SocketEvents.Disconnect, () => {
       setTimeout(async () => {
-        await userStatusService.removeOnlineSocket(socket.request.user.id, socket.id);
-        //#####
-        // AVOID broadcasting in case of rapid reconnection
-        if ((await userStatusService.getOnlineSocketsCount(socket.request.user.id)) === 0) {
-          updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Offline);
+        try {
+          await userStatusService.removeOnlineSocket(socket.request.user.id, socket.id);
+
+          // AVOID broadcasting in case of rapid reconnection
+          if ((await userStatusService.getOnlineSocketsCount(socket.request.user.id)) === 0) {
+            updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Offline);
+          }
+        } catch (err) {
+          console.log('error handling user diconnection', err);
         }
       }, ENV_VAR.SOCKET_GRACE_PERIOD * 1000);
     });

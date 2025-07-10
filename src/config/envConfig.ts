@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const envSchema = z.object({
+  PROCESS_ID: z.number().optional(),
   NODE_ENV: z.string().regex(/\b(development|production|test)\b/),
   PORT: z.number(),
 
@@ -36,6 +37,7 @@ const envSchema = z.object({
 });
 
 export default envSchema.parse({
+  PROCESS_ID: parseInt(process.env.pm_id as string) || 0,
   NODE_ENV: process.env.NODE_ENV,
   PORT: parseInt(process.env.PORT as string),
 

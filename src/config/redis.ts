@@ -5,7 +5,7 @@ const client = createClient({
   username: ENV_VAR.REDIS_USERNAME,
   password: ENV_VAR.REDIS_PASSWORD,
   socket: {
-    host: ENV_VAR.REDIS_HOST as string,
+    host: ENV_VAR.REDIS_HOST,
     port: ENV_VAR.REDIS_PORT,
   },
 });
@@ -18,11 +18,8 @@ export const redisConfig = async () => {
   try {
     await client.connect();
     await subscriber.connect();
-    subscriber.configSet('notify-keyspace-events', 'Ex');
 
-    // subscriber.subscriber.subscribe('__keyevent@0__:expired', async (message, channel) => {
-    //   if (message.startsWith('heartbeat')) console.log('EXPIRED KEY EVENT');
-    // });
+    client.configSet('notify-keyspace-events', 'Ex');
 
     console.log('Connected successfully to Redis');
   } catch (error) {
@@ -42,6 +39,7 @@ export const clearRedis = async () => {
 export const disconnectRedis = async () => {
   try {
     await client.close();
+    await subscriber.close();
     console.log('Redis is disconnected successfully ');
   } catch (error) {
     console.log('Redis Client Disconnection Error', error);
