@@ -10,12 +10,12 @@ export const removeOnlineSocket = async (userId: string, socketId: string) => {
   return await userStatusRepository.removeOnlineSocket(userId, socketId);
 };
 
-// export const getOnlineSockets = async (userId: string) => {
-//   return await userStatusRepository.getOnlineSockets(userId);
-// };
+export const getOnlineSocketsCount = async (userId: string): Promise<number> => {
+  return await userStatusRepository.getOnlineSocketsCount(userId);
+};
 
 export const setUserStatus = async (userId: string, status: User_Status) => {
-  return await userStatusRepository.setStatus(userId, status);
+  await userStatusRepository.setStatus(userId, status);
 };
 
 export const getUserStatus = async (

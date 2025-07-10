@@ -9,9 +9,9 @@ export const removeOnlineSocket = async (userId: string, socketId: string) => {
   await redis.sRem(`sockets:${userId}`, socketId);
 };
 
-// export const getOnlineSockets = async (userId: string) => {
-//   await redis.get(`sockets:${userId}`);
-// };
+export const getOnlineSocketsCount = async (userId: string): Promise<number> => {
+  return await redis.sCard(`sockets:${userId}`);
+};
 
 export const setStatus = async (userId: string, status: User_Status) => {
   await redis.hSet(`presence:${userId}`, { status, lastActive: Date.now() });

@@ -25,17 +25,17 @@ const sendFriendsStatus = async (socket: Socket, userId: string) => {
   }
 };
 
-const broadcastUserStatus = async (io: Server, userId: string, status: User_Status) => {
+const updateAndBroadcastUserStatus = async (io: Server, userId: string, status: User_Status) => {
   try {
     const { status: oldStatus, lastActive } = await userStatusService.getUserStatus(userId);
 
-    if (oldStatus === status) return;
+    await userStatusService.setUserStatus(userId, status);
+
+    if (oldStatus === status) return; //#####
 
     const userChats = (await chatService.getAllChatsByMember(userId)).map(
       (chat) => `chat:${chat.id}`
     );
-
-    await userStatusService.setUserStatus(userId, status);
 
     io.to(userChats).emit(SocketEvents.User_Status_Update, {
       userId,
@@ -51,7 +51,8 @@ export const handleUserEvents = async (io: Server, socket: Socket) => {
   try {
     // add socket and broadcast if status changes
     await userStatusService.addOnlineSocket(socket.request.user.id, socket.id);
-    broadcastUserStatus(io, socket.request.user.id, User_Status.Online);
+
+    updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Online);
 
     // send statuses of friends to newly joined user
     sendFriendsStatus(socket, socket.request.user.id);
@@ -71,15 +72,18 @@ export const handleUserEvents = async (io: Server, socket: Socket) => {
     //     clearInterval(heartbeat);
     //   }
     // }, ENV_VAR.SOCKET_HEARTBEAT_RATE * 1000);
+
+    socket.on(SocketEvents.Disconnect, () => {
+      setTimeout(async () => {
+        await userStatusService.removeOnlineSocket(socket.request.user.id, socket.id);
+        //#####
+        // AVOID broadcasting in case of rapid reconnection
+        if ((await userStatusService.getOnlineSocketsCount(socket.request.user.id)) === 0) {
+          updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Offline);
+        }
+      }, ENV_VAR.SOCKET_GRACE_PERIOD * 1000);
+    });
   } catch (err) {
     console.log('error handling user events', err);
   }
-
-  // GRACE PERIOOD NOT WORKING
-  socket.on(SocketEvents.Disconnect, () => {
-    setTimeout(async () => {
-      await userStatusService.removeOnlineSocket(socket.request.user.id, socket.id);
-      broadcastUserStatus(io, socket.request.user.id, User_Status.Offline);
-    }, 5000);
-  });
 };
