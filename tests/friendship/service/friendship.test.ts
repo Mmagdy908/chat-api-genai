@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 import * as friendshipService from '../../../src/services/friendshipService';
 import * as userRepository from '../../../src/repositories/userRepository';
 import * as friendshipRepository from '../../../src/repositories/friendshipRepository';
-import AppError from '../../../src/util/appError';
+import * as chatRepository from '../../../src/repositories/chatRepository';
+import { AppError } from '../../../src/util/appError';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';
 import { userFactory } from '../../utils/userFactory';
 import { friendshipFactory } from '../../utils/friendshipFactory';
@@ -15,6 +16,7 @@ import { Friendship } from '../../../src/interfaces/models/friendship';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/repositories/friendshipRepository');
+jest.mock('../../../src/repositories/chatRepository');
 
 describe('Friendship Service', () => {
   let sender: User;
@@ -94,6 +96,7 @@ describe('Friendship Service', () => {
       jest.mocked(friendshipRepository.getById).mockResolvedValue(pendingFriendship);
       const updatedFriendship = { ...pendingFriendship.toObject(), status: 'Accepted' };
       jest.mocked(friendshipRepository.updateById).mockResolvedValue(updatedFriendship as any);
+      jest.mocked(chatRepository.createPrivateChat);
 
       const result = (await friendshipService.respond(
         pendingFriendship.id,

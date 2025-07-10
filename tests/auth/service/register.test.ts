@@ -4,7 +4,7 @@ import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import Email from '../../../src/util/email';
 import userModel from '../../../src/models/user';
-import AppError from '../../../src/util/appError';
+import { AppError } from '../../../src/util/appError';
 import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');

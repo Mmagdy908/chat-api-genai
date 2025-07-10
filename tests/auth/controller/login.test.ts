@@ -7,7 +7,7 @@ import * as authService from '../../../src/services/authService';
 import * as authUtil from '../../../src/util/authUtil';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
-import AppError from '../../../src/util/appError';
+import { AppError } from '../../../src/util/appError';
 import { mockedSendLoginResponseImplementation } from '../../utils/mocks';
 import { MockUser, userFactory } from '../../utils/userFactory';
 

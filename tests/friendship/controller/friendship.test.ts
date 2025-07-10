@@ -6,7 +6,7 @@ import * as friendshipController from '../../../src/controllers/friendshipContro
 import * as friendshipSchemas from '../../../src/schemas/friendshipSchemas';
 import * as friendshipService from '../../../src/services/friendshipService';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';
-import AppError from '../../../src/util/appError';
+import { AppError } from '../../../src/util/appError';
 import friendshipModel from '../../../src/models/friendship';
 
 jest.mock('../../../src/services/friendshipService');

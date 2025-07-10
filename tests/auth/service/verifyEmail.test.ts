@@ -3,7 +3,7 @@ import { verifyEmail } from '../../../src/services/authService';
 import * as userRepository from '../../../src/repositories/userRepository';
 import * as authUtil from '../../../src/util/authUtil';
 import userModel from '../../../src/models/user';
-import AppError from '../../../src/util/appError';
+import { AppError } from '../../../src/util/appError';
 import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/repositories/userRepository');

@@ -4,7 +4,7 @@ import { resetPassword } from '../../../src/controllers/authController';
 import * as authService from '../../../src/services/authService';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';
-import AppError from '../../../src/util/appError';
+import { AppError } from '../../../src/util/appError';
 import { userFactory } from '../../utils/userFactory';
 
 jest.mock('../../../src/services/authService');
