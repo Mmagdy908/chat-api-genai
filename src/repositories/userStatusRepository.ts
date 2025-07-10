@@ -27,3 +27,7 @@ export const getStatus = async (
     lastActive: new Date(parseInt(lastActive) || Date.now()),
   };
 };
+
+export const updateKeyExpiration = async (userId: string, seconds: number) => {
+  await redis.set(`heartbeat:${userId}`, '', { EX: seconds });
+};

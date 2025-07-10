@@ -5,6 +5,7 @@ import * as userStatusService from '../../services/userStatusService';
 import * as chatService from '../../services/chatService';
 import { User_Status } from '../../enums/userEnums';
 import ENV_VAR from '../../config/envConfig';
+import { subscriber } from '../../config/redis';
 import { handleSocketResponse } from '../socketUtils';
 import { handleError } from '../../util/appError';
 
@@ -57,21 +58,24 @@ export const handleUserEvents = async (io: Server, socket: Socket) => {
     // send statuses of friends to newly joined user
     sendFriendsStatus(socket, socket.request.user.id);
 
-    // TODO    IMPLEMENT HEARTBEAT
-    // heartbeat
-    // const heartbeat = setInterval(async () => {
-    //   // console.log('socket still connected');
+    socket.on(SocketEvents.Heartbeat, async () => {
+      console.log('HEARTBEAT');
+      updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Online);
+      userStatusService.updateHeartbeatKey(
+        socket.request.user.id,
+        ENV_VAR.HEARTBEAT_KEY_EXPIRES_IN
+      );
+    });
 
-    //   if (!io.sockets.sockets.has(socket.id)) {
-    //     // remove socket and broadcast if status changes
-    //     await userStatusService.removeOnlineSocket(socket.request.user.id, socket.id);
-
-    //     broadcastUserStatus(io, socket.request.user.id, User_Status.Offline);
-    //     // console.log('socket disconnected now');
-
-    //     clearInterval(heartbeat);
+    // subscriber.subscribe('__keyevent@0__:expired', async (message, channel) => {
+    //   if (
+    //     message.startsWith('heartbeat') &&
+    //     (await userStatusService.getOnlineSocketsCount(message.split(':')[1])) > 0
+    //   ) {
+    //     console.log('EXPIRED KEY EVENT');
+    //     updateAndBroadcastUserStatus(io, message.split(':')[1], User_Status.Idle);
     //   }
-    // }, ENV_VAR.SOCKET_HEARTBEAT_RATE * 1000);
+    // });
 
     socket.on(SocketEvents.Disconnect, () => {
       setTimeout(async () => {

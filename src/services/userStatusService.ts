@@ -23,3 +23,7 @@ export const getUserStatus = async (
 ): Promise<{ status: User_Status; lastActive: Date }> => {
   return await userStatusRepository.getStatus(userId);
 };
+
+export const updateHeartbeatKey = async (userId: string, seconds: number) => {
+  await userStatusRepository.updateKeyExpiration(userId, seconds);
+};

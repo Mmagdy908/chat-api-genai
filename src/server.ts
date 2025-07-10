@@ -28,6 +28,7 @@ const io = new Server(httpServer, {
 // Initialize Socket.IO event handlers
 setupSocket(io);
 
+console.log('process id', process.pid);
 httpServer.listen(port, () => console.log(`Server is running on port ${port}`));
 
 process.on('SIGTERM', async () => {
