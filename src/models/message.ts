@@ -12,7 +12,7 @@ const messageSchema = new Schema<Message>(
     sender: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'A message must jave a sender'],
+      required: [true, 'A message must have a sender'],
     },
     status: {
       type: String,

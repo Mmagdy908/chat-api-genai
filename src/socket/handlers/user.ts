@@ -5,8 +5,6 @@ import * as userStatusService from '../../services/userStatusService';
 import * as chatService from '../../services/chatService';
 import { User_Status } from '../../enums/userEnums';
 import ENV_VAR from '../../config/envConfig';
-import { handleSocketResponse } from '../socketUtils';
-import { handleError } from '../../util/appError';
 
 const sendFriendsStatus = async (socket: Socket, userId: string) => {
   try {
@@ -31,7 +29,7 @@ const updateAndBroadcastUserStatus = async (io: Server, userId: string, status: 
 
     await userStatusService.setUserStatus(userId, status);
 
-    if (oldStatus === status) return; //#####
+    if (oldStatus === status) return;
 
     const userChats = (await chatService.getAllChatsByMember(userId)).map(
       (chat) => `chat:${chat.id}`

@@ -21,18 +21,6 @@ export const setupSocket = (io: Server) => {
     handleUserEvents(io, socket);
     handleChatEvents(io, socket);
     handleMessageEvents(io, socket);
-
-    socket.on(SocketEvents.Disconnecting, () => {
-      console.log('a user disconnecting');
-      // console.log(io.sockets.sockets.has(socket.id));
-      console.log(socket.rooms);
-    });
-
-    // socket.on(SocketEvents.Disconnect, () => {
-    // console.log('a user disconnected');
-    // console.log(io.sockets.sockets.has(socket.id));
-    // console.log('rooms:', socket.rooms);
-    // });
   });
 
   io.on('error', (error) => {

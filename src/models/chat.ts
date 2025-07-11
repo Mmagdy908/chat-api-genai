@@ -22,14 +22,26 @@ const chatSchema = new Schema<Chat>(
         values: ['Private', 'Group'],
         message: 'Chat type must be either Private or Group',
       },
+      required: [true, 'A chat must have a type'],
     },
-    members: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: [true, 'A chat must have at least one member'],
+    members: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+      ],
+      validate: {
+        validator: function (members) {
+          if (this.type === Chat_Type.Private && members.length < 2) return false;
+          if (this.type === Chat_Type.Group && members.length < 1) return false;
+
+          return true;
+        },
+        message:
+          'A private chat must have at least two members and a group chat must have at least one member',
       },
-    ],
+    },
     lastMessage: {
       type: Schema.Types.ObjectId,
       ref: 'Message',
