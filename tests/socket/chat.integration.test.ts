@@ -12,7 +12,8 @@ import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import { AddressInfo } from 'net';
 import ioClient from 'socket.io-client';
-import * as chatHandler from '../../src/socket/handlers/chat';
+import { handleChatEvents } from '../../src/socket/handlers/chat';
+import * as chatController from '../../src/controllers/chatController';
 import * as chatService from '../../src/services/chatService';
 import { handleSocketResponse } from '../../src/socket/socketUtils';
 import { SocketEvents } from '../../src/enums/socketEventEnums';
@@ -73,7 +74,7 @@ describe('Integration Tests - chatHandler.handleChatEvents', () => {
 
     // Setup socket events
     io.on(SocketEvents.Connection, (socket) => {
-      chatHandler.handleChatEvents(io, socket);
+      handleChatEvents(io, socket);
     });
 
     // Connect client
@@ -105,13 +106,13 @@ describe('Integration Tests - chatHandler.handleChatEvents', () => {
     const error = new Error('Invalid chat ID');
     const mockErrorResponse = { status: 'error', statusCode: 400, message: 'Invalid chat ID' };
     jest.mocked(chatService.join).mockRejectedValue(error);
-    jest.spyOn(chatHandler, 'joinUserChats');
+    jest.spyOn(chatController, 'joinUserChats');
     jest.mocked(handleError).mockReturnValue(mockErrorResponse);
     jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
     // Setup socket events
     io.on(SocketEvents.Connection, (socket) => {
-      chatHandler.handleChatEvents(io, socket);
+      handleChatEvents(io, socket);
     });
 
     // Connect client
@@ -141,11 +142,11 @@ describe('Integration Tests - chatHandler.handleChatEvents', () => {
     jest.mocked(chatService.join);
 
     // Mock joinUserChats to spy on socket.join
-    jest.spyOn(chatHandler, 'joinUserChats');
+    jest.spyOn(chatController, 'joinUserChats');
 
     // Setup socket events
     io.on(SocketEvents.Connection, (socket) => {
-      chatHandler.handleChatEvents(io, socket);
+      handleChatEvents(io, socket);
     });
 
     // Connect client
@@ -156,7 +157,7 @@ describe('Integration Tests - chatHandler.handleChatEvents', () => {
       setTimeout(() => {
         // Assert
         expect(chatService.getAllChatsByMember).toHaveBeenCalledWith('user123');
-        expect(chatHandler.joinUserChats).toHaveBeenCalled();
+        expect(chatController.joinUserChats).toHaveBeenCalled();
 
         // Verify sockets joined the room
         const socketRooms = Array.from(serverSocket.rooms);

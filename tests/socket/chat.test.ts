@@ -1,6 +1,6 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { Socket } from 'socket.io';
-import { joinUserChats } from '../../src/socket/handlers/chat';
+import * as chatController from '../../src/controllers/chatController';
 import * as chatService from '../../src/services/chatService';
 import { Chat } from '../../src/interfaces/models/chat';
 
@@ -9,11 +9,16 @@ jest.mock('../../src/services/chatService');
 
 describe('Unit Tests - joinUserChats', () => {
   let socket: any;
+  let io: any;
 
   beforeEach(() => {
     socket = {
       join: jest.fn(),
       request: { user: { id: 'user123' } },
+    };
+    io = {
+      to: jest.fn().mockReturnThis(),
+      emit: jest.fn(),
     };
     jest.clearAllMocks();
   });
@@ -24,7 +29,7 @@ describe('Unit Tests - joinUserChats', () => {
     jest.mocked(chatService.getAllChatsByMember).mockResolvedValue(mockChats);
 
     // Act
-    await joinUserChats(socket as Socket, 'user123');
+    await chatController.joinUserChats(io, socket as Socket)('user123');
 
     // Assert
     expect(chatService.getAllChatsByMember).toHaveBeenCalledWith('user123');
@@ -37,7 +42,7 @@ describe('Unit Tests - joinUserChats', () => {
     jest.mocked(chatService.getAllChatsByMember).mockRejectedValue(error);
 
     // Act
-    await joinUserChats(socket as Socket, 'user123');
+    await chatController.joinUserChats(io, socket as Socket)('user123');
 
     // Assert
     expect(chatService.getAllChatsByMember).toHaveBeenCalledWith('user123');
