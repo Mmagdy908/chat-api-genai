@@ -4,14 +4,14 @@ import * as chatService from '../../services/chatService';
 import { handleSocketResponse } from '../socketUtils';
 import { handleError } from '../../util/appError';
 
-const joinUserChats = async (socket: Socket, userId: string) => {
+export const joinUserChats = async (socket: Socket, userId: string) => {
   try {
     const userChats = (await chatService.getAllChatsByMember(userId)).map(
       (chat) => `chat:${chat.id}`
     );
     socket.join(userChats);
   } catch (err) {
-    console.log('error jouning user chats', err);
+    console.log('error joining user chats', err);
   }
 };
 

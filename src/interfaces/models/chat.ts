@@ -4,10 +4,10 @@ import { Message } from './message';
 
 export interface Chat {
   id: string;
-  metaData: {
-    name: string;
-    description: string;
-    image: string;
+  metaData?: {
+    name?: string;
+    description?: string;
+    image?: string;
   };
   type: Chat_Type;
   members: Types.ObjectId[];

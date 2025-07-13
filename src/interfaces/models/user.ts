@@ -10,6 +10,7 @@ export interface User {
   passwordUpdatedAt: Date;
   isVerified: boolean;
   status: User_Status;
+  photo: string;
   createdAt: Date;
   updatedAt: Date;
   checkPassword: (password: string) => Promise<boolean>;

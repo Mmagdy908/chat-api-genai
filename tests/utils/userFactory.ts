@@ -10,6 +10,7 @@ export interface MockUser {
   password?: string;
   isVerified?: boolean;
   status?: User_Status;
+  photo?: string;
   passwordUpdatedAt?: Date;
 }
 
@@ -21,6 +22,7 @@ class UserFactory {
     email: 'ahmedessam@example.com',
     password: 'pass1234',
     isVerified: false,
+    photo: 'http://example.com/image.jpg',
   };
 
   create(overrides: MockUser = {}): MockUser {

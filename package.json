@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand",
-    "test-specific": "jest tests/models --runInBand",
+    "test-specific": "jest tests/socket --runInBand --detectOpenHandles",
     "start": "nodemon src/server.ts",
     "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts"
   },
@@ -57,6 +57,7 @@
     "pm2": "^6.0.8",
     "redis": "^5.5.6",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0",
     "validator": "^13.15.15",
     "zod": "^3.25.64"
