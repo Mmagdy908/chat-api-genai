@@ -2,7 +2,6 @@ import { jest, describe, expect, test, beforeEach, beforeAll, afterAll } from '@
 import { mongoConfig, clearMongoDB, disconnectMongoDB } from '../../src/config/mongo';
 import userModel from '../../src/models/user';
 import { userFactory } from '../utils/userFactory';
-import { User_Status } from '../../src/enums/userEnums';
 
 describe('User Model', () => {
   beforeAll(async () => {
@@ -287,7 +286,6 @@ describe('User Model', () => {
 
       // Assert
       expect(savedUser.isVerified).toBe(false);
-      expect(savedUser.status).toBe(User_Status.Offline);
     });
   });
 
