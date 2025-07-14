@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import catchAsync from '../util/catchAsync';
-import * as friendshipSchema from '../schemas/friendshipSchemas';
-import * as friendshipService from '../services/friendshipService';
-import { Friendship } from '../interfaces/models/friendship';
+import catchAsync from '../../util/catchAsync';
+import * as friendshipSchema from '../../schemas/friendshipSchemas';
+import * as friendshipService from '../../services/friendshipService';
+import { Friendship } from '../../interfaces/models/friendship';
 
 export const sendFriendRequest = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {

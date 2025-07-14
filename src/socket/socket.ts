@@ -4,7 +4,7 @@ import { wrap } from './socketUtils';
 import { protect } from '../middlewares/authMiddleware';
 import { handleUserEvents } from './handlers/user';
 import { handleChatEvents } from './handlers/chat';
-import * as userController from '../controllers/userController';
+import * as userSocketController from '../controllers/socket/userSocketController';
 import { handleMessageEvents } from './handlers/message';
 import { subscriber } from '../config/redis';
 import ENV_VAR from '../config/envConfig';
@@ -13,7 +13,7 @@ export const setupSocket = (io: Server) => {
   io.use(wrap(protect));
 
   if (ENV_VAR.PROCESS_ID === 0)
-    subscriber.subscribe('__keyevent@0__:expired', userController.handleKeyExpiredEvent(io));
+    subscriber.subscribe('__keyevent@0__:expired', userSocketController.handleKeyExpiredEvent(io));
 
   io.on(SocketEvents.Connection, (socket) => {
     console.log('a user connected');

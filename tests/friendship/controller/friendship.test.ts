@@ -2,7 +2,7 @@ import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import * as friendshipController from '../../../src/controllers/friendshipController';
+import * as friendshipController from '../../../src/controllers/http/friendshipController';
 import * as friendshipSchemas from '../../../src/schemas/friendshipSchemas';
 import * as friendshipService from '../../../src/services/friendshipService';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';

@@ -1,10 +1,10 @@
 import { Server, Socket } from 'socket.io';
-import * as userStatusService from '../services/userStatusService';
-import * as chatService from '../services/chatService';
-import * as userService from '../services/userService';
-import { SocketEvents } from '../enums/socketEventEnums';
-import { User_Status } from '../enums/userEnums';
-import ENV_VAR from '../config/envConfig';
+import * as userStatusService from '../../services/userStatusService';
+import * as chatService from '../../services/chatService';
+import * as userService from '../../services/userService';
+import { SocketEvents } from '../../enums/socketEventEnums';
+import { User_Status } from '../../enums/userEnums';
+import ENV_VAR from '../../config/envConfig';
 
 const updateAndBroadcastUserStatus = async (io: Server, userId: string, status: User_Status) => {
   try {

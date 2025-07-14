@@ -1,6 +1,6 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { getMockReq, getMockRes } from '@jest-mock/express';
-import { register } from '../../../src/controllers/authController';
+import { register } from '../../../src/controllers/http/authController';
 import userModel from '../../../src/models/user';
 import * as userMapper from '../../../src/mappers/userMapper';
 import * as authService from '../../../src/services/authService';

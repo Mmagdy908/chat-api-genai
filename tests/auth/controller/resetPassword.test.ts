@@ -1,6 +1,6 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { getMockReq, getMockRes } from '@jest-mock/express';
-import { resetPassword } from '../../../src/controllers/authController';
+import { resetPassword } from '../../../src/controllers/http/authController';
 import * as authService from '../../../src/services/authService';
 import checkRequiredFields from '../../../src/util/checkRequiredFields';
 import { Request, Response, NextFunction } from 'express';

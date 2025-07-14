@@ -23,6 +23,11 @@ const userSchema = new Schema<User>(
       unique: [true, 'This username already exists'],
       trim: true,
     },
+    photo: {
+      type: String,
+      default:
+        'https://res.cloudinary.com/dqwk3uad1/image/upload/v1752483514/Profile_avatar_placeholder_large_dska7s.png',
+    },
     email: {
       type: String,
       required: [true, 'A user must have an email'],
@@ -43,14 +48,6 @@ const userSchema = new Schema<User>(
     isVerified: {
       type: Boolean,
       default: false,
-    },
-    status: {
-      type: String,
-      enum: {
-        values: ['Online', 'Offline'],
-        message: 'User status must be either Online or Offline',
-      },
-      default: User_Status.Offline,
     },
   },
   { timestamps: true, toObject: { virtuals: true }, toJSON: { virtuals: true } }

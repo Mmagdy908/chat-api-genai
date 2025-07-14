@@ -1,11 +1,11 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { Server, Socket } from 'socket.io';
 import { handleUserEvents } from '../../../src/socket/handlers/user';
-import * as userController from '../../../src/controllers/userController';
+import * as userSocketController from '../../../src/controllers/socket/userSocketController';
 import { SocketEvents } from '../../../src/enums/socketEventEnums';
 
 // Mock dependencies
-jest.mock('../../../src/controllers/userController');
+jest.mock('../../../src/controllers/socket/userSocketController');
 
 describe('Unit Tests - handleUserEvents', () => {
   let socket: any;
@@ -28,15 +28,15 @@ describe('Unit Tests - handleUserEvents', () => {
     const mockConnect = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
     const mockHeartbeat = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
     const mockDisconnect = jest.fn();
-    jest.mocked(userController.connect).mockReturnValue(mockConnect);
-    jest.mocked(userController.heartbeat).mockReturnValue(mockHeartbeat);
-    jest.mocked(userController.disconnect).mockReturnValue(mockDisconnect);
+    jest.mocked(userSocketController.connect).mockReturnValue(mockConnect);
+    jest.mocked(userSocketController.heartbeat).mockReturnValue(mockHeartbeat);
+    jest.mocked(userSocketController.disconnect).mockReturnValue(mockDisconnect);
 
     // Act
     await handleUserEvents(io as Server, socket as Socket);
 
     // Assert
-    expect(userController.connect).toHaveBeenCalledWith(io, socket);
+    expect(userSocketController.connect).toHaveBeenCalledWith(io, socket);
     expect(mockConnect).toHaveBeenCalled();
     expect(socket.on).toHaveBeenCalledWith(SocketEvents.Heartbeat, mockHeartbeat);
     expect(socket.on).toHaveBeenCalledWith(SocketEvents.Disconnect, mockDisconnect);
@@ -45,7 +45,7 @@ describe('Unit Tests - handleUserEvents', () => {
   test('should handle errors gracefully', async () => {
     // Arrange
     const error = new Error('Connect error');
-    jest.mocked(userController.connect).mockImplementation(() => {
+    jest.mocked(userSocketController.connect).mockImplementation(() => {
       throw error;
     });
 
@@ -53,7 +53,7 @@ describe('Unit Tests - handleUserEvents', () => {
     await handleUserEvents(io as Server, socket as Socket);
 
     // Assert
-    expect(userController.connect).toHaveBeenCalledWith(io, socket);
+    expect(userSocketController.connect).toHaveBeenCalledWith(io, socket);
     expect(socket.on).not.toHaveBeenCalled(); // No further events registered on error
   });
 });

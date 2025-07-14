@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError, handleError } from '../util/appError';
-import ENV_VAR from '../config/envConfig';
+import { AppError, handleError } from '../../util/appError';
+import ENV_VAR from '../../config/envConfig';
 
 const sendDevError = (err: any, res: Response) => {
   res

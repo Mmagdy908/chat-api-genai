@@ -1,6 +1,6 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { Socket } from 'socket.io';
-import * as chatController from '../../../src/controllers/chatController';
+import * as chatController from '../../../src/controllers/socket/chatSocketController';
 import * as chatService from '../../../src/services/chatService';
 import { Chat } from '../../../src/interfaces/models/chat';
 

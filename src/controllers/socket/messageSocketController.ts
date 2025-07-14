@@ -1,9 +1,9 @@
 import { Server, Socket } from 'socket.io';
-import * as messageSchemas from '../schemas/messageSchemas';
-import * as messageService from '../services/messageService';
-import { handleSocketResponse } from '../socket/socketUtils';
-import { handleError } from '../util/appError';
-import { SocketEvents } from '../enums/socketEventEnums';
+import * as messageSchemas from '../../schemas/messageSchemas';
+import * as messageService from '../../services/messageService';
+import { handleSocketResponse } from '../../socket/socketUtils';
+import { handleError } from '../../util/appError';
+import { SocketEvents } from '../../enums/socketEventEnums';
 
 export const sendMessage =
   (io: Server, socket: Socket) =>

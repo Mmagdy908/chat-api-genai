@@ -25,7 +25,7 @@ export const mapLoginResponse = (
   accessToken: string,
   refreshToken: string
 ): LoginResponse => {
-  const { id, firstName, lastName, username, fullName, email, createdAt } = userData;
+  const { id, firstName, lastName, username, fullName, email, photo, createdAt } = userData;
   // const workspaces = userData.workspaces as Workspace[];
   return {
     id,
@@ -34,6 +34,7 @@ export const mapLoginResponse = (
     fullName,
     username,
     email,
+    photo,
     // workspaces: workspaces.map((workspace) =>
     //   workspaceMapper.mapCreateWorkspaceResponse(workspace)
     // ),

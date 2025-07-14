@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
-import * as chatService from '../services/chatService';
-import { handleSocketResponse } from '../socket/socketUtils';
-import { handleError } from '../util/appError';
+import * as chatService from '../../services/chatService';
+import { handleSocketResponse } from '../../socket/socketUtils';
+import { handleError } from '../../util/appError';
 
 export const joinUserChats = (io: Server, socket: Socket) => async (userId: string) => {
   try {

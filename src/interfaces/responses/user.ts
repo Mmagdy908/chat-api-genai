@@ -15,6 +15,7 @@ export interface LoginResponse {
   username: string;
   fullName: string;
   email: string;
+  photo: string;
   accessToken: string;
   refreshToken: string;
   createdAt: Date;

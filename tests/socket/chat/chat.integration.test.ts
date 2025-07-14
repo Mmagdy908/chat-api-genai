@@ -13,7 +13,7 @@ import { createServer } from 'http';
 import { AddressInfo } from 'net';
 import ioClient from 'socket.io-client';
 import { handleChatEvents } from '../../../src/socket/handlers/chat';
-import * as chatController from '../../../src/controllers/chatController';
+import * as chatController from '../../../src/controllers/socket/chatSocketController';
 import * as chatService from '../../../src/services/chatService';
 import { handleSocketResponse } from '../../../src/socket/socketUtils';
 import { SocketEvents } from '../../../src/enums/socketEventEnums';

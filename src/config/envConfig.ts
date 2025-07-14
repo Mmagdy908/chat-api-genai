@@ -34,6 +34,10 @@ const envSchema = z.object({
 
   SOCKET_GRACE_PERIOD: z.number(),
   HEARTBEAT_KEY_EXPIRES_IN: z.number(),
+
+  CLOUDINARY_CLOUD_NAME: z.string(),
+  CLOUDINARY_CLOUD_API_KEY: z.string(),
+  CLOUDINARY_CLOUD_API_SECRET: z.string(),
 });
 
 export default envSchema.parse({
@@ -68,4 +72,8 @@ export default envSchema.parse({
 
   SOCKET_GRACE_PERIOD: parseInt(process.env.SOCKET_GRACE_PERIOD as string),
   HEARTBEAT_KEY_EXPIRES_IN: parseInt(process.env.HEARTBEAT_KEY_EXPIRES_IN as string),
+
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_CLOUD_API_KEY: process.env.CLOUDINARY_CLOUD_API_KEY,
+  CLOUDINARY_CLOUD_API_SECRET: process.env.CLOUDINARY_CLOUD_API_SECRET,
 });

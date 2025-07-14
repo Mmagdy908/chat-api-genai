@@ -21,7 +21,7 @@ import { User_Status } from '../../../src/enums/userEnums';
 import { User } from '../../../src/interfaces/models/user';
 import ENV_VAR from '../../../src/config/envConfig';
 import { Chat } from '../../../src/interfaces/models/chat';
-import * as userController from '../../../src/controllers/userController';
+import * as userSocketController from '../../../src/controllers/socket/userSocketController';
 
 // Mock dependencies
 jest.mock('../../../src/services/userStatusService');
@@ -224,7 +224,7 @@ describe('Integration Tests - handleUserEvents', () => {
     });
 
     // Simulate key expiration
-    userController.handleKeyExpiredEvent(io)(`heartbeat:${userId}`, '__keyevent@0__:expired');
+    userSocketController.handleKeyExpiredEvent(io)(`heartbeat:${userId}`, '__keyevent@0__:expired');
 
     // Wait briefly to ensure async operations complete
     setTimeout(() => {

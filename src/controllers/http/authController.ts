@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { storeRefreshTokenToCookie, sendLoginResponse } from '../util/authUtil';
-import catchAsync from '../util/catchAsync';
-import * as authService from '../services/authService';
-import * as userMapper from '../mappers/userMapper';
-import checkRequiredFields from '../util/checkRequiredFields';
+import { storeRefreshTokenToCookie, sendLoginResponse } from '../../util/authUtil';
+import catchAsync from '../../util/catchAsync';
+import * as authService from '../../services/authService';
+import * as userMapper from '../../mappers/userMapper';
+import checkRequiredFields from '../../util/checkRequiredFields';
 
 export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
