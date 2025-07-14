@@ -70,9 +70,9 @@ describe('Chat Model', () => {
       // Assert
       expect(savedChat.id).toBeDefined();
       expect(savedChat.type).toBe(Chat_Type.Group);
-      expect(savedChat.metaData.name).toBe('Test Group');
-      expect(savedChat.metaData.description).toBe('Test group description');
-      expect(savedChat.metaData.image).toBe('http://example.com/image.jpg');
+      expect(savedChat.metaData?.name).toBe('Test Group');
+      expect(savedChat.metaData?.description).toBe('Test group description');
+      expect(savedChat.metaData?.image).toBe('http://example.com/image.jpg');
     });
 
     test('should fail validation when members array is empty', async () => {
@@ -148,7 +148,7 @@ describe('Chat Model', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Act
-      savedChat.metaData.name = 'Updated Group Name';
+      savedChat.metaData = { name: 'Updated Group Name' };
       const updatedChat = await savedChat.save();
 
       // Assert

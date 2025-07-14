@@ -12,19 +12,19 @@ import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import { AddressInfo } from 'net';
 import ioClient from 'socket.io-client';
-import { handleChatEvents } from '../../src/socket/handlers/chat';
-import * as chatController from '../../src/controllers/chatController';
-import * as chatService from '../../src/services/chatService';
-import { handleSocketResponse } from '../../src/socket/socketUtils';
-import { SocketEvents } from '../../src/enums/socketEventEnums';
-import { handleError } from '../../src/util/appError';
-import { User } from '../../src/interfaces/models/user';
-import { Chat } from '../../src/interfaces/models/chat';
+import { handleChatEvents } from '../../../src/socket/handlers/chat';
+import * as chatController from '../../../src/controllers/chatController';
+import * as chatService from '../../../src/services/chatService';
+import { handleSocketResponse } from '../../../src/socket/socketUtils';
+import { SocketEvents } from '../../../src/enums/socketEventEnums';
+import { handleError } from '../../../src/util/appError';
+import { User } from '../../../src/interfaces/models/user';
+import { Chat } from '../../../src/interfaces/models/chat';
 
 // Mock dependencies
-jest.mock('../../src/services/chatService');
-jest.mock('../../src/socket/socketUtils');
-jest.mock('../../src/util/appError');
+jest.mock('../../../src/services/chatService');
+jest.mock('../../../src/socket/socketUtils');
+jest.mock('../../../src/util/appError');
 
 describe('Integration Tests - chatHandler.handleChatEvents', () => {
   let io: Server;

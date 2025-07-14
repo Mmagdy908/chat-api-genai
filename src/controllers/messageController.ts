@@ -12,7 +12,6 @@ export const sendMessage =
       messageData.sender = socket.request.user.id;
       const mappedMessageData = messageSchemas.mapSendRequest(messageData);
       const message = await messageService.send(mappedMessageData);
-
       const response = {
         status: 'success',
         statusCode: 200,

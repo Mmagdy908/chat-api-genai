@@ -1,13 +1,7 @@
 import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { Server, Socket } from 'socket.io';
-import { handleMessageEvents } from '../../src/socket/handlers/message';
-import { SocketEvents } from '../../src/enums/socketEventEnums';
-
-// Mock dependencies
-jest.mock('../../src/services/messageService');
-jest.mock('../../src/schemas/messageSchemas');
-jest.mock('../../src/socket/socketUtils');
-jest.mock('../../src/util/appError');
+import { handleMessageEvents } from '../../../src/socket/handlers/message';
+import { SocketEvents } from '../../../src/enums/socketEventEnums';
 
 describe('Unit Tests - handleMessageEvents', () => {
   let socket: any;

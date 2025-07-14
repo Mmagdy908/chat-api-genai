@@ -45,15 +45,17 @@ const sendFriendsStatus = async (socket: Socket, userId: string) => {
   }
 };
 
-export const connect = (io: Server, socket: Socket) => async () => {
-  // add socket and broadcast if status changes
-  await userStatusService.addOnlineSocket(socket.request.user.id, socket.id);
+export const connect =
+  (io: Server, socket: Socket): (() => Promise<void>) =>
+  async () => {
+    // add socket and broadcast if status changes
+    await userStatusService.addOnlineSocket(socket.request.user.id, socket.id);
 
-  updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Online);
+    updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Online);
 
-  // send statuses of friends to newly joined user
-  sendFriendsStatus(socket, socket.request.user.id);
-};
+    // send statuses of friends to newly joined user
+    sendFriendsStatus(socket, socket.request.user.id);
+  };
 
 export const heartbeat = (io: Server, socket: Socket) => async () => {
   console.log('HEARTBEAT');
