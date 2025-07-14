@@ -9,5 +9,5 @@ export enum Message_Type {
   Image = 'Image',
   Video = 'Video',
   Audio = 'Audio',
-  File = 'File',
+  Document = 'Document',
 }

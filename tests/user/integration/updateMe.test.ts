@@ -35,7 +35,7 @@ describe('POST /update-me', () => {
 
     // Act
     const response = await request(app)
-      .post('/api/v1/users/update-me')
+      .patch('/api/v1/users/update-me')
       .set('Authorization', `Bearer ${accessToken}`)
       .send(updateData)
       .expect(200);
@@ -58,7 +58,7 @@ describe('POST /update-me', () => {
 
     // Act
     const response = await request(app)
-      .post('/api/v1/users/update-me')
+      .patch('/api/v1/users/update-me')
       .send(updateData)
       .expect(401);
 

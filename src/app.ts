@@ -5,6 +5,7 @@ import ENV_VAR from './config/envConfig';
 import authRouter from './routes/authRoutes';
 import friendshipRouter from './routes/friendshipRoutes';
 import userRouter from './routes/userRoutes';
+import uploadRouter from './routes/uploadRoutes';
 import globalErrorHandler from './controllers/http/errorController';
 import { AppError } from './util/appError';
 import { generateRefreshToken } from './util/authUtil';
@@ -22,6 +23,7 @@ if (ENV_VAR.NODE_ENV === 'development') app.use(morgan('dev'));
 
 // routers
 app.use('/api/v1', authRouter);
+app.use('/api/v1/uploads', uploadRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/friendships', friendshipRouter);
 // app.use('/api/v1/tasks', taskRouter);
