@@ -1,33 +1,8 @@
 import nodemailer from 'nodemailer';
+import htmlToText from 'html-to-text';
 import { User } from '../interfaces/models/user';
 import { generateResetPasswordEmailTemplate, generateVerifyEmailTemplate } from './emailTemplate';
 import ENV_VAR from '../config/envConfig';
-
-// export default async (email: string, subject: string, html: string) => {
-//   // 1) create transport
-//   const transport = nodemailer.createTransport({
-//     host: ENV_VAR.EMAIL_HOST,
-//     port: Number(ENV_VAR.EMAIL_PORT),
-//     auth: {
-//       user: ENV_VAR.EMAIL_USERNAME,
-//       pass: ENV_VAR.EMAIL_PASSWORD,
-//     },
-//   });
-
-//   // 2) create mail options
-//   const mailOptions = {
-//     from: 'Todo List API <admin@todo.io>',
-//     to: email,
-//     subject: subject,
-//     html,
-//   };
-
-//   // 3) send mail
-
-//   await transport.sendMail(mailOptions);
-// };
-
-// import htmlToText from 'html-to-text';
 
 export default class Email {
   firstName: string;
@@ -64,23 +39,16 @@ export default class Email {
   }
 
   async send(template: string, subject: string) {
-    // 1) render template
-    // const html = pug.renderFile(`${__dirname}/../views/emails/${template}.pug`, {
-    //   firstName: this.firstName,
-    //   url: this.url,
-    //   subject,
-    // });
-
-    // 2) create mail options
+    // 1) create mail options
     const mailOptions = {
       from: this.from,
       to: this.to,
       subject,
       html: template,
-      // text: htmlToText.convert(html),
+      text: htmlToText.convert(template),
     };
 
-    // 3) send mail
+    // 2) send mail
     await this.newTransport().sendMail(mailOptions);
   }
 
