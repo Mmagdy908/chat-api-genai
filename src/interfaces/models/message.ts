@@ -7,6 +7,8 @@ export interface Message {
   chat: Types.ObjectId;
   sender: Types.ObjectId | User;
   status: Message_Status;
+  deliveredTo: Types.ObjectId[];
+  seenBy: Types.ObjectId[];
   content: {
     contentType: Message_Type;
     text: string;

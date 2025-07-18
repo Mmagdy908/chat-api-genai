@@ -2,6 +2,7 @@ import { toObjectId } from '../util/objectIdUtil';
 import * as userRepository from '../repositories/userRepository';
 import * as friendshipRepository from '../repositories/friendshipRepository';
 import * as chatRepository from '../repositories/chatRepository';
+import * as userChatRepository from '../repositories/userChatRepository';
 import { AppError } from '../util/appError';
 import { Friendship_Status } from '../enums/friendshipEnums';
 
@@ -43,11 +44,15 @@ export const respond = async (id: string, recipientId: string, status: Friendshi
   //TODO send notification to sender in case of acceptance
 
   // create new chat between sender and recipient in case of acceptance
-  if (status === Friendship_Status.Accepted)
-    await chatRepository.createPrivateChat([
+  if (status === Friendship_Status.Accepted) {
+    const chat = await chatRepository.createPrivateChat([
       friendship.sender.toString(),
       friendship.recipient.toString(),
     ]);
+
+    await userChatRepository.create(friendship.sender.toString(), chat.id);
+    await userChatRepository.create(friendship.recipient.toString(), chat.id);
+  }
 
   return newFriendship;
 };

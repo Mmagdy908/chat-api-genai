@@ -51,6 +51,10 @@ export const connect =
     // add socket and broadcast if status changes
     await userStatusService.addOnlineSocket(socket.request.user.id, socket.id);
 
+    // join user room
+    socket.join(`user:${socket.request.user.id}`);
+
+    // update user presence status
     updateAndBroadcastUserStatus(io, socket.request.user.id, User_Status.Online);
 
     // send statuses of friends to newly joined user

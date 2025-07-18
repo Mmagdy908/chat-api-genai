@@ -23,6 +23,18 @@ const messageSchema = new Schema<Message>(
       default: Message_Status.Sent,
       required: [true, 'A message must have a status'],
     },
+    deliveredTo: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    seenBy: [
+      {
+        type: [Schema.Types.ObjectId],
+        ref: 'User',
+      },
+    ],
     content: {
       contentType: {
         type: String,

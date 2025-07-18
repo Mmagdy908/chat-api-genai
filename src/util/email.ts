@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import htmlToText from 'html-to-text';
+import * as htmlToText from 'html-to-text';
 import { User } from '../interfaces/models/user';
 import { generateResetPasswordEmailTemplate, generateVerifyEmailTemplate } from './emailTemplate';
 import ENV_VAR from '../config/envConfig';
