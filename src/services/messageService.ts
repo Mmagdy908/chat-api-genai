@@ -12,8 +12,17 @@ import { Chat } from '../interfaces/models/chat';
 const updateMessageStatus = async (chat: Chat, messages: Message[], status: Message_Status) => {
   const field = status === Message_Status.Seen ? 'seenBy' : 'deliveredTo';
 
+  const previousStatuses =
+    status === Message_Status.Delivered
+      ? [Message_Status.Sent]
+      : [Message_Status.Sent, Message_Status.Delivered];
+
   const promises = messages
-    .filter((message) => message[field].length === chat.members.length - 1)
+    .filter(
+      (message) =>
+        previousStatuses.includes(message.status) &&
+        message[field].length === chat.members.length - 1
+    )
     .map((message) => messageRepository.updateById(message.id, { status }));
   return await Promise.all(promises);
 };

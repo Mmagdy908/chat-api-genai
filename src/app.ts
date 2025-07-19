@@ -8,7 +8,7 @@ import userRouter from './routes/userRoutes';
 import uploadRouter from './routes/uploadRoutes';
 import globalErrorHandler from './controllers/http/errorController';
 import { AppError } from './util/appError';
-import { generateRefreshToken } from './util/authUtil';
+import { Message_Status } from './enums/messageEnums';
 
 const app = express();
 
@@ -26,8 +26,6 @@ app.use('/api/v1', authRouter);
 app.use('/api/v1/uploads', uploadRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/friendships', friendshipRouter);
-// app.use('/api/v1/tasks', taskRouter);
-// app.use('/api/v1/workspaces', workspaceRouter);
 
 //route not found
 app.use('/{*splat}', (req, res, next) => {
