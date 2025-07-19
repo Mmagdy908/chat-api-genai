@@ -3,7 +3,8 @@ import { SocketEvents } from '../../enums/socketEventEnums';
 import * as messageController from '../../controllers/socket/messageSocketController';
 
 export const handleMessageEvents = (io: Server, socket: Socket) => {
-  socket.on(SocketEvents.Message, messageController.sendMessage(io, socket));
+  socket.on(SocketEvents.Message, messageController.produceMessage(io, socket));
+  // socket.on(SocketEvents.Message, messageController.sendMessage(io, socket));
 
   socket.on(
     SocketEvents.Mark_Messages_As_Delivered,

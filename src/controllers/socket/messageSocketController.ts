@@ -5,14 +5,16 @@ import { handleSocketResponse } from '../../socket/socketUtils';
 import { handleError } from '../../util/appError';
 import { SocketEvents } from '../../enums/socketEventEnums';
 import { Message_Status } from '../../enums/messageEnums';
+import { messageProducer } from '../../kafka/producer';
 
-export const sendMessage =
+export const produceMessage =
   (io: Server, socket: Socket) =>
   async (messageData: messageSchemas.SendMessageRequest, callback: () => void) => {
     try {
       messageData.sender = socket.request.user.id;
-      const mappedMessageData = messageSchemas.mapSendRequest(messageData);
-      const message = await messageService.send(mappedMessageData);
+
+      await messageProducer(messageData);
+
       const response = {
         status: 'success',
         statusCode: 200,
@@ -20,13 +22,34 @@ export const sendMessage =
       };
 
       handleSocketResponse(callback, response);
+    } catch (err) {
+      console.log(err);
+      handleSocketResponse(callback, handleError(err));
+    }
+  };
+
+export const sendMessage =
+  (io: Server, socket?: Socket) => async (messageData: messageSchemas.SendMessageRequest) => {
+    try {
+      // messageData.sender = socket.request.user.id;
+      const mappedMessageData = messageSchemas.mapSendRequest(messageData);
+      const message = await messageService.send(mappedMessageData);
+      // const response = {
+      //   status: 'success',
+      //   statusCode: 200,
+      //   message: 'Successfully sent message',
+      // };
+
+      // handleSocketResponse(callback, response);
       io.to(`chat:${message.chat.toString()}`).emit(
         SocketEvents.Message,
         messageSchemas.mapSendResponse(message)
       );
     } catch (err: any) {
-      console.log(err);
-      handleSocketResponse(callback, handleError(err));
+      console.log('error sending message: ', err);
+
+      // console.log(err);
+      // handleSocketResponse(callback, handleError(err));
     }
   };
 
