@@ -11,8 +11,8 @@ export interface Notification {
   sender: Types.ObjectId;
   receiver: Types.ObjectId;
   status: Notification_Status;
-  refId: Types.ObjectId;
-  refType: Reference_Type;
+  reference: Types.ObjectId;
+  referenceType: Reference_Type;
   createdAt: Date;
   updatedAt: Date;
 }

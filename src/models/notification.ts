@@ -33,12 +33,12 @@ const notificationSchema = new Schema<Notification>(
         message: 'Notification status must be either read or unread',
       },
     },
-    refId: {
+    reference: {
       types: Schema.Types.ObjectId,
-      refPath: 'refType',
-      required: [true, 'A notification must have a ref id'],
+      refPath: 'referenceType',
+      required: [true, 'A notification must have a reference'],
     },
-    refType: {
+    referenceType: {
       types: String,
       enum: {
         values: [Reference_Type.Friendship],
