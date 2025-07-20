@@ -25,6 +25,8 @@ import { Types } from 'mongoose';
 import { messageProducer } from '../../../src/kafka/producer';
 import * as messageSocketController from '../../../src/controllers/socket/messageSocketController';
 import { messageConsumer } from '../../../src/kafka/consumer';
+import { Message } from '../../../src/interfaces/models/message';
+import messageModel from '../../../src/models/message';
 
 // Mock dependencies
 jest.mock('../../../src/services/messageService');
@@ -283,56 +285,135 @@ describe('Integration Tests - handleMessageEvents', () => {
       await messageConsumer(io)();
     });
   });
-  // test('should broadcast Message event to chat room', (done) => {
-  //   // Arrange
-  //   const messageData = messageFactory.create();
-  //   const mappedMessageData = {
-  //     ...messageData,
-  //   } as messageSchemas.SendMessageRequest;
-  //   const mockMessage: messageSchemas.SendMessageResponse = {
-  //     id: 'msg123',
-  //     chat: new Types.ObjectId(messageData.chat!),
-  //     sender: {
-  //       id: 'user123',
-  //       firstName: 'John',
-  //       lastName: 'Doe',
-  //       photo: 'http://example.com/photo.jpg',
-  //     },
-  //     status: Message_Status.Sent,
-  //     content: messageData.content!,
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //   };
-  //   const mockResponse = { ...mockMessage };
-  //   jest.mocked(messageSchemas.mapSendRequest).mockReturnValue(mappedMessageData);
-  //   jest.mocked(messageService.send).mockResolvedValue(mockMessage);
-  //   jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
-  //   jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
-  //   // Connect client
-  //   clientSocket = ioClient(`http://localhost:${port}`);
+  test('should handle Mark_Messages_As_Delivered event successfully', (done) => {
+    const userId = 'user123';
+    const senderId = 'sender456';
 
-  //   clientSocket.on(SocketEvents.Message, (message: any) => {
-  //     const responseMessage = {
-  //       ...mockResponse,
-  //       chat: mockResponse.chat.toString(),
-  //       createdAt: mockResponse.createdAt.toISOString(),
-  //       updatedAt: mockResponse.updatedAt.toISOString(),
-  //     };
-  //     // Assert
-  //     expect(message).toEqual(responseMessage);
-  //     // expect(io.to).toHaveBeenCalledWith(`chat:${messageData.chat}`);
-  //     // expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
-  //     const socketRooms = Array.from(serverSocket.rooms);
-  //     expect(socketRooms).toContain(`chat:${messageData.chat}`); // Verify serverSocket is in the room
-  //     done();
-  //   });
+    const messagesPerChat = {
+      [senderId]: [
+        new messageModel(messageFactory.create()),
+        new messageModel(messageFactory.create()),
+      ],
+    };
+    jest.mocked(messageService.markMessagesAsDelivered).mockResolvedValue(messagesPerChat);
+    jest.spyOn(io, 'to').mockReturnThis();
+    jest.spyOn(io, 'emit');
 
-  //   clientSocket.on('connect', async () => {
-  //     // Join the chat room to receive messages
-  //     await serverSocket.join(`chat:${messageData.chat}`);
+    clientSocket = ioClient(`http://localhost:${port}`);
+    clientSocket.on('connect', async () => {
+      await serverSocket.join(`user:${senderId}`);
+      clientSocket.on(SocketEvents.Message_Status_Update, (data: any) => {
+        expect(messageService.markMessagesAsDelivered).toHaveBeenCalledWith(userId);
+        expect(io.to).toHaveBeenCalledWith(`user:${senderId}`);
+        expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message_Status_Update, {
+          userId,
+          messages: messagesPerChat[senderId].map((msg: any) => ({
+            id: msg.id,
+            chat: msg.chat.toString(),
+          })),
+          status: Message_Status.Delivered,
+        });
+        expect(data).toEqual({
+          userId,
+          messages: messagesPerChat[senderId].map((msg: any) => ({
+            id: msg.id,
+            chat: msg.chat.toString(),
+          })),
+          status: Message_Status.Delivered,
+        });
+        expect(serverSocket.rooms.has(`user:${senderId}`)).toBe(true);
+        done();
+      });
+      clientSocket.emit(SocketEvents.Mark_Messages_As_Delivered);
+    });
+  });
 
-  //     clientSocket.emit(SocketEvents.Message, messageData, () => {});
-  //   });
-  // });
+  test('should handle Mark_Messages_As_Seen event successfully', (done) => {
+    const userId = 'user123';
+    const senderId = 'sender456';
+    const chatId = '685c46356a5d7ff0af63af79';
+    const seenMessages = {
+      [senderId]: [
+        new messageModel(messageFactory.create()),
+        new messageModel(messageFactory.create()),
+      ],
+    };
+    jest.mocked(messageService.markMessagesAsSeen).mockResolvedValue(seenMessages);
+    jest.spyOn(io, 'to').mockReturnThis();
+    jest.spyOn(io, 'emit');
+
+    clientSocket = ioClient(`http://localhost:${port}`);
+    clientSocket.on('connect', async () => {
+      await serverSocket.join(`user:${senderId}`);
+      clientSocket.on(SocketEvents.Message_Status_Update, (data: any) => {
+        expect(messageService.markMessagesAsSeen).toHaveBeenCalledWith(userId, chatId);
+        expect(io.to).toHaveBeenCalledWith(`user:${senderId}`);
+        expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message_Status_Update, {
+          userId,
+          messages: seenMessages[senderId].map((msg: any) => ({
+            id: msg.id,
+            chat: msg.chat.toString(),
+          })),
+          status: Message_Status.Seen,
+        });
+        expect(data).toEqual({
+          userId,
+          messages: seenMessages[senderId].map((msg: any) => ({
+            id: msg.id,
+            chat: msg.chat.toString(),
+          })),
+          status: Message_Status.Seen,
+        });
+        expect(serverSocket.rooms.has(`user:${senderId}`)).toBe(true);
+        done();
+      });
+      clientSocket.emit(SocketEvents.Mark_Messages_As_Seen, chatId);
+    });
+  });
+
+  test('should handle error in Mark_Messages_As_Delivered event', (done) => {
+    const userId = 'user123';
+    const error = new Error('Database error');
+    jest.mocked(messageService.markMessagesAsDelivered).mockRejectedValue(error);
+    jest.spyOn(console, 'log');
+    jest.spyOn(io, 'to').mockReturnThis();
+    jest.spyOn(io, 'emit');
+
+    clientSocket = ioClient(`http://localhost:${port}`);
+    clientSocket.on('connect', () => {
+      clientSocket.emit(SocketEvents.Mark_Messages_As_Delivered, () => {});
+      setTimeout(() => {
+        expect(messageService.markMessagesAsDelivered).toHaveBeenCalledWith(userId);
+        expect(console.log).toHaveBeenCalledWith('error marking messages as delivered: ', error);
+        expect(io.to).not.toHaveBeenCalled();
+        expect(io.emit).not.toHaveBeenCalled();
+        done();
+      }, 200);
+    });
+  });
+
+  test('should handle error in Mark_Messages_As_Seen event', (done) => {
+    const userId = 'user123';
+    const chatId = '685c46356a5d7ff0af63af79';
+    const error = new Error('Chat not found');
+    jest.mocked(messageService.markMessagesAsSeen).mockImplementation(() => {
+      throw error;
+    });
+    jest.spyOn(console, 'log');
+    jest.spyOn(io, 'to').mockReturnThis();
+    jest.spyOn(io, 'emit');
+
+    clientSocket = ioClient(`http://localhost:${port}`);
+    clientSocket.on('connect', () => {
+      clientSocket.emit(SocketEvents.Mark_Messages_As_Seen, chatId, () => {});
+      setTimeout(() => {
+        expect(messageService.markMessagesAsSeen).toHaveBeenCalledWith(userId, chatId);
+        expect(console.log).toHaveBeenCalledWith('error marking messges as seen: ', error);
+        expect(io.to).not.toHaveBeenCalled();
+        expect(io.emit).not.toHaveBeenCalled();
+        done();
+      }, 200);
+    });
+  });
 });

@@ -2,7 +2,6 @@ import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { Server, Socket } from 'socket.io';
 import { handleMessageEvents } from '../../../src/socket/handlers/message';
 import { SocketEvents } from '../../../src/enums/socketEventEnums';
-import * as messageSocketController from '../../../src/controllers/socket/messageSocketController';
 
 describe('Unit Tests - handleMessageEvents', () => {
   let socket: any;

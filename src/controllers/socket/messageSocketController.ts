@@ -55,6 +55,7 @@ export const sendMessage =
 
 export const markMessagesAsDelivered = (io: Server, socket: Socket) => async () => {
   try {
+    console.log('FROM controller');
     // 1) update messages statuses
     const messagesPerChat = await messageService.markMessagesAsDelivered(socket.request.user.id);
 
