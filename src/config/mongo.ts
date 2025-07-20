@@ -16,9 +16,9 @@ export const mongoConfig = async () => {
 export const clearMongoDB = async () => {
   try {
     const models = await mongoose.connection.db?.listCollections().toArray();
-    models?.forEach(async (model) => {
-      await mongoose.connection.db?.collection(model.name).deleteMany();
-    });
+    await Promise.all(
+      models?.map((model) => mongoose.connection.db?.collection(model.name).deleteMany()) || []
+    );
     console.log('MongoDB is cleared successfully');
   } catch (err) {
     console.log('Failed to clear MongoDB', err);

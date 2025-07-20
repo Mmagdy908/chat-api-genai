@@ -12,8 +12,9 @@ export const produceMessage =
   async (messageData: messageSchemas.SendMessageRequest, callback: () => void) => {
     try {
       messageData.sender = socket.request.user.id;
+      const mappedMessageData = messageSchemas.mapSendRequest(messageData);
 
-      await messageProducer(messageData);
+      await messageProducer(mappedMessageData);
 
       const response = {
         status: 'success',
@@ -32,8 +33,7 @@ export const sendMessage =
   (io: Server, socket?: Socket) => async (messageData: messageSchemas.SendMessageRequest) => {
     try {
       // messageData.sender = socket.request.user.id;
-      const mappedMessageData = messageSchemas.mapSendRequest(messageData);
-      const message = await messageService.send(mappedMessageData);
+      const message = await messageService.send(messageData);
       // const response = {
       //   status: 'success',
       //   statusCode: 200,

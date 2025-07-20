@@ -16,6 +16,8 @@ export const setupIntegrationTests = () => {
   });
 
   afterAll(async () => {
+    await clearMongoDB(); // Reset database
+    await clearRedis();
     await disconnectMongoDB(); // Stop MongoDB
     await disconnectRedis();
   });

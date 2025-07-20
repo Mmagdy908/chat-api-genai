@@ -4,6 +4,7 @@ import * as friendshipService from '../../../src/services/friendshipService';
 import * as userRepository from '../../../src/repositories/userRepository';
 import * as friendshipRepository from '../../../src/repositories/friendshipRepository';
 import * as chatRepository from '../../../src/repositories/chatRepository';
+import * as userChatRepository from '../../../src/repositories/userChatRepository';
 import { AppError } from '../../../src/util/appError';
 import { Friendship_Status } from '../../../src/enums/friendshipEnums';
 import { userFactory } from '../../utils/userFactory';
@@ -17,6 +18,7 @@ import { Friendship } from '../../../src/interfaces/models/friendship';
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/repositories/friendshipRepository');
 jest.mock('../../../src/repositories/chatRepository');
+jest.mock('../../../src/repositories/userChatRepository');
 
 describe('Friendship Service', () => {
   let sender: User;
@@ -96,7 +98,8 @@ describe('Friendship Service', () => {
       jest.mocked(friendshipRepository.getById).mockResolvedValue(pendingFriendship);
       const updatedFriendship = { ...pendingFriendship.toObject(), status: 'Accepted' };
       jest.mocked(friendshipRepository.updateById).mockResolvedValue(updatedFriendship as any);
-      jest.mocked(chatRepository.createPrivateChat);
+      jest.mocked(chatRepository.createPrivateChat).mockResolvedValue({ id: 'chat123' } as any);
+      jest.mocked(userChatRepository.create);
 
       const result = (await friendshipService.respond(
         pendingFriendship.id,
@@ -108,6 +111,18 @@ describe('Friendship Service', () => {
       expect(friendshipRepository.updateById).toHaveBeenCalledWith(pendingFriendship.id, {
         status: Friendship_Status.Accepted,
       });
+      expect(chatRepository.createPrivateChat).toHaveBeenCalledWith([
+        pendingFriendship.sender.toString(),
+        pendingFriendship.recipient.toString(),
+      ]);
+      expect(userChatRepository.create).toHaveBeenCalledWith(
+        pendingFriendship.sender.toString(),
+        'chat123'
+      );
+      expect(userChatRepository.create).toHaveBeenCalledWith(
+        pendingFriendship.recipient.toString(),
+        'chat123'
+      );
       expect(result.status).toBe(Friendship_Status.Accepted);
     });
 

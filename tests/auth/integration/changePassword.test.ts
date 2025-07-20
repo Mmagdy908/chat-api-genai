@@ -4,20 +4,17 @@ import app from '../../../src/app';
 import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import * as authUtil from '../../../src/util/authUtil';
-import { userFactory } from '../../utils/userFactory';
+import { userFactory, setupUser } from '../../utils/userFactory';
 
 describe('POST /change-password', () => {
   setupIntegrationTests();
 
   test('should change password successfully for authenticated user', async () => {
     // Arrange
-    const userData = userFactory.create({
+    const { user, accessToken, userData } = await setupUser({
       password: 'oldPassword123',
       isVerified: true,
     });
-
-    const user = await userModel.create(userData);
-    const { accessToken } = await authUtil.login(user.id);
 
     const changePasswordData = {
       oldPassword: 'oldPassword123',

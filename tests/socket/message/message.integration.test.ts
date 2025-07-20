@@ -22,12 +22,17 @@ import { User } from '../../../src/interfaces/models/user';
 import { messageFactory } from '../../utils/messageFactory';
 import { Message_Status, Message_Type } from '../../../src/enums/messageEnums';
 import { Types } from 'mongoose';
+import { messageProducer } from '../../../src/kafka/producer';
+import * as messageSocketController from '../../../src/controllers/socket/messageSocketController';
+import { messageConsumer } from '../../../src/kafka/consumer';
 
 // Mock dependencies
 jest.mock('../../../src/services/messageService');
 jest.mock('../../../src/schemas/messageSchemas');
 jest.mock('../../../src/socket/socketUtils');
 jest.mock('../../../src/util/appError');
+jest.mock('../../../src/kafka/producer');
+jest.mock('../../../src/kafka/consumer');
 
 describe('Integration Tests - handleMessageEvents', () => {
   let io: Server;
@@ -72,31 +77,15 @@ describe('Integration Tests - handleMessageEvents', () => {
     }
   });
 
-  test('should handle Message event successfully with text content', (done) => {
+  test('should handle Message event successfully with text content via Kafka', (done) => {
     // Arrange
-    const messageData = {
-      chat: '685c46356a5d7ff0af63af79',
-      content: { contentType: Message_Type.Text, text: 'Hello, world!' },
-    };
-    const mappedMessageData = { ...messageData, sender: 'user123' };
-    const mockMessage: messageSchemas.SendMessageResponse = {
-      id: 'msg123',
-      chat: new Types.ObjectId('685c46356a5d7ff0af63af79'),
-      sender: {
-        id: 'user123',
-        firstName: 'John',
-        lastName: 'Doe',
-        photo: 'http://example.com/photo.jpg',
-      },
-      status: Message_Status.Sent,
-      content: { contentType: Message_Type.Text, text: 'Hello, world!' },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const mockResponse = { ...mockMessage };
+    const messageData = messageFactory.create();
+    const mappedMessageData = {
+      ...messageData,
+      sender: 'user123',
+    } as messageSchemas.SendMessageRequest;
     jest.mocked(messageSchemas.mapSendRequest).mockReturnValue(mappedMessageData);
-    jest.mocked(messageService.send).mockResolvedValue(mockMessage);
-    jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
+    jest.mocked(messageProducer).mockResolvedValue(undefined);
     jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
     // Connect client
@@ -106,14 +95,9 @@ describe('Integration Tests - handleMessageEvents', () => {
       // Act
       clientSocket.emit(SocketEvents.Message, messageData, (response: any) => {
         // Assert
-        expect(messageSchemas.mapSendRequest).toHaveBeenCalledWith({
-          ...messageData,
-          sender: 'user123',
-        });
-        expect(messageService.send).toHaveBeenCalledWith(mappedMessageData);
-        expect(messageSchemas.mapSendResponse).toHaveBeenCalledWith(mockMessage);
-        // expect(io.to).toHaveBeenCalledWith('chat:685c46356a5d7ff0af63af79');
-        // expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
+        expect(messageSchemas.mapSendRequest).toHaveBeenCalledWith(mappedMessageData);
+        expect(messageProducer).toHaveBeenCalledWith(mappedMessageData);
+        expect(messageService.send).not.toHaveBeenCalled(); // Not called since using Kafka
         expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), {
           status: 'success',
           statusCode: 200,
@@ -129,35 +113,14 @@ describe('Integration Tests - handleMessageEvents', () => {
     });
   });
 
-  test('should handle Message event successfully with media content', (done) => {
+  test('should handle Message event successfully with media content via Kafka', (done) => {
     // Arrange
-    const messageData = {
-      chat: '685c46356a5d7ff0af63af79',
+    const messageData = messageFactory.create({
       content: { contentType: Message_Type.Image, mediaUrl: 'http://example.com/image.jpg' },
-    };
+    }) as messageSchemas.SendMessageRequest;
     const mappedMessageData = { ...messageData, sender: 'user123' };
-    const mockMessage = messageFactory.create({
-      content: { contentType: Message_Type.Image, mediaUrl: 'http://example.com/image.jpg' },
-      sender: 'user123',
-      chat: '685c46356a5d7ff0af63af79',
-    });
-    const mockResponse: messageSchemas.SendMessageResponse = {
-      id: mockMessage.chat!,
-      chat: new Types.ObjectId(mockMessage.chat),
-      sender: {
-        id: 'user123',
-        firstName: 'John',
-        lastName: 'Doe',
-        photo: 'http://example.com/photo.jpg',
-      },
-      status: Message_Status.Sent,
-      content: { contentType: Message_Type.Image, mediaUrl: 'http://example.com/image.jpg' },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
     jest.mocked(messageSchemas.mapSendRequest).mockReturnValue(mappedMessageData);
-    jest.mocked(messageService.send).mockResolvedValue(mockResponse);
-    jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
+    jest.mocked(messageProducer).mockResolvedValue(undefined);
     jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
     // Connect client
@@ -171,10 +134,8 @@ describe('Integration Tests - handleMessageEvents', () => {
           ...messageData,
           sender: 'user123',
         });
-        expect(messageService.send).toHaveBeenCalledWith(mappedMessageData);
-        expect(messageSchemas.mapSendResponse).toHaveBeenCalledWith(mockResponse);
-        // expect(io.to).toHaveBeenCalledWith('chat:685c46356a5d7ff0af63af79');
-        // expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
+        expect(messageProducer).toHaveBeenCalledWith(mappedMessageData);
+        expect(messageService.send).not.toHaveBeenCalled(); // Not called since using Kafka
         expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), {
           status: 'success',
           statusCode: 200,
@@ -198,6 +159,7 @@ describe('Integration Tests - handleMessageEvents', () => {
     jest.mocked(messageSchemas.mapSendRequest).mockImplementation(() => {
       throw error;
     });
+    jest.mocked(messageProducer).mockResolvedValue(undefined);
     jest.mocked(handleError).mockReturnValue(mockErrorResponse);
     jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
@@ -212,11 +174,11 @@ describe('Integration Tests - handleMessageEvents', () => {
           ...messageData,
           sender: 'user123',
         } as messageSchemas.SendMessageRequest);
+        expect(messageProducer).not.toHaveBeenCalled();
         expect(messageService.send).not.toHaveBeenCalled();
         expect(handleError).toHaveBeenCalledWith(error);
         expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), mockErrorResponse);
         expect(response).toEqual(mockErrorResponse);
-        // expect(io.to).not.toHaveBeenCalled(); // No broadcast on error
         done();
       });
     });
@@ -224,10 +186,9 @@ describe('Integration Tests - handleMessageEvents', () => {
 
   test('should handle error in Message event with invalid content', (done) => {
     // Arrange
-    const messageData = {
-      chat: '685c46356a5d7ff0af63af79',
+    const messageData = messageFactory.create({
       content: { contentType: Message_Type.Text }, // Missing text
-    };
+    }) as messageSchemas.SendMessageRequest;
     const error = new Error('Text content must have text');
     const mockErrorResponse = {
       status: 'error',
@@ -237,6 +198,7 @@ describe('Integration Tests - handleMessageEvents', () => {
     jest.mocked(messageSchemas.mapSendRequest).mockImplementation(() => {
       throw error;
     });
+    jest.mocked(messageProducer).mockResolvedValue(undefined);
     jest.mocked(handleError).mockReturnValue(mockErrorResponse);
     jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
 
@@ -251,66 +213,126 @@ describe('Integration Tests - handleMessageEvents', () => {
           ...messageData,
           sender: 'user123',
         });
+        expect(messageProducer).not.toHaveBeenCalled();
         expect(messageService.send).not.toHaveBeenCalled();
         expect(handleError).toHaveBeenCalledWith(error);
         expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), mockErrorResponse);
         expect(response).toEqual(mockErrorResponse);
-        // expect(io.to).not.toHaveBeenCalled(); // No broadcast on error
         done();
       });
     });
   });
 
-  test('should broadcast Message event to chat room', (done) => {
+  test('should handle Kafka consumer processing message and emitting to chat room', (done) => {
     // Arrange
-    const messageData = messageFactory.create();
-    const mappedMessageData = {
-      ...messageData,
-    } as messageSchemas.SendMessageRequest;
-    const mockMessage: messageSchemas.SendMessageResponse = {
+    const messageData = messageFactory.create({
+      content: { contentType: Message_Type.Text, text: 'Hello from Kafka!' },
+      sender: 'user123',
+    }) as messageSchemas.SendMessageRequest;
+    const mappedMessageData = { ...messageData } as messageSchemas.SendMessageRequest;
+    const mockMessage = {
       id: 'msg123',
-      chat: new Types.ObjectId(messageData.chat!),
+      chat: new Types.ObjectId(mappedMessageData.chat),
       sender: {
-        id: 'user123',
+        id: mappedMessageData.sender,
         firstName: 'John',
         lastName: 'Doe',
         photo: 'http://example.com/photo.jpg',
       },
       status: Message_Status.Sent,
-      content: messageData.content!,
+      content: mappedMessageData.content,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
     const mockResponse = { ...mockMessage };
-    jest.mocked(messageSchemas.mapSendRequest).mockReturnValue(mappedMessageData);
     jest.mocked(messageService.send).mockResolvedValue(mockMessage);
     jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
-    jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
+    jest.mocked(messageConsumer).mockImplementation(() => async () => {
+      // Simulate consumer calling sendMessage
+      await messageSocketController.sendMessage(io)(messageData);
+    });
+    jest.spyOn(io, 'to').mockReturnThis();
+    jest.spyOn(io, 'emit');
 
     // Connect client
     clientSocket = ioClient(`http://localhost:${port}`);
-
-    clientSocket.on(SocketEvents.Message, (message: any) => {
-      const responseMessage = {
-        ...mockResponse,
-        chat: mockResponse.chat.toString(),
-        createdAt: mockResponse.createdAt.toISOString(),
-        updatedAt: mockResponse.updatedAt.toISOString(),
-      };
-      // Assert
-      expect(message).toEqual(responseMessage);
-      // expect(io.to).toHaveBeenCalledWith(`chat:${messageData.chat}`);
-      // expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
-      const socketRooms = Array.from(serverSocket.rooms);
-      expect(socketRooms).toContain(`chat:${messageData.chat}`); // Verify serverSocket is in the room
-      done();
-    });
 
     clientSocket.on('connect', async () => {
       // Join the chat room to receive messages
       await serverSocket.join(`chat:${messageData.chat}`);
 
-      clientSocket.emit(SocketEvents.Message, messageData, () => {});
+      clientSocket.on(SocketEvents.Message, (message: any) => {
+        // Assert
+        const expectedMessage = {
+          ...mockResponse,
+          chat: mockResponse.chat.toString(),
+          createdAt: mockResponse.createdAt.toISOString(),
+          updatedAt: mockResponse.updatedAt.toISOString(),
+        };
+        expect(message).toEqual(expectedMessage);
+        expect(messageService.send).toHaveBeenCalledWith(mappedMessageData);
+        expect(messageSchemas.mapSendResponse).toHaveBeenCalledWith(mockMessage);
+        expect(io.to).toHaveBeenCalledWith(`chat:${messageData.chat}`);
+        expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
+        const socketRooms = Array.from(serverSocket.rooms);
+        expect(socketRooms).toContain(`chat:${messageData.chat}`);
+        done();
+      });
+
+      // Act: Simulate consumer processing a message
+      await messageConsumer(io)();
     });
   });
+  // test('should broadcast Message event to chat room', (done) => {
+  //   // Arrange
+  //   const messageData = messageFactory.create();
+  //   const mappedMessageData = {
+  //     ...messageData,
+  //   } as messageSchemas.SendMessageRequest;
+  //   const mockMessage: messageSchemas.SendMessageResponse = {
+  //     id: 'msg123',
+  //     chat: new Types.ObjectId(messageData.chat!),
+  //     sender: {
+  //       id: 'user123',
+  //       firstName: 'John',
+  //       lastName: 'Doe',
+  //       photo: 'http://example.com/photo.jpg',
+  //     },
+  //     status: Message_Status.Sent,
+  //     content: messageData.content!,
+  //     createdAt: new Date(),
+  //     updatedAt: new Date(),
+  //   };
+  //   const mockResponse = { ...mockMessage };
+  //   jest.mocked(messageSchemas.mapSendRequest).mockReturnValue(mappedMessageData);
+  //   jest.mocked(messageService.send).mockResolvedValue(mockMessage);
+  //   jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
+  //   jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
+
+  //   // Connect client
+  //   clientSocket = ioClient(`http://localhost:${port}`);
+
+  //   clientSocket.on(SocketEvents.Message, (message: any) => {
+  //     const responseMessage = {
+  //       ...mockResponse,
+  //       chat: mockResponse.chat.toString(),
+  //       createdAt: mockResponse.createdAt.toISOString(),
+  //       updatedAt: mockResponse.updatedAt.toISOString(),
+  //     };
+  //     // Assert
+  //     expect(message).toEqual(responseMessage);
+  //     // expect(io.to).toHaveBeenCalledWith(`chat:${messageData.chat}`);
+  //     // expect(io.emit).toHaveBeenCalledWith(SocketEvents.Message, mockResponse);
+  //     const socketRooms = Array.from(serverSocket.rooms);
+  //     expect(socketRooms).toContain(`chat:${messageData.chat}`); // Verify serverSocket is in the room
+  //     done();
+  //   });
+
+  //   clientSocket.on('connect', async () => {
+  //     // Join the chat room to receive messages
+  //     await serverSocket.join(`chat:${messageData.chat}`);
+
+  //     clientSocket.emit(SocketEvents.Message, messageData, () => {});
+  //   });
+  // });
 });
