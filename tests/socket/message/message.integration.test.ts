@@ -24,7 +24,7 @@ import { Message_Status, Message_Type } from '../../../src/enums/messageEnums';
 import { Types } from 'mongoose';
 import { messageProducer } from '../../../src/kafka/producer';
 import * as messageSocketController from '../../../src/controllers/socket/messageSocketController';
-import { messageConsumer } from '../../../src/kafka/consumer';
+import { setupConsumer } from '../../../src/kafka/consumer';
 import { Message } from '../../../src/interfaces/models/message';
 import messageModel from '../../../src/models/message';
 
@@ -249,7 +249,7 @@ describe('Integration Tests - handleMessageEvents', () => {
     const mockResponse = { ...mockMessage };
     jest.mocked(messageService.send).mockResolvedValue(mockMessage);
     jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);
-    jest.mocked(messageConsumer).mockImplementation(() => async () => {
+    jest.mocked(setupConsumer).mockImplementation(() => async () => {
       // Simulate consumer calling sendMessage
       await messageSocketController.sendMessage(io)(messageData);
     });
@@ -282,7 +282,7 @@ describe('Integration Tests - handleMessageEvents', () => {
       });
 
       // Act: Simulate consumer processing a message
-      await messageConsumer(io)();
+      await setupConsumer(io)();
     });
   });
 
