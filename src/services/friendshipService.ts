@@ -15,7 +15,7 @@ export const send = async (senderId: string, recipientId: string) => {
 
   const recipient = await userRepository.getById(recipientId);
 
-  if (!recipient) throw new AppError(404, 'This recipient is not found');
+  if (!recipient || !recipient.isVerified) throw new AppError(404, 'This recipient is not found');
 
   if (await friendshipRepository.getBySenderRecipientId(senderId, recipientId))
     throw new AppError(400, 'This Friendship already exists');

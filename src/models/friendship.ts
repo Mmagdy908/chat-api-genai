@@ -19,7 +19,7 @@ const friendshipSchema = new Schema<Friendship>(
       type: [Schema.Types.ObjectId],
       ref: 'User',
       select: false,
-      unique: true,
+      // unique: true,
     },
     status: {
       type: String,

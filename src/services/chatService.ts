@@ -1,3 +1,4 @@
+import { ParsedQs } from 'qs';
 import * as chatRepository from '../repositories/chatRepository';
 import { toObjectId } from '../util/objectIdUtil';
 import { AppError } from '../util/appError';
@@ -11,6 +12,19 @@ export const join = async (userId: string, chatId: string) => {
     throw new AppError(403, 'User is not a member of this chat');
 };
 
-export const getAllChatsByMember = async (userId: string) => {
-  return await chatRepository.getAllChatsByMember(userId);
+export const getAllChatsByMember = async (
+  userId: string,
+  options?: {
+    before?: number;
+    limit?: number;
+    selectedFields?: string;
+  }
+) => {
+  return await chatRepository.getAllChatsByMember(userId, {
+    ...options,
+    populateOptions: [
+      { path: 'members', select: 'firstName lastName photo' },
+      { path: 'lastMessage', populate: 'sender' },
+    ],
+  });
 };

@@ -1,7 +1,8 @@
-import { PopulateOptions } from 'mongoose';
+import { PopulateOptions, Schema } from 'mongoose';
 import { Chat } from '../interfaces/models/chat';
 import chatModel from '../models/chat';
 import { Chat_Type } from '../enums/chatEnums';
+import { GetChatResponse } from '../schemas/chatSchemas';
 
 export const createPrivateChat = async (membersId: string[]): Promise<Chat> => {
   return await chatModel.create({
@@ -21,24 +22,35 @@ export const getById = async (
   return await query;
 };
 
-export const getByMembers = async (
-  membersId: string[],
-  ...populateOptions: PopulateOptions[]
-): Promise<Chat | null> => {
-  const query = chatModel.findOne({ members: { $all: membersId } });
+// export const getByMembers = async (
+//   membersId: string[],
+//   ...populateOptions: PopulateOptions[]
+// ): Promise<Chat | null> => {
+//   const query = chatModel.findOne({ members: { $all: membersId } });
 
-  populateOptions?.forEach((option) => query.populate(option));
+//   populateOptions?.forEach((option) => query.populate(option));
 
-  return await query;
-};
+//   return await query;
+// };
 
 export const getAllChatsByMember = async (
   memberId: string,
-  ...selectedFields: string[]
-): Promise<Chat[]> => {
-  return await chatModel
-    .find({ members: { $elemMatch: { $eq: memberId } } })
-    .select(selectedFields);
+  options?: {
+    before?: number;
+    limit?: number;
+    selectedFields?: string;
+    populateOptions?: PopulateOptions[];
+  }
+): Promise<GetChatResponse[]> => {
+  const query = chatModel.find({ members: { $elemMatch: { $eq: memberId } } });
+
+  if (options?.before) query.find({ updatedAt: { $lt: new Date(options.before) } });
+
+  query.select(options!.selectedFields!).limit(options!.limit!).sort('-updatedAt');
+
+  options?.populateOptions?.forEach((option) => query.populate(option));
+
+  return (await query) as GetChatResponse[];
 };
 
 export const updateById = async (id: string, newChatData: Partial<Chat>): Promise<Chat | null> => {

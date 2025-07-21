@@ -149,7 +149,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   // 1) get user
   const user = await userRepository.getByEmail(email);
 
-  if (!user) return; // DO NOT throw error to prevent email leakage
+  if (!user || !user.isVerified) return; // DO NOT throw error to prevent email leakage
 
   // 2) generate reset OTP
   const resetOTP = await generateOTP();

@@ -58,9 +58,9 @@ export const send = async (messageData: SendMessageRequest): Promise<SendMessage
 
 export const markMessagesAsDelivered = async (userId: string) => {
   // 1) get user chats
-  const userChatIds = (await chatRepository.getAllChatsByMember(userId, 'id')).map(
-    (chat) => chat.id
-  );
+  const userChatIds = (
+    await chatRepository.getAllChatsByMember(userId, { selectedFields: 'id' })
+  ).map((chat) => chat.id);
 
   // 2) get last delivered message
   const lastDeliveredMessages = (await Promise.all(

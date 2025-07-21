@@ -27,7 +27,7 @@ const sendMessageRequestSchema = z.object({
     }),
 });
 
-const sendMessageResponseSchema = z.object({
+export const sendMessageResponseSchema = z.object({
   id: z.string().refine((value) => Types.ObjectId.isValid(value), {
     message: 'Invalid id format',
   }),

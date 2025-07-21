@@ -6,10 +6,6 @@ export const create = async (userData: Partial<User>): Promise<User> => {
   return await userModel.create(userData);
 };
 
-export const getAll = async (): Promise<User[]> => {
-  return await userModel.find();
-};
-
 export const getById = async (
   id: string,
   ...populateOptions: PopulateOptions[]
