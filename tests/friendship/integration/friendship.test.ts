@@ -9,6 +9,9 @@ import { Friendship_Status } from '../../../src/enums/friendshipEnums';
 import { User } from '../../../src/interfaces/models/user';
 import { Friendship } from '../../../src/interfaces/models/friendship';
 import { Chat_Type } from '../../../src/enums/chatEnums';
+import { notificationProducer } from '../../../src/kafka/producer';
+
+jest.mock('../../../src/kafka/producer');
 
 describe('Friendship Routes', () => {
   let sender: User;
@@ -30,6 +33,8 @@ describe('Friendship Routes', () => {
       email: 'recipient@example.com',
       isVerified: true,
     }));
+
+    jest.mocked(notificationProducer);
   });
 
   describe('POST /friendships/send', () => {

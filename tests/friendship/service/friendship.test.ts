@@ -14,11 +14,14 @@ import friendshipModel from '../../../src/models/friendship';
 import { toObjectId } from '../../../src/util/objectIdUtil';
 import { User } from '../../../src/interfaces/models/user';
 import { Friendship } from '../../../src/interfaces/models/friendship';
+import { notificationProducer } from '../../../src/kafka/producer';
+import { Notification_Type, Reference_Type } from '../../../src/enums/notificationEnums';
 
 jest.mock('../../../src/repositories/userRepository');
 jest.mock('../../../src/repositories/friendshipRepository');
 jest.mock('../../../src/repositories/chatRepository');
 jest.mock('../../../src/repositories/userChatRepository');
+jest.mock('../../../src/kafka/producer');
 
 describe('Friendship Service', () => {
   let sender: User;
@@ -36,6 +39,7 @@ describe('Friendship Service', () => {
     test('should send a friend request successfully', async () => {
       jest.mocked(userRepository.getById).mockResolvedValue(recipient);
       jest.mocked(friendshipRepository.getBySenderRecipientId).mockResolvedValue(null);
+      jest.mocked(notificationProducer);
 
       const createdFriendship = new friendshipModel(
         friendshipFactory.create({
@@ -56,6 +60,15 @@ describe('Friendship Service', () => {
         sender: toObjectId(sender.id),
         recipient: toObjectId(recipient.id),
       });
+
+      expect(notificationProducer).toHaveBeenCalledWith({
+        type: Notification_Type.Received_Friend_Request,
+        sender: sender.id,
+        recipient: recipient.id,
+        reference: createdFriendship.id,
+        referenceType: Reference_Type.Friendship,
+      });
+
       expect(result).toEqual(createdFriendship);
     });
 
@@ -76,10 +89,13 @@ describe('Friendship Service', () => {
     test('should throw 400 error if friendship already exists', async () => {
       jest.mocked(userRepository.getById).mockResolvedValue(recipient);
       jest.mocked(friendshipRepository.getBySenderRecipientId).mockResolvedValue({} as any);
+      jest.mocked(notificationProducer);
 
       await expect(friendshipService.send(sender.id, recipient.id)).rejects.toThrow(
         new AppError(400, 'This Friendship already exists')
       );
+
+      expect(notificationProducer).not.toHaveBeenCalled();
     });
   });
 
@@ -100,6 +116,7 @@ describe('Friendship Service', () => {
       jest.mocked(friendshipRepository.updateById).mockResolvedValue(updatedFriendship as any);
       jest.mocked(chatRepository.createPrivateChat).mockResolvedValue({ id: 'chat123' } as any);
       jest.mocked(userChatRepository.create);
+      jest.mocked(notificationProducer);
 
       const result = (await friendshipService.respond(
         pendingFriendship.id,
@@ -123,15 +140,26 @@ describe('Friendship Service', () => {
         pendingFriendship.recipient.toString(),
         'chat123'
       );
+
+      expect(notificationProducer).toHaveBeenCalledWith({
+        type: Notification_Type.Accepted_Friend_Request,
+        sender: recipient.id,
+        recipient: sender.id,
+        reference: pendingFriendship.id,
+        referenceType: Reference_Type.Friendship,
+      });
+
       expect(result.status).toBe(Friendship_Status.Accepted);
     });
 
     test('should throw 404 error if friendship is not found', async () => {
       jest.mocked(friendshipRepository.getById).mockResolvedValue(null);
+      jest.mocked(notificationProducer);
 
       await expect(
         friendshipService.respond(pendingFriendship.id, recipient.id, Friendship_Status.Accepted)
       ).rejects.toThrow(new AppError(404, 'This friendship is not found'));
+      expect(notificationProducer).not.toHaveBeenCalled();
     });
 
     test('should throw 403 error if user is not the recipient', async () => {
