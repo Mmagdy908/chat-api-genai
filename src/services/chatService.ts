@@ -31,7 +31,9 @@ export const createGroup = async (groupChatData: CreateGroupChatRequest) => {
 
   const chat = await chatRepository.createGroupChat(groupChatData);
 
-  await userChatRepository.create(groupChatData.owner, chat.id);
+  await Promise.all(
+    groupChatData.members.map((member) => userChatRepository.create(member, chat.id))
+  );
 
   return chat;
 };
