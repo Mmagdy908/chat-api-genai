@@ -10,6 +10,7 @@ export enum SocketEvents {
   Mark_Messages_As_Delivered = 'mark_messages_as_delivered',
   Mark_Messages_As_Seen = 'mark_messages_as_seen',
   Friends_Status = 'friends_status',
+  Notification = 'notification',
   Disconnecting = 'disconnecting',
   Disconnect = 'disconnect',
 }

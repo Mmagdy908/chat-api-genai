@@ -9,7 +9,7 @@ export interface Notification {
   id: string;
   type: Notification_Type;
   sender: Types.ObjectId;
-  receiver: Types.ObjectId;
+  recipient: Types.ObjectId;
   status: Notification_Status;
   reference: Types.ObjectId;
   referenceType: Reference_Type;

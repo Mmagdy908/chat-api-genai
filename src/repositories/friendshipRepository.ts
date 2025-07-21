@@ -1,6 +1,7 @@
 import { PopulateOptions } from 'mongoose';
 import { Friendship } from '../interfaces/models/friendship';
 import friendshipModel from '../models/friendship';
+import { Friendship_Status } from '../enums/friendshipEnums';
 
 export const create = async (friendshipData: Partial<Friendship>): Promise<Friendship> => {
   return await friendshipModel.create(friendshipData);
@@ -26,7 +27,10 @@ export const getBySenderRecipientId = async (
 };
 
 export const getAllByUser = async (userId: string): Promise<Friendship[]> => {
-  return await friendshipModel.find({ userPair: { $elemMatch: { $eq: userId } } });
+  return await friendshipModel.find({
+    userPair: { $elemMatch: { $eq: userId } },
+    status: Friendship_Status.Accepted,
+  });
 };
 
 export const updateById = async (

@@ -31,7 +31,7 @@ const messageSchema = new Schema<Message>(
     ],
     seenBy: [
       {
-        type: [Schema.Types.ObjectId],
+        type: Schema.Types.ObjectId,
         ref: 'User',
       },
     ],

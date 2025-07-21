@@ -5,6 +5,9 @@ import * as chatRepository from '../repositories/chatRepository';
 import * as userChatRepository from '../repositories/userChatRepository';
 import { AppError } from '../util/appError';
 import { Friendship_Status } from '../enums/friendshipEnums';
+import { notificationProducer } from '../kafka/producer';
+import { Notification_Type, Reference_Type } from '../enums/notificationEnums';
+import { SendNotificationRequest } from '../schemas/notificationSchemas';
 
 export const send = async (senderId: string, recipientId: string) => {
   if (senderId === recipientId)
@@ -22,7 +25,16 @@ export const send = async (senderId: string, recipientId: string) => {
     recipient: toObjectId(recipientId),
   });
 
-  //TODO send notification to recipient
+  // send notification to recipient
+  const notificationData: SendNotificationRequest = {
+    type: Notification_Type.Received_Friend_Request,
+    sender: senderId,
+    recipient: recipientId,
+    reference: friendship.id,
+    referenceType: Reference_Type.Friendship,
+  };
+
+  await notificationProducer(notificationData);
 
   return friendship;
 };
@@ -41,10 +53,9 @@ export const respond = async (id: string, recipientId: string, status: Friendshi
   // respond to friendship Request
   const newFriendship = await friendshipRepository.updateById(id, { status });
 
-  //TODO send notification to sender in case of acceptance
-
-  // create new chat between sender and recipient in case of acceptance
+  //  in case of acceptance
   if (status === Friendship_Status.Accepted) {
+    // create new chat between sender and recipient
     const chat = await chatRepository.createPrivateChat([
       friendship.sender.toString(),
       friendship.recipient.toString(),
@@ -52,6 +63,17 @@ export const respond = async (id: string, recipientId: string, status: Friendshi
 
     await userChatRepository.create(friendship.sender.toString(), chat.id);
     await userChatRepository.create(friendship.recipient.toString(), chat.id);
+
+    // send notification to sender
+    const notificationData: SendNotificationRequest = {
+      type: Notification_Type.Accepted_Friend_Request,
+      sender: recipientId,
+      recipient: friendship.sender.toString(),
+      reference: friendship.id,
+      referenceType: Reference_Type.Friendship,
+    };
+
+    await notificationProducer(notificationData);
   }
 
   return newFriendship;

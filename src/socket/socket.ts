@@ -9,7 +9,7 @@ import { handleMessageEvents } from './handlers/message';
 import { subscriber } from '../config/redis';
 import ENV_VAR from '../config/envConfig';
 import { connectProducer } from '../kafka/producer';
-import { messageConsumer } from '../kafka/consumer';
+import { connectConsumer, setupConsumer } from '../kafka/consumer';
 
 export const setupSocket = async (io: Server) => {
   io.use(wrap(protect));
@@ -17,8 +17,12 @@ export const setupSocket = async (io: Server) => {
   if (ENV_VAR.PROCESS_ID === 0)
     subscriber.subscribe('__keyevent@0__:expired', userSocketController.handleKeyExpiredEvent(io));
 
+  // kafka producer-consumer
   await connectProducer();
-  await messageConsumer(io)();
+  await connectConsumer();
+  await setupConsumer(io)();
+
+  console.log('Successfully connected to Kafka');
 
   io.on(SocketEvents.Connection, (socket) => {
     console.log('a user connected');

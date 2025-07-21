@@ -46,7 +46,7 @@ export const sendMessage =
         messageSchemas.mapSendResponse(message)
       );
     } catch (err: any) {
-      console.log('error sending message: ', err);
+      console.error('Kafka message processing error:', err);
 
       // console.log(err);
       // handleSocketResponse(callback, handleError(err));

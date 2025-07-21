@@ -17,12 +17,12 @@ const notificationSchema = new Schema<Notification>(
       },
     },
     sender: {
-      types: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'A notification must have a sender'],
     },
-    receiver: {
-      types: Schema.Types.ObjectId,
+    recipient: {
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'A notification must have a receiver'],
     },
@@ -32,14 +32,15 @@ const notificationSchema = new Schema<Notification>(
         values: [Notification_Status.Read, Notification_Status.Unread],
         message: 'Notification status must be either read or unread',
       },
+      default: Notification_Status.Unread,
     },
     reference: {
-      types: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       refPath: 'referenceType',
       required: [true, 'A notification must have a reference'],
     },
     referenceType: {
-      types: String,
+      type: String,
       enum: {
         values: [Reference_Type.Friendship],
         message: 'Notification status must be either Friendship or ...',
