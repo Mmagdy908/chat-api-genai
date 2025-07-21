@@ -4,6 +4,8 @@ import { Chat_Type } from '../enums/chatEnums';
 
 const chatSchema = new Schema<Chat>(
   {
+    owner: Schema.Types.ObjectId, // only for group chats
+    admins: [Schema.Types.ObjectId], // only for group chats
     // only for group chats
     metaData: {
       name: {

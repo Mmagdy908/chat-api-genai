@@ -20,6 +20,7 @@ import { SocketEvents } from '../../../src/enums/socketEventEnums';
 import { handleError } from '../../../src/util/appError';
 import { User } from '../../../src/interfaces/models/user';
 import { Chat } from '../../../src/interfaces/models/chat';
+import { GetChatResponse } from '../../../src/schemas/chatSchemas';
 
 // Mock dependencies
 jest.mock('../../../src/services/chatService');
@@ -137,7 +138,7 @@ describe('Integration Tests - chatHandler.handleChatEvents', () => {
 
   test('should join user chats on connection', (done) => {
     // Arrange
-    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as GetChatResponse[];
     jest.mocked(chatService.getAllChatsByMember).mockResolvedValue(mockChats);
     jest.mocked(chatService.join);
 

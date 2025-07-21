@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 import * as chatController from '../../../src/controllers/socket/chatSocketController';
 import * as chatService from '../../../src/services/chatService';
 import { Chat } from '../../../src/interfaces/models/chat';
+import { GetChatResponse } from '../../../src/schemas/chatSchemas';
 
 // Mock dependencies
 jest.mock('../../../src/services/chatService');
@@ -25,7 +26,7 @@ describe('Unit Tests - joinUserChats', () => {
 
   test('should join user to their chat rooms', async () => {
     // Arrange
-    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as GetChatResponse[];
     jest.mocked(chatService.getAllChatsByMember).mockResolvedValue(mockChats);
 
     // Act

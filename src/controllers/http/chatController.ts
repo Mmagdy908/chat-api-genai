@@ -1,8 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import * as chatService from '../../services/chatService';
 import catchAsync from '../../util/catchAsync';
-import { GetChatResponse, mapGetResponse } from '../../schemas/chatSchemas';
+import { GetChatResponse, mapCreateGroupRequest, mapGetResponse } from '../../schemas/chatSchemas';
 
+export const createGroup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  req.body.owner = req.user.id;
+  const body = mapCreateGroupRequest(req.body);
+  const chat = await chatService.createGroup(body);
+
+  res.status(201).json({
+    status: 'success',
+    data: { chat: mapGetResponse(chat as GetChatResponse) },
+    message: 'Group chat is created successfully',
+  });
+});
 export const getAllUserChats = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const chats = await chatService.getAllChatsByMember(req.user.id, {

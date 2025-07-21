@@ -2,13 +2,21 @@ import { PopulateOptions, Schema } from 'mongoose';
 import { Chat } from '../interfaces/models/chat';
 import chatModel from '../models/chat';
 import { Chat_Type } from '../enums/chatEnums';
-import { GetChatResponse } from '../schemas/chatSchemas';
+import { CreateGroupChatRequest, GetChatResponse } from '../schemas/chatSchemas';
 
 export const createPrivateChat = async (membersId: string[]): Promise<Chat> => {
   return await chatModel.create({
     type: Chat_Type.Private,
     members: membersId,
   });
+};
+
+export const createGroupChat = async (groupChatData: CreateGroupChatRequest): Promise<Chat> => {
+  const chat = await chatModel.create({
+    ...groupChatData,
+    type: Chat_Type.Group,
+  });
+  return await chat.populate({ path: 'members', select: 'firstName lastName photo' });
 };
 
 export const getById = async (

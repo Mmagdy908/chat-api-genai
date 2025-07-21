@@ -7,5 +7,6 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 
 router.route('/').get(chatController.getAllUserChats);
+router.route('/group').post(chatController.createGroup);
 
 export default router;

@@ -5,6 +5,8 @@ import { User } from './user';
 
 export interface Chat {
   id: string;
+  owner: Types.ObjectId;
+  admins: Types.ObjectId[];
   metaData?: {
     name?: string;
     description?: string;
