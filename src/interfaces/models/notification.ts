@@ -4,11 +4,12 @@ import {
   Notification_Type,
   Reference_Type,
 } from '../../enums/notificationEnums';
+import { User } from './user';
 
 export interface Notification {
   id: string;
   type: Notification_Type;
-  sender: Types.ObjectId;
+  sender: Types.ObjectId | User;
   recipient: Types.ObjectId;
   status: Notification_Status;
   reference: Types.ObjectId;

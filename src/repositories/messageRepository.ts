@@ -15,6 +15,7 @@ export const create = async (messageData: SendMessageRequest): Promise<SendMessa
     select: 'firstName lastName photo',
   });
 };
+
 export const getAllByChat = async (
   chatId: string,
   limit: string,

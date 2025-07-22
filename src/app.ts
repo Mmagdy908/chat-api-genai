@@ -6,6 +6,7 @@ import authRouter from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
 import friendshipRouter from './routes/friendshipRoutes';
 import chatRouter from './routes/chatRoutes';
+import notificationRouter from './routes/notificationRoutes';
 import uploadRouter from './routes/uploadRoutes';
 import globalErrorHandler from './controllers/http/errorController';
 import { AppError } from './util/appError';
@@ -26,6 +27,7 @@ app.use('/api/v1', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/friendships', friendshipRouter);
 app.use('/api/v1/chats', chatRouter);
+app.use('/api/v1/notifications', notificationRouter);
 app.use('/api/v1/uploads', uploadRouter);
 
 //route not found

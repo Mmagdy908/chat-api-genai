@@ -1,5 +1,11 @@
-import { SendNotificationRequest, SendNotificationResponse } from '../schemas/notificationSchemas';
+import {
+  GetNotificationResponse,
+  SendNotificationRequest,
+  SendNotificationResponse,
+} from '../schemas/notificationSchemas';
 import notificationModel from '../models/notification';
+import { toObjectId } from '../util/objectIdUtil';
+import { Notification_Status } from '../enums/notificationEnums';
 
 export const create = async (
   notificationData: SendNotificationRequest
@@ -9,4 +15,28 @@ export const create = async (
     path: 'sender',
     select: 'firstName lastName photo',
   });
+};
+
+export const getAll = async (
+  userId: string,
+  limit: string,
+  before?: string
+): Promise<GetNotificationResponse[]> => {
+  const query = notificationModel
+    .find({ recipient: userId })
+    .sort('-_id')
+    .limit(parseInt(limit))
+    .populate({
+      path: 'sender',
+      select: 'firstName lastName photo',
+    });
+
+  if (before) query.find({ _id: { $lt: toObjectId(before) } });
+
+  return (await query) as GetNotificationResponse[];
+};
+
+export const getUnreadNotificationsCount = async (userId: string): Promise<number> => {
+  return (await notificationModel.find({ recipient: userId, status: Notification_Status.Unread }))
+    .length;
 };

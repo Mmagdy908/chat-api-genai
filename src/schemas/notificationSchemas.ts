@@ -45,6 +45,7 @@ const sendFriendshipNotificationResponseSchema = z.object({
 
 export type SendNotificationRequest = z.infer<typeof sendNotificationRequestSchema>;
 export type SendNotificationResponse = z.infer<typeof sendFriendshipNotificationResponseSchema>;
+export type GetNotificationResponse = SendNotificationResponse;
 
 export const mapSendRequest = (notificationData: SendNotificationRequest) =>
   sendNotificationRequestSchema.parse(notificationData);
@@ -66,3 +67,5 @@ export const mapSendResponse = (notification: SendNotificationResponse) =>
     createdAt: notification.createdAt,
     updatedAt: notification.updatedAt,
   });
+
+export const mapGetResponse = mapSendResponse;
