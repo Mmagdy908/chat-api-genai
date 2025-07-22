@@ -1,4 +1,3 @@
-import { User_Status } from '../../enums/userEnums';
 export interface User {
   id: string;
   firstName: string;
@@ -9,7 +8,6 @@ export interface User {
   password: string;
   passwordUpdatedAt: Date;
   isVerified: boolean;
-  status: User_Status;
   photo: string;
   createdAt: Date;
   updatedAt: Date;

@@ -6,6 +6,9 @@ import { Media_Type } from '../enums/uploadEnums';
 
 const router = express.Router();
 
+router.route('/:id').get(userController.getUser);
+router.route('/search/:username').get(userController.searchByUsername);
+
 router.use(authMiddleware.protect);
 
 router

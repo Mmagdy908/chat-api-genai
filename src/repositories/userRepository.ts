@@ -1,6 +1,7 @@
 import { PopulateOptions } from 'mongoose';
 import { User } from '../interfaces/models/user';
 import userModel from '../models/user';
+import user from '../models/user';
 
 export const create = async (userData: Partial<User>): Promise<User> => {
   return await userModel.create(userData);
@@ -27,6 +28,10 @@ export const getVerifiedById = async (
 
 export const getByEmail = async (email: string): Promise<User | null> => {
   return await userModel.findOne({ email });
+};
+
+export const searchByUsername = async (username: string): Promise<User[]> => {
+  return await userModel.find({ username: { $regex: new RegExp(username, 'i') } });
 };
 
 export const updateById = async (id: string, newUserData: Partial<User>): Promise<User | null> => {

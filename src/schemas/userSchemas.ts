@@ -22,11 +22,12 @@ const updateMeResponseSchema = z.object({
 
 export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>;
 export type UpdateMeResponse = z.infer<typeof updateMeResponseSchema>;
+export type GetUserResponse = UpdateMeResponse;
 
-export const mapToUpdateMeRequest = (userData: UpdateMeRequest) =>
+export const mapUpdateMeRequest = (userData: UpdateMeRequest) =>
   updateMeRequestSchema.parse(userData);
 
-export const mapToUpdateMeResponse = (userData: User): UpdateMeResponse =>
+export const mapUpdateMeResponse = (userData: User): UpdateMeResponse =>
   updateMeResponseSchema.parse({
     id: userData.id,
     firstName: userData.firstName,
@@ -36,3 +37,5 @@ export const mapToUpdateMeResponse = (userData: User): UpdateMeResponse =>
     email: userData.email,
     photo: userData.photo,
   });
+
+export const mapGetResponse = mapUpdateMeResponse;
