@@ -22,3 +22,7 @@ export const send = async (
 ): Promise<SendNotificationResponse> => {
   return await notificationRepository.create(notificationData);
 };
+
+export const markNotificationsAsRead = async (userId: string) => {
+  await notificationRepository.markNotificationsAsRead(userId);
+};

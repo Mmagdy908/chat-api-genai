@@ -4,6 +4,7 @@ import { wrap } from './socketUtils';
 import { protect } from '../middlewares/authMiddleware';
 import { handleUserEvents } from './handlers/user';
 import { handleChatEvents } from './handlers/chat';
+import { handleNotificationEvents } from './handlers/notification';
 import * as userSocketController from '../controllers/socket/userSocketController';
 import { handleMessageEvents } from './handlers/message';
 import { subscriber } from '../config/redis';
@@ -31,6 +32,7 @@ export const setupSocket = async (io: Server) => {
     handleUserEvents(io, socket);
     handleChatEvents(io, socket);
     handleMessageEvents(io, socket);
+    handleNotificationEvents(io, socket);
   });
 
   io.on('error', (error) => {

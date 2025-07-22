@@ -40,3 +40,12 @@ export const getUnreadNotificationsCount = async (userId: string): Promise<numbe
   return (await notificationModel.find({ recipient: userId, status: Notification_Status.Unread }))
     .length;
 };
+
+export const markNotificationsAsRead = async (userId: string) => {
+  await notificationModel.updateMany(
+    { recipient: userId, status: Notification_Status.Unread },
+    {
+      status: Notification_Status.Read,
+    }
+  );
+};
