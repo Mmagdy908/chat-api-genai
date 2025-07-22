@@ -15,6 +15,16 @@ export const getById = async (
   return await query;
 };
 
+// gets user if it exists and is verified
+export const getVerifiedById = async (
+  id: string,
+  ...populateOptions: PopulateOptions[]
+): Promise<User | null> => {
+  const query = userModel.findById(id).findOne({ isVerified: true });
+  populateOptions?.forEach((option) => query.populate(option));
+  return await query;
+};
+
 export const getByEmail = async (email: string): Promise<User | null> => {
   return await userModel.findOne({ email });
 };

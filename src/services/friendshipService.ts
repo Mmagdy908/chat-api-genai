@@ -13,9 +13,9 @@ export const send = async (senderId: string, recipientId: string) => {
   if (senderId === recipientId)
     throw new AppError(400, 'You cannot send a friend request to yourself');
 
-  const recipient = await userRepository.getById(recipientId);
+  const recipient = await userRepository.getVerifiedById(recipientId);
 
-  if (!recipient || !recipient.isVerified) throw new AppError(404, 'This recipient is not found');
+  if (!recipient) throw new AppError(404, 'This recipient is not found');
 
   if (await friendshipRepository.getBySenderRecipientId(senderId, recipientId))
     throw new AppError(400, 'This Friendship already exists');

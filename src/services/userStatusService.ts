@@ -1,5 +1,4 @@
 import { User_Status } from '../enums/userEnums';
-import { User } from '../interfaces/models/user';
 import * as userStatusRepository from '../repositories/userStatusRepository';
 
 export const addOnlineSocket = async (userId: string, socketId: string) => {
