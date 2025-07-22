@@ -60,6 +60,7 @@ export const getAllUserChats = catchAsync(
     res.status(200).json({
       status: 'success',
       data: { chats: chats.map((chat: GetChatResponse) => mapGetResponse(chat)) },
+      results: chats.length,
       message: 'Chats are fetched successfully',
     });
   }

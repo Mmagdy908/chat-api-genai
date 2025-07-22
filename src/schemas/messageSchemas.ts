@@ -1,7 +1,18 @@
 import { Types } from 'mongoose';
 import z from 'zod/v4';
 import { Message_Status, Message_Type } from '../enums/messageEnums';
-import { Message } from '../interfaces/models/message';
+
+const getAllMessagesRequestSchema = z.object({
+  chatId: z.string().refine((value) => Types.ObjectId.isValid(value), {
+    message: 'Invalid id format',
+  }),
+  before: z
+    .string()
+    .refine((value) => Types.ObjectId.isValid(value), {
+      message: 'Invalid id format',
+    })
+    .optional(),
+});
 
 const sendMessageRequestSchema = z.object({
   chat: z.string().refine((value) => Types.ObjectId.isValid(value), {
@@ -54,6 +65,7 @@ export const sendMessageResponseSchema = z.object({
 
 export type SendMessageRequest = z.infer<typeof sendMessageRequestSchema>;
 export type SendMessageResponse = z.infer<typeof sendMessageResponseSchema>;
+export type GetMessageResponse = SendMessageResponse;
 
 export const mapSendRequest = (messageData: SendMessageRequest) =>
   sendMessageRequestSchema.parse(messageData);
@@ -73,3 +85,5 @@ export const mapSendResponse = (message: SendMessageResponse) =>
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
   });
+
+export const mapGetResponse = mapSendResponse;

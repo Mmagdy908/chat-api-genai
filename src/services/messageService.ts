@@ -4,7 +4,11 @@ import * as chatRepository from '../repositories/chatRepository';
 import * as userChatRepository from '../repositories/userChatRepository';
 import { toObjectId } from '../util/objectIdUtil';
 import { AppError } from '../util/appError';
-import { SendMessageRequest, SendMessageResponse } from '../schemas/messageSchemas';
+import {
+  GetMessageResponse,
+  SendMessageRequest,
+  SendMessageResponse,
+} from '../schemas/messageSchemas';
 import { User_Chat_Modification_Field } from '../enums/userChatEnums';
 import { Message_Status } from '../enums/messageEnums';
 import { Chat } from '../interfaces/models/chat';
@@ -25,6 +29,22 @@ const updateMessageStatus = async (chat: Chat, messages: Message[], status: Mess
     )
     .map((message) => messageRepository.updateById(message.id, { status }));
   return await Promise.all(promises);
+};
+
+export const getAllByChat = async (
+  chatId: string,
+  limit: string,
+  before?: string
+): Promise<GetMessageResponse[]> => {
+  return await messageRepository.getAllByChat(chatId, limit, before);
+};
+
+export const getUnreadMessagesCount = async (userId: string, chatId: string): Promise<number> => {
+  const lastSeenMessage = (
+    await userChatRepository.getByUserAndChat(userId, chatId)
+  )?.lastSeenMessage?.toString();
+
+  return await messageRepository.getUnreadMessagesCount(userId, chatId, lastSeenMessage);
 };
 
 export const send = async (messageData: SendMessageRequest): Promise<SendMessageResponse> => {

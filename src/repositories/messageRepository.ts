@@ -1,7 +1,11 @@
 import { Send } from 'express';
 import { Message } from '../interfaces/models/message';
 import messageModel from '../models/message';
-import { SendMessageRequest, SendMessageResponse } from '../schemas/messageSchemas';
+import {
+  GetMessageResponse,
+  SendMessageRequest,
+  SendMessageResponse,
+} from '../schemas/messageSchemas';
 import { toObjectId } from '../util/objectIdUtil';
 
 export const create = async (messageData: SendMessageRequest): Promise<SendMessageResponse> => {
@@ -11,9 +15,35 @@ export const create = async (messageData: SendMessageRequest): Promise<SendMessa
     select: 'firstName lastName photo',
   });
 };
+export const getAllByChat = async (
+  chatId: string,
+  limit: string,
+  before?: string
+): Promise<GetMessageResponse[]> => {
+  const query = messageModel.find({ chat: chatId }).sort('-_id').limit(parseInt(limit)).populate({
+    path: 'sender',
+    select: 'firstName lastName photo',
+  });
+
+  if (before) query.find({ _id: { $lt: toObjectId(before) } });
+
+  return (await query) as GetMessageResponse[];
+};
 
 export const getById = async (id: string): Promise<Message | null> => {
   return await messageModel.findById(id);
+};
+
+export const getUnreadMessagesCount = async (
+  userId: string,
+  chatId: string,
+  lastSeenMessage?: string
+): Promise<number> => {
+  const query = messageModel.find({ chat: chatId, sender: { $ne: userId } });
+
+  if (lastSeenMessage) query.find({ _id: { $gt: toObjectId(lastSeenMessage) } });
+
+  return (await query).length;
 };
 
 export const updateById = async (
