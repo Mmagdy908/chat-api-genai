@@ -49,9 +49,6 @@ app.use(
 // compress text sent in responses
 app.use(compression());
 
-// body -parser
-app.use(express.json());
-
 // cookie parser
 app.use(cookieParser());
 

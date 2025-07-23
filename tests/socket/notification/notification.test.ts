@@ -5,6 +5,7 @@ import { notificationProducer } from '../../../src/kafka/producer';
 import { setupConsumer } from '../../../src/kafka/consumer';
 import { SocketEvents } from '../../../src/enums/socketEventEnums';
 import { SendNotificationRequest } from '../../../src/schemas/notificationSchemas';
+import { handleNotificationEvents } from '../../../src/socket/handlers/notification';
 
 jest.mock('../../../src/kafka/producer', () => ({
   notificationProducer: jest.fn(),
@@ -28,6 +29,17 @@ describe('Unit Tests - Notification Handling', () => {
       emit: jest.fn(),
     };
     jest.clearAllMocks();
+  });
+
+  test('should register Mark_Notifications_As_Read event listener', () => {
+    // Act
+    handleNotificationEvents(io as Server, socket as Socket);
+
+    // Assert
+    expect(socket.on).toHaveBeenCalledWith(
+      SocketEvents.Mark_Notifications_As_Read,
+      expect.any(Function)
+    );
   });
 
   test('should set up consumer for notifications topic', () => {

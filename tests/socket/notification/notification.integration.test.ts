@@ -21,12 +21,17 @@ import { setupConsumer } from '../../../src/kafka/consumer';
 import { User } from '../../../src/interfaces/models/user';
 import { Types } from 'mongoose';
 import { Notification_Type } from '../../../src/enums/notificationEnums';
+import { handleSocketResponse } from '../../../src/socket/socketUtils';
+import { handleError } from '../../../src/util/appError';
+import { handleNotificationEvents } from '../../../src/socket/handlers/notification';
 
 // Mock dependencies
 jest.mock('../../../src/services/notificationService');
 jest.mock('../../../src/schemas/notificationSchemas');
 jest.mock('../../../src/kafka/producer');
 jest.mock('../../../src/kafka/consumer');
+jest.mock('../../../src/socket/socketUtils');
+jest.mock('../../../src/util/appError');
 
 describe('Integration Tests - Notification Handling', () => {
   let io: Server;
@@ -44,6 +49,7 @@ describe('Integration Tests - Notification Handling', () => {
     });
     io.on(SocketEvents.Connection, (socket) => {
       serverSocket = socket;
+      handleNotificationEvents(io, socket);
     });
   });
 
@@ -238,6 +244,58 @@ describe('Integration Tests - Notification Handling', () => {
       expect(io.to).not.toHaveBeenCalled();
       expect(io.emit).not.toHaveBeenCalled();
       done();
+    });
+  });
+
+  test('should handle Mark_Notifications_As_Read event successfully', (done) => {
+    // Arrange
+    jest.mocked(notificationService.markNotificationsAsRead).mockResolvedValue(undefined);
+    jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
+
+    // Connect client
+    clientSocket = ioClient(`http://localhost:${port}`);
+
+    clientSocket.on('connect', () => {
+      // Act
+      clientSocket.emit(SocketEvents.Mark_Notifications_As_Read, null, (response: any) => {
+        // Assert
+        expect(notificationService.markNotificationsAsRead).toHaveBeenCalledWith('user123');
+        expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), {
+          status: 'success',
+          statusCode: 200,
+          message: 'Successfully marked notifications as read',
+        });
+        expect(response).toEqual({
+          status: 'success',
+          statusCode: 200,
+          message: 'Successfully marked notifications as read',
+        });
+        done();
+      });
+    });
+  });
+
+  test('should handle error in Mark_Notifications_As_Read event', (done) => {
+    // Arrange
+    const error = new Error('Database error');
+    const mockErrorResponse = { status: 'error', statusCode: 500, message: 'Database error' };
+    jest.mocked(notificationService.markNotificationsAsRead).mockRejectedValue(error);
+    jest.mocked(handleError).mockReturnValue(mockErrorResponse);
+    jest.mocked(handleSocketResponse).mockImplementation((cb, response) => cb(response));
+
+    // Connect client
+    clientSocket = ioClient(`http://localhost:${port}`);
+
+    clientSocket.on('connect', () => {
+      // Act
+      clientSocket.emit(SocketEvents.Mark_Notifications_As_Read, null, (response: any) => {
+        // Assert
+        expect(notificationService.markNotificationsAsRead).toHaveBeenCalledWith('user123');
+        expect(handleError).toHaveBeenCalledWith(error);
+        expect(handleSocketResponse).toHaveBeenCalledWith(expect.any(Function), mockErrorResponse);
+        expect(response).toEqual(mockErrorResponse);
+        done();
+      });
     });
   });
 });
