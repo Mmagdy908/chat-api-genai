@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand",
-    "test-specific": "jest tests/socket/notification/notification.integration.test.ts --runInBand --detectOpenHandles",
+    "test-specific": "jest tests/user/integration --runInBand --detectOpenHandles",
     "start": "nodemon src/server.ts",
     "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts"
   },

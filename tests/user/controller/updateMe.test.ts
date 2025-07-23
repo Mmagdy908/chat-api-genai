@@ -31,6 +31,7 @@ describe('updateMe controller', () => {
       url: 'https://example.com/photo.jpg',
     });
     ({ res, next } = getMockRes());
+
     next = jest.fn();
   });
 
@@ -43,17 +44,17 @@ describe('updateMe controller', () => {
     };
     const updatedUser = { ...userData, ...updateData } as User;
 
-    jest.spyOn(userSchema, 'mapToUpdateMeRequest').mockReturnValue(updateData);
+    jest.spyOn(userSchema, 'mapUpdateMeRequest').mockReturnValue(updateData);
     jest.spyOn(userService, 'updateMe').mockResolvedValue(updatedUser);
-    jest.spyOn(userSchema, 'mapToUpdateMeResponse').mockReturnValue(updatedUser);
+    jest.spyOn(userSchema, 'mapUpdateMeResponse').mockReturnValue(updatedUser);
 
     // Act
     await updateMe(req as Request, res as Response, next);
 
     // Assert
-    expect(userSchema.mapToUpdateMeRequest).toHaveBeenCalledWith(req.body);
+    expect(userSchema.mapUpdateMeRequest).toHaveBeenCalledWith(req.body);
     expect(userService.updateMe).toHaveBeenCalledWith(req.user?.id as string, updateData);
-    expect(userSchema.mapToUpdateMeResponse).toHaveBeenCalledWith(updatedUser);
+    expect(userSchema.mapUpdateMeResponse).toHaveBeenCalledWith(updatedUser);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       status: 'success',
@@ -72,11 +73,11 @@ describe('updateMe controller', () => {
     };
     const updatedUser = { ...userData, ...updateData } as User;
 
-    jest.spyOn(userSchema, 'mapToUpdateMeRequest').mockReturnValue(updateData);
+    jest.spyOn(userSchema, 'mapUpdateMeRequest').mockReturnValue(updateData);
     jest.spyOn(userService, 'updateMe').mockImplementation(() => {
       throw new Error();
     });
-    jest.spyOn(userSchema, 'mapToUpdateMeResponse').mockReturnValue(updatedUser);
+    jest.spyOn(userSchema, 'mapUpdateMeResponse').mockReturnValue(updatedUser);
 
     // Act
     await updateMe(req as Request, res as Response, next);

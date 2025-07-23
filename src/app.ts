@@ -53,7 +53,7 @@ app.use(compression());
 app.use(cookieParser());
 
 //sanitize data against nosql injections
-app.use(mongoSanitizer());
+if (ENV_VAR.NODE_ENV !== 'test') app.use(mongoSanitizer());
 
 //prevent parameter pollution
 app.use(hpp());

@@ -5,12 +5,20 @@ import { setupIntegrationTests } from '../../utils/setup';
 import userModel from '../../../src/models/user';
 import { setupUser } from '../../utils/userFactory';
 import { UpdateMeRequest } from '../../../src/schemas/userSchemas';
+import * as uploadMiddleware from '../../../src/middlewares/uploadMiddleware';
 
-jest.mock('../../../src/middlewares/uploadMiddleware');
+// jest.mock('../../../src/middlewares/uploadMiddleware');
 
 describe('POST /update-me', () => {
   setupIntegrationTests();
 
+  // Mock upload middleware
+  jest.spyOn(uploadMiddleware, 'uploadToCloud').mockImplementation(() => (req, res, next) => {
+    next();
+  });
+  jest.spyOn(uploadMiddleware, 'uploadMedia').mockImplementation(() => (req, res, next) => {
+    next();
+  });
   test('should update user data successfully', async () => {
     // Arrange
     const { user, accessToken } = await setupUser({ isVerified: true });
@@ -18,20 +26,6 @@ describe('POST /update-me', () => {
       firstName: 'Updated Name',
       photo: 'https://example.com/photo.jpg',
     };
-
-    // Mock upload middleware
-    jest
-      .spyOn(require('../../../src/middlewares/uploadMiddleware'), 'uploadPhoto')
-      .mockImplementation((req: any, res: any, next: any) => {
-        req.file = { path: 'temp/photo.jpg' };
-        next();
-      });
-    jest
-      .spyOn(require('../../../src/middlewares/uploadMiddleware'), 'uploadToCloud')
-      .mockImplementation((req: any, res: any, next: any) => {
-        req.url = 'https://example.com/photo.jpg';
-        next();
-      });
 
     // Act
     const response = await request(app)
