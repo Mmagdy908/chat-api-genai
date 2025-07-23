@@ -18,13 +18,17 @@ export const create = async (messageData: SendMessageRequest): Promise<SendMessa
 
 export const getAllByChat = async (
   chatId: string,
-  limit: string,
+  limit?: string,
   before?: string
 ): Promise<GetMessageResponse[]> => {
-  const query = messageModel.find({ chat: chatId }).sort('-_id').limit(parseInt(limit)).populate({
-    path: 'sender',
-    select: 'firstName lastName photo',
-  });
+  const query = messageModel
+    .find({ chat: chatId })
+    .sort('-_id')
+    .limit(parseInt(limit || ''))
+    .populate({
+      path: 'sender',
+      select: 'firstName lastName photo',
+    });
 
   if (before) query.find({ _id: { $lt: toObjectId(before) } });
 

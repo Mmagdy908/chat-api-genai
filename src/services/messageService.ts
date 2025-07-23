@@ -33,7 +33,7 @@ const updateMessageStatus = async (chat: Chat, messages: Message[], status: Mess
 
 export const getAllByChat = async (
   chatId: string,
-  limit: string,
+  limit?: string,
   before?: string
 ): Promise<GetMessageResponse[]> => {
   return await messageRepository.getAllByChat(chatId, limit, before);

@@ -12,16 +12,10 @@ import * as chatMiddleware from '../../../src/middlewares/chatMiddleware';
 import { Chat_Type } from '../../../src/enums/chatEnums';
 import { User } from '../../../src/interfaces/models/user';
 import { Chat } from '../../../src/interfaces/models/chat';
+import { mapPopulatedUser } from '../../utils/mappers';
 
 jest.mock('../../../src/middlewares/authMiddleware');
 jest.mock('../../../src/middlewares/chatMiddleware');
-
-const mapPopulatedUser = (user: User) => ({
-  id: user.id,
-  firstName: user.firstName,
-  lastName: user.lastName,
-  photo: user.photo,
-});
 
 describe('POST /api/v1/chats/group', () => {
   setupIntegrationTests();
