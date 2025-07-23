@@ -19,19 +19,25 @@ export const createGroupChat = async (groupChatData: CreateGroupChatRequest): Pr
   return await chat.populate({ path: 'members', select: 'firstName lastName photo' });
 };
 
-export const addGroupChatMember = async (memberId: string, chatId: string) => {
+export const addGroupChatMember = async (
+  memberId: string,
+  chatId: string
+): Promise<Chat | null> => {
   return await chatModel
     .findByIdAndUpdate(chatId, { $push: { members: memberId } }, { new: true })
     .populate({ path: 'members', select: 'firstName lastName photo' });
 };
 
-export const addGroupChatAdmin = async (adminId: string, chatId: string) => {
+export const addGroupChatAdmin = async (adminId: string, chatId: string): Promise<Chat | null> => {
   return await chatModel
     .findByIdAndUpdate(chatId, { $push: { admins: adminId } }, { new: true })
     .populate({ path: 'members', select: 'firstName lastName photo' });
 };
 
-export const removeGroupChatAdmin = async (adminId: string, chatId: string) => {
+export const removeGroupChatAdmin = async (
+  adminId: string,
+  chatId: string
+): Promise<Chat | null> => {
   return await chatModel
     .findByIdAndUpdate(chatId, { $pull: { admins: adminId } }, { new: true })
     .populate({ path: 'members', select: 'firstName lastName photo' });

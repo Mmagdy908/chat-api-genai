@@ -8,12 +8,17 @@ export interface MockChat {
   };
   type?: Chat_Type;
   members?: string[];
+  admins?: string[];
+  owner?: string;
+  lastMessage?: string;
 }
 
 class ChatFactory {
   private defaultChat: MockChat = {
     members: ['685c46356a5d7ff0af63af79', '685c46356a5d7ff0af63af79'],
-    type: Chat_Type.Private,
+    admins: ['685c46356a5d7ff0af63af79'],
+    owner: '685c46356a5d7ff0af63af79',
+    type: Chat_Type.Group,
   };
 
   create(overrides: MockChat = {}): MockChat {
