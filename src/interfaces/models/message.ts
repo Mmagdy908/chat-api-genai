@@ -14,6 +14,7 @@ export interface Message {
     text: string;
     mediaUrl: string;
   };
+  genai: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

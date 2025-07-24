@@ -5,7 +5,6 @@ import { handleSocketResponse } from '../../socket/socketUtils';
 import { handleError } from '../../util/appError';
 import { SocketEvents } from '../../enums/socketEventEnums';
 import { Message_Status } from '../../enums/messageEnums';
-import { messageProducer } from '../../kafka/producer';
 
 export const produceMessage =
   (io: Server, socket: Socket) =>
@@ -14,7 +13,7 @@ export const produceMessage =
       messageData.sender = socket.request.user.id;
       const mappedMessageData = messageSchemas.mapSendRequest(messageData);
 
-      await messageProducer(mappedMessageData);
+      await messageService.produceMessage(mappedMessageData);
 
       const response = {
         status: 'success',
@@ -41,6 +40,7 @@ export const sendMessage =
       // };
 
       // handleSocketResponse(callback, response);
+
       io.to(`chat:${message.chat.toString()}`).emit(
         SocketEvents.Message,
         messageSchemas.mapSendResponse(message)

@@ -14,7 +14,7 @@ export interface Chat {
   };
   type: Chat_Type;
   members: (Types.ObjectId | User)[];
-  lastMessage: Types.ObjectId | Message;
+  lastMessage?: Types.ObjectId | Message;
   createdAt: Date;
   updatedAt: Date;
 }

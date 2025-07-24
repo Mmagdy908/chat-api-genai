@@ -3,12 +3,15 @@ import { Message } from '../interfaces/models/message';
 import messageModel from '../models/message';
 import {
   GetMessageResponse,
+  SendGenaiMessageRequest,
   SendMessageRequest,
   SendMessageResponse,
 } from '../schemas/messageSchemas';
 import { toObjectId } from '../util/objectIdUtil';
 
-export const create = async (messageData: SendMessageRequest): Promise<SendMessageResponse> => {
+export const create = async (
+  messageData: SendMessageRequest | SendGenaiMessageRequest
+): Promise<SendMessageResponse> => {
   const message = await messageModel.create(messageData);
   return await message.populate({
     path: 'sender',
@@ -37,6 +40,15 @@ export const getAllByChat = async (
 
 export const getById = async (id: string): Promise<Message | null> => {
   return await messageModel.findById(id);
+};
+
+export const appendMessage = async (id: string, append: string) => {
+  // return await messageModel.findById(id);
+  return await messageModel.updateOne({ _id: id }, [
+    {
+      $set: { 'content.text': { $concat: ['$content.text', append] } },
+    },
+  ]);
 };
 
 export const getUnreadMessagesCount = async (

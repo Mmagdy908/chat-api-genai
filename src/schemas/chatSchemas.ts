@@ -89,7 +89,9 @@ export const mapGetResponse = (chat: GetChatResponse) =>
       lastName: member.lastName,
       photo: member.photo,
     })),
-    lastMessage: chat.lastMessage ? messageSchemas.mapSendResponse(chat.lastMessage) : undefined,
+    lastMessage: chat.lastMessage
+      ? messageSchemas.mapGetResponse(chat.lastMessage as messageSchemas.GetMessageResponse)
+      : undefined,
     createdAt: chat.createdAt,
     updatedAt: chat.updatedAt,
   });

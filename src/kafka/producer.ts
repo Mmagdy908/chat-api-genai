@@ -1,5 +1,7 @@
 import { kafka } from '../config/kafka';
-import { SendMessageRequest } from '../schemas/messageSchemas';
+import { KafkaTopics } from '../enums/kafkaEnums';
+import { SendGenaiRequest } from '../schemas/genaiSchemas';
+import { SendGenaiMessageRequest, SendMessageRequest } from '../schemas/messageSchemas';
 import { SendNotificationRequest } from '../schemas/notificationSchemas';
 
 const producer = kafka.producer();
@@ -8,16 +10,25 @@ export const connectProducer = async () => {
   await producer.connect();
 };
 
-export const messageProducer = async (messageData: SendMessageRequest) => {
+export const messageProducer = async (
+  messageData: SendMessageRequest | SendGenaiMessageRequest
+) => {
   await producer.send({
-    topic: 'messages',
+    topic: KafkaTopics.Messages,
     messages: [{ key: messageData.chat, value: JSON.stringify(messageData) }],
   });
 };
 
 export const notificationProducer = async (notificationData: SendNotificationRequest) => {
   await producer.send({
-    topic: 'notifications',
+    topic: KafkaTopics.Notifications,
     messages: [{ value: JSON.stringify(notificationData) }],
+  });
+};
+
+export const genaiProducer = async (genaiRequestData: SendGenaiRequest) => {
+  await producer.send({
+    topic: KafkaTopics.Genai,
+    messages: [{ key: genaiRequestData.chatId, value: JSON.stringify(genaiRequestData) }],
   });
 };

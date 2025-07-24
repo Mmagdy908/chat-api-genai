@@ -12,6 +12,7 @@ export enum SocketEvents {
   Friends_Status = 'friends_status',
   Notification = 'notification',
   Mark_Notifications_As_Read = 'mark_notifications_as_read',
+  Genai_Response_Append = 'genai_response_append',
   Disconnecting = 'disconnecting',
   Disconnect = 'disconnect',
 }

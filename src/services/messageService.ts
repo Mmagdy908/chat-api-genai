@@ -2,16 +2,19 @@ import { Message } from '../interfaces/models/message';
 import * as messageRepository from '../repositories/messageRepository';
 import * as chatRepository from '../repositories/chatRepository';
 import * as userChatRepository from '../repositories/userChatRepository';
+import * as genaiService from '../services/genaiService';
 import { toObjectId } from '../util/objectIdUtil';
 import { AppError } from '../util/appError';
 import {
   GetMessageResponse,
+  SendGenaiMessageRequest,
   SendMessageRequest,
   SendMessageResponse,
 } from '../schemas/messageSchemas';
 import { User_Chat_Modification_Field } from '../enums/userChatEnums';
-import { Message_Status } from '../enums/messageEnums';
+import { Message_Status, Message_Type } from '../enums/messageEnums';
 import { Chat } from '../interfaces/models/chat';
+import { genaiProducer, messageProducer } from '../kafka/producer';
 
 const updateMessageStatus = async (chat: Chat, messages: Message[], status: Message_Status) => {
   const field = status === Message_Status.Seen ? 'seenBy' : 'deliveredTo';
@@ -47,7 +50,13 @@ export const getUnreadMessagesCount = async (userId: string, chatId: string): Pr
   return await messageRepository.getUnreadMessagesCount(userId, chatId, lastSeenMessage);
 };
 
-export const send = async (messageData: SendMessageRequest): Promise<SendMessageResponse> => {
+export const produceMessage = async (messageData: SendMessageRequest) => {
+  await messageProducer(messageData);
+};
+
+export const send = async (
+  messageData: SendMessageRequest | SendGenaiMessageRequest
+): Promise<SendMessageResponse> => {
   // get chat
   const chat = await chatRepository.getById(messageData.chat.toString(), {
     path: 'lastMessage',
@@ -58,7 +67,7 @@ export const send = async (messageData: SendMessageRequest): Promise<SendMessage
   if (!chat) throw new AppError(404, 'Chat not found');
 
   // check if sender is a member in chat
-  if (!chat.members.includes(toObjectId(messageData.sender)))
+  if ('sender' in messageData && !chat.members.includes(toObjectId(messageData.sender)))
     throw new AppError(403, 'User is not a member of this chat');
 
   // create message
@@ -71,6 +80,39 @@ export const send = async (messageData: SendMessageRequest): Promise<SendMessage
     await chatRepository.updateById(message.chat.toString(), {
       lastMessage: toObjectId(message.id),
     });
+  }
+
+  // handle genai response
+  if ('genai' in messageData && messageData.genai) {
+    await genaiService.generateGenaiResponse({
+      text: messageData.prompt.text,
+      mediaUrl: messageData.prompt.mediaUrl,
+      chatId: messageData.chat,
+      messageId: message.id,
+      genaiStreaming: messageData.genaiStreaming || false,
+    });
+  }
+
+  // check if mentioning genai
+  if (messageData.content.text?.match(/@genai\b/)) {
+    await messageProducer({
+      chat: chat.id,
+      content: {
+        contentType: Message_Type.Text,
+        text: '',
+      },
+      genai: true,
+      prompt: {
+        text: messageData.content.text?.replace('@genai', ''),
+        mediaUrl: messageData.content.mediaUrl,
+      },
+      genaiStreaming: messageData.genaiStreaming,
+    });
+    // await genaiProducer({
+    //   messageType: message.content.contentType,
+    //   chat: message.chat.toString(),
+    //   content: message.content,
+    // });
   }
 
   return message;
@@ -144,4 +186,8 @@ export const markMessagesAsSeen = async (userId: string, chatId: string) => {
 
   // 6) return all marked messages grouped by sender id
   return Object.groupBy(seenMessages, (message: Message) => message.sender.toString());
+};
+
+export const appendMessageText = async (id: string, append: string) => {
+  return await messageRepository.appendMessage(id, append);
 };

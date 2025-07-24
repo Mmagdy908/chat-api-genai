@@ -12,7 +12,7 @@ const messageSchema = new Schema<Message>(
     sender: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'A message must have a sender'],
+      // required: [true, 'A message must have a sender'],
     },
     status: {
       type: String,
@@ -46,6 +46,10 @@ const messageSchema = new Schema<Message>(
       },
       text: String,
       mediaUrl: String,
+    },
+    genai: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true, toObject: { virtuals: true }, toJSON: { virtuals: true } }

@@ -65,22 +65,22 @@ let answer = '';
 
 // ###  with dynamic think and streaming
 
-// async function main() {
-//   const response = await ai.models.generateContentStream({
-//     model: 'gemini-2.5-flash',
-//     contents: prompt,
-//     config: {
-//       thinkingConfig: {
-//         // Turn on dynamic thinking:
-//         thinkingBudget: -1,
-//       },
-//     },
-//   });
+async function main() {
+  const response = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: 'Tell how to solve tower of hanoi ',
+    config: {
+      thinkingConfig: {
+        // Turn on dynamic thinking:
+        thinkingBudget: -1,
+      },
+    },
+  });
 
-//   for await (const chunk of response) {
-//     console.log(chunk.text);
-//   }
-// }
+  for await (const chunk of response) {
+    console.log(chunk.text);
+  }
+}
 
 // ###  with multimedia (image, pdf, video)
 
@@ -112,31 +112,31 @@ let answer = '';
 //   }
 // }
 
-async function main() {
-  try {
-    const fileUrl =
-      'https://res.cloudinary.com/dqwk3uad1/video/upload/v1753256288/Facebook_2_otjyn7.mp4';
+// async function main() {
+//   try {
+//     const fileUrl =
+//       'https://res.cloudinary.com/dqwk3uad1/video/upload/v1753256288/Facebook_2_otjyn7.mp4';
 
-    const response = await fetch(fileUrl);
-    const fileArrayBuffer = await response.arrayBuffer();
-    const base64FileData = Buffer.from(fileArrayBuffer).toString('base64');
+//     const response = await fetch(fileUrl);
+//     const fileArrayBuffer = await response.arrayBuffer();
+//     const base64FileData = Buffer.from(fileArrayBuffer).toString('base64');
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [
-        // {
-        //   inlineData: {
-        //     mimeType: response.headers.get('content-type') as string,
-        //     data: base64FileData,
-        //   },
-        // },
-        { text: 'احكي عن قصة نجاح ملهمة' },
-      ],
-    });
+//     const result = await ai.models.generateContent({
+//       model: 'gemini-2.5-flash',
+//       contents: [
+//         // {
+//         //   inlineData: {
+//         //     mimeType: response.headers.get('content-type') as string,
+//         //     data: base64FileData,
+//         //   },
+//         // },
+//         { text: 'احكي عن قصة نجاح ملهمة' },
+//       ],
+//     });
 
-    console.log(result.text);
-  } catch (err) {
-    console.log(err);
-  }
-}
+//     console.log(result.text);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
 main();
