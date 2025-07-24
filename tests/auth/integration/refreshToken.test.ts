@@ -97,7 +97,7 @@ describe('POST /refresh-token', () => {
     expect(response.body.message).toContain('Invalid Refresh Token');
   });
 
-  test('should return 400 if user does not exist', async () => {
+  test('should return 404 if user does not exist', async () => {
     // Arrange
     const nonExistentUserId = new userModel().id;
     const deviceId = 'test-device-id';
@@ -110,7 +110,7 @@ describe('POST /refresh-token', () => {
     };
 
     // Act
-    const response = await request(app).post('/api/v1/refresh-token').send(refreshData).expect(400);
+    const response = await request(app).post('/api/v1/refresh-token').send(refreshData).expect(404);
 
     // Assert
     expect(response.body.status).toBe('fail');

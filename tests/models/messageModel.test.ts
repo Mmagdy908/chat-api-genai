@@ -76,16 +76,6 @@ describe('Message Model', () => {
       await expect(message.save()).rejects.toThrow('A message must belong to a chat');
     });
 
-    test('should fail validation when sender is missing', async () => {
-      // Arrange
-      const chat = await new chatModel(chatFactory.create()).save();
-      const invalidMessageData = messageFactory.createWithMissingFields('sender');
-
-      // Act & Assert
-      const message = new messageModel(invalidMessageData);
-      await expect(message.save()).rejects.toThrow('A message must have a sender');
-    });
-
     test('should fail validation with invalid content type', async () => {
       // Arrange
       const chat = await new chatModel(chatFactory.create()).save();

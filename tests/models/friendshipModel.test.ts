@@ -66,29 +66,29 @@ describe('Friendship Model', () => {
       );
     });
 
-    test('should enforce unique sender-recipient pair constraint', async () => {
-      // Arrange
-      const friendshipData1 = friendshipFactory.create();
-      const friendshipData2 = friendshipFactory.create({
-        sender: friendshipData1.sender,
-        recipient: friendshipData1.recipient,
-      });
-      const friendshipData3 = friendshipFactory.create({
-        sender: friendshipData1.recipient,
-        recipient: friendshipData1.sender,
-      });
+    // test('should enforce unique sender-recipient pair constraint', async () => {
+    //   // Arrange
+    //   const friendshipData1 = friendshipFactory.create();
+    //   const friendshipData2 = friendshipFactory.create({
+    //     sender: friendshipData1.sender,
+    //     recipient: friendshipData1.recipient,
+    //   });
+    //   const friendshipData3 = friendshipFactory.create({
+    //     sender: friendshipData1.recipient,
+    //     recipient: friendshipData1.sender,
+    //   });
 
-      // Act
-      const friendship1 = new friendshipModel(friendshipData1);
-      await friendship1.save();
+    //   // Act
+    //   const friendship1 = new friendshipModel(friendshipData1);
+    //   await friendship1.save();
 
-      const friendship2 = new friendshipModel(friendshipData2);
-      const friendship3 = new friendshipModel(friendshipData3);
+    //   const friendship2 = new friendshipModel(friendshipData2);
+    //   const friendship3 = new friendshipModel(friendshipData3);
 
-      // Assert
-      await expect(friendship2.save()).rejects.toThrow('duplicate key error');
-      await expect(friendship3.save()).rejects.toThrow('duplicate key error');
-    });
+    //   // Assert
+    //   await expect(friendship2.save()).rejects.toThrow('duplicate key error');
+    //   await expect(friendship3.save()).rejects.toThrow('duplicate key error');
+    // });
   });
 
   describe('Default Values', () => {

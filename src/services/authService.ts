@@ -107,7 +107,7 @@ export const refreshToken = async (
   // 4) check if user exists
   const user = await userRepository.getVerifiedById(payload.userId);
 
-  if (!user) throw new AppError(400, 'User does not exist');
+  if (!user) throw new AppError(404, 'User does not exist');
 
   // 5) generate access token
   const newAccessToken = generateAccessToken(userId);

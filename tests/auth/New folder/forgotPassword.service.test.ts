@@ -12,11 +12,12 @@ jest.mock('../../../src/util/authUtil');
 describe('authService - forgotPassword', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('should generate OTP and send reset email for existing user', async () => {
     // Arrange
-    const userData = userFactory.create();
+    const userData = userFactory.create({ isVerified: true });
     const userMock = new userModel(userData);
     const email = userMock.email;
     const resetOTP = '123456';
@@ -38,7 +39,7 @@ describe('authService - forgotPassword', () => {
 
   test('should not throw error for non-existent user (prevent email enumeration)', async () => {
     // Arrange
-    const userData = userFactory.create();
+    const userData = userFactory.create({ isVerified: true });
     const email = userData.email as string;
 
     jest.spyOn(userRepository, 'getByEmail').mockResolvedValue(null);

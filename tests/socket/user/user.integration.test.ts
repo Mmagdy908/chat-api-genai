@@ -22,6 +22,7 @@ import { User } from '../../../src/interfaces/models/user';
 import ENV_VAR from '../../../src/config/envConfig';
 import { Chat } from '../../../src/interfaces/models/chat';
 import * as userSocketController from '../../../src/controllers/socket/userSocketController';
+import { GetChatResponse } from '../../../src/schemas/chatSchemas';
 
 // Mock dependencies
 jest.mock('../../../src/services/userStatusService');
@@ -75,7 +76,7 @@ describe('Integration Tests - handleUserEvents', () => {
   test('should handle connect event and broadcast status', (done) => {
     // Arrange
     const userId = 'user123';
-    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }, { id: 'chat2' }] as GetChatResponse[];
     const mockFriends = ['friend1', 'friend2'];
     const mockStatus = { status: User_Status.Offline, lastActive: new Date() };
     const mockFriendsStatuses = [
@@ -136,7 +137,7 @@ describe('Integration Tests - handleUserEvents', () => {
   test('should handle Heartbeat event and update status', (done) => {
     // Arrange
     const userId = 'user123';
-    const mockChats = [{ id: 'chat1' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }] as GetChatResponse[];
     const mockStatus = { status: User_Status.Offline, lastActive: new Date() };
     jest.mocked(userStatusService.getUserStatus).mockResolvedValue(mockStatus);
     jest.mocked(userStatusService.setUserStatus).mockResolvedValue(undefined);
@@ -173,7 +174,7 @@ describe('Integration Tests - handleUserEvents', () => {
   test('should handle Disconnect event and update status after grace period', (done) => {
     // Arrange
     const userId = 'user123';
-    const mockChats = [{ id: 'chat1' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }] as GetChatResponse[];
     const mockStatus = { status: User_Status.Online, lastActive: new Date() };
     jest.mocked(userStatusService.removeOnlineSocket).mockResolvedValue(undefined);
     jest.mocked(userStatusService.getOnlineSocketsCount).mockResolvedValue(0);
@@ -209,7 +210,7 @@ describe('Integration Tests - handleUserEvents', () => {
   test('should handle key expired event and update status to Idle', (done) => {
     // Arrange
     const userId = 'user456';
-    const mockChats = [{ id: 'chat1' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }] as GetChatResponse[];
     const mockStatus = { status: User_Status.Online, lastActive: new Date() };
     jest.mocked(userStatusService.getOnlineSocketsCount).mockResolvedValue(1);
     jest.mocked(userStatusService.getUserStatus).mockResolvedValue(mockStatus);
@@ -244,7 +245,7 @@ describe('Integration Tests - handleUserEvents', () => {
   test('should not broadcast status if unchanged', (done) => {
     // Arrange
     const userId = 'user123';
-    const mockChats = [{ id: 'chat1' }] as Chat[];
+    const mockChats = [{ id: 'chat1' }] as GetChatResponse[];
     const mockStatus = { status: User_Status.Online, lastActive: new Date() };
     jest.mocked(userStatusService.addOnlineSocket).mockResolvedValue(undefined);
     jest.mocked(userStatusService.getUserStatus).mockResolvedValue(mockStatus);

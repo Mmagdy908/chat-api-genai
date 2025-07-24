@@ -36,6 +36,11 @@ jest.mock('../../../src/util/appError');
 jest.mock('../../../src/kafka/producer');
 jest.mock('../../../src/kafka/consumer');
 
+jest
+  .mocked(messageService.produceMessage)
+  .mockImplementation(
+    async (messageData: messageSchemas.SendMessageRequest) => await messageProducer(messageData)
+  );
 describe('Integration Tests - handleMessageEvents', () => {
   let io: Server;
   let server: ReturnType<typeof createServer>;
@@ -245,7 +250,8 @@ describe('Integration Tests - handleMessageEvents', () => {
       content: mappedMessageData.content,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    } as messageSchemas.SendMessageResponse;
+
     const mockResponse = { ...mockMessage };
     jest.mocked(messageService.send).mockResolvedValue(mockMessage);
     jest.mocked(messageSchemas.mapSendResponse).mockReturnValue(mockResponse);

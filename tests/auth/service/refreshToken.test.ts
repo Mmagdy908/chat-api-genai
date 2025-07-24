@@ -33,7 +33,7 @@ describe('authService - refreshToken', () => {
 
     jest.mocked(authUtil.verifyToken).mockResolvedValue(tokenPayload);
     jest.mocked(authUtil.retrieveRefreshToken).mockResolvedValue(oldRefreshToken);
-    jest.mocked(userRepository.getById).mockResolvedValue(userMock);
+    jest.mocked(userRepository.getVerifiedById).mockResolvedValue(userMock);
     jest.mocked(authUtil.generateAccessToken).mockReturnValue(newAccessToken);
     jest.mocked(authUtil.generateRefreshToken).mockReturnValue(newRefreshToken);
     jest.mocked(authUtil.storeRefreshToken).mockResolvedValue(undefined);
@@ -44,7 +44,7 @@ describe('authService - refreshToken', () => {
     // Assert
     expect(authUtil.verifyToken).toHaveBeenCalledWith(oldRefreshToken);
     expect(authUtil.retrieveRefreshToken).toHaveBeenCalledWith(userId, deviceId);
-    expect(userRepository.getById).toHaveBeenCalledWith(userId);
+    expect(userRepository.getVerifiedById).toHaveBeenCalledWith(userId);
     expect(authUtil.generateAccessToken).toHaveBeenCalledWith(userId);
     expect(authUtil.generateRefreshToken).toHaveBeenCalledWith(userId, deviceId);
     expect(authUtil.storeRefreshToken).toHaveBeenCalledWith(userId, deviceId, newRefreshToken);
@@ -68,7 +68,7 @@ describe('authService - refreshToken', () => {
 
     expect(authUtil.verifyToken).toHaveBeenCalledWith(oldRefreshToken);
     expect(authUtil.retrieveRefreshToken).not.toHaveBeenCalled();
-    expect(userRepository.getById).not.toHaveBeenCalled();
+    expect(userRepository.getVerifiedById).not.toHaveBeenCalled();
   });
 
   test('should throw 400 error if retrieved refresh token does not match provided token', async () => {
@@ -95,7 +95,7 @@ describe('authService - refreshToken', () => {
 
     expect(authUtil.verifyToken).toHaveBeenCalledWith(oldRefreshToken);
     expect(authUtil.retrieveRefreshToken).toHaveBeenCalledWith(userId, deviceId);
-    expect(userRepository.getById).not.toHaveBeenCalled();
+    expect(userRepository.getVerifiedById).not.toHaveBeenCalled();
   });
 
   test('should throw 400 error if user ID in payload does not match provided user ID', async () => {
@@ -121,10 +121,10 @@ describe('authService - refreshToken', () => {
 
     expect(authUtil.verifyToken).toHaveBeenCalledWith(oldRefreshToken);
     expect(authUtil.retrieveRefreshToken).toHaveBeenCalledWith(userId, deviceId);
-    expect(userRepository.getById).not.toHaveBeenCalled();
+    expect(userRepository.getVerifiedById).not.toHaveBeenCalled();
   });
 
-  test('should throw 400 error if user does not exist', async () => {
+  test('should throw 404 error if user does not exist', async () => {
     // Arrange
     const userId = 'user123';
     const deviceId = 'device456';
@@ -139,16 +139,16 @@ describe('authService - refreshToken', () => {
 
     jest.mocked(authUtil.verifyToken).mockResolvedValue(tokenPayload);
     jest.mocked(authUtil.retrieveRefreshToken).mockResolvedValue(oldRefreshToken);
-    jest.mocked(userRepository.getById).mockResolvedValue(null);
+    jest.mocked(userRepository.getVerifiedById).mockResolvedValue(null);
 
     // Act & Assert
     await expect(refreshToken(userId, oldRefreshToken)).rejects.toThrow(
-      new AppError(400, 'User does not exist')
+      new AppError(404, 'User does not exist')
     );
 
     expect(authUtil.verifyToken).toHaveBeenCalledWith(oldRefreshToken);
     expect(authUtil.retrieveRefreshToken).toHaveBeenCalledWith(userId, deviceId);
-    expect(userRepository.getById).toHaveBeenCalledWith(userId);
+    expect(userRepository.getVerifiedById).toHaveBeenCalledWith(userId);
     expect(authUtil.generateAccessToken).not.toHaveBeenCalled();
   });
 });

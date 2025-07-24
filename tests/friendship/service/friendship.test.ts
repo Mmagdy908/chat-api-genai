@@ -37,7 +37,7 @@ describe('Friendship Service', () => {
 
   describe('send', () => {
     test('should send a friend request successfully', async () => {
-      jest.mocked(userRepository.getById).mockResolvedValue(recipient);
+      jest.mocked(userRepository.getVerifiedById).mockResolvedValue(recipient);
       jest.mocked(friendshipRepository.getBySenderRecipientId).mockResolvedValue(null);
       jest.mocked(notificationProducer);
 
@@ -51,7 +51,7 @@ describe('Friendship Service', () => {
 
       const result = await friendshipService.send(sender.id.toString(), recipient.id.toString());
 
-      expect(userRepository.getById).toHaveBeenCalledWith(recipient.id.toString());
+      expect(userRepository.getVerifiedById).toHaveBeenCalledWith(recipient.id.toString());
       expect(friendshipRepository.getBySenderRecipientId).toHaveBeenCalledWith(
         sender.id.toString(),
         recipient.id.toString()
@@ -79,7 +79,7 @@ describe('Friendship Service', () => {
     });
 
     test('should throw 404 error if recipient is not found', async () => {
-      jest.mocked(userRepository.getById).mockResolvedValue(null);
+      jest.mocked(userRepository.getVerifiedById).mockResolvedValue(null);
 
       await expect(friendshipService.send(sender.id, recipient.id)).rejects.toThrow(
         new AppError(404, 'This recipient is not found')
@@ -87,7 +87,7 @@ describe('Friendship Service', () => {
     });
 
     test('should throw 400 error if friendship already exists', async () => {
-      jest.mocked(userRepository.getById).mockResolvedValue(recipient);
+      jest.mocked(userRepository.getVerifiedById).mockResolvedValue(recipient);
       jest.mocked(friendshipRepository.getBySenderRecipientId).mockResolvedValue({} as any);
       jest.mocked(notificationProducer);
 

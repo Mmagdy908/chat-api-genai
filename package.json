@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest --runInBand",
-    "test-specific": "jest tests/notification --runInBand --detectOpenHandles",
+    "test": "jest tests --runInBand",
+    "test-specific": "jest tests/friendship --runInBand --detectOpenHandles",
     "start": "nodemon src/server.ts",
     "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts"
   },
