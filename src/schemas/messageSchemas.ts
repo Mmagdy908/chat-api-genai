@@ -129,16 +129,20 @@ export const getMessageResponseSchema = z.object({
     text: z.string().optional(),
     mediaUrl: z.string().optional(),
   }),
-  deliveredTo: z.array(
-    z.custom<Types.ObjectId>().refine((value) => Types.ObjectId.isValid(value), {
-      message: 'Invalid id format',
-    })
-  ),
-  seenBy: z.array(
-    z.custom<Types.ObjectId>().refine((value) => Types.ObjectId.isValid(value), {
-      message: 'Invalid id format',
-    })
-  ),
+  deliveredTo: z
+    .array(
+      z.custom<Types.ObjectId>().refine((value) => Types.ObjectId.isValid(value), {
+        message: 'Invalid id format',
+      })
+    )
+    .optional(),
+  seenBy: z
+    .array(
+      z.custom<Types.ObjectId>().refine((value) => Types.ObjectId.isValid(value), {
+        message: 'Invalid id format',
+      })
+    )
+    .optional(),
   genai: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -175,8 +179,8 @@ export const mapSendResponse = (message: SendMessageResponse) =>
     updatedAt: message.updatedAt,
   });
 
-export const mapGetResponse = (message: GetMessageResponse) =>
-  getMessageResponseSchema.parse({
+export const mapGetResponse = (message: GetMessageResponse) => {
+  return getMessageResponseSchema.parse({
     id: message.id,
     chat: message.chat,
     sender: message.genai
@@ -193,9 +197,10 @@ export const mapGetResponse = (message: GetMessageResponse) =>
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
   });
+};
 
-export const mapGetSenderMessageResponse = (message: GetMessageResponse) =>
-  getMessageResponseSchema.parse({
+export const mapGetSenderMessageResponse = (message: GetMessageResponse) => {
+  return getMessageResponseSchema.parse({
     id: message.id,
     chat: message.chat,
     sender: {
@@ -206,9 +211,10 @@ export const mapGetSenderMessageResponse = (message: GetMessageResponse) =>
     },
     status: message.status,
     content: message.content,
-    deliverTo: message.deliveredTo,
+    deliveredTo: message.deliveredTo,
     seenBy: message.seenBy,
     genai: message.genai,
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
   });
+};

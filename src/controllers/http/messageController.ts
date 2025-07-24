@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import * as messageService from '../../services/messageService';
 import catchAsync from '../../util/catchAsync';
-import { GetMessageResponse, mapGetResponse } from '../../schemas/messageSchemas';
+import {
+  GetMessageResponse,
+  mapGetResponse,
+  mapGetSenderMessageResponse,
+} from '../../schemas/messageSchemas';
 
 export const getAllMessages = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -11,9 +15,16 @@ export const getAllMessages = catchAsync(
       req.query.before as string
     );
 
+    console.log(messages);
     res.status(200).json({
       status: 'success',
-      data: { messages: messages.map((message: GetMessageResponse) => mapGetResponse(message)) },
+      data: {
+        messages: messages.map((message: GetMessageResponse) =>
+          message.sender.id === req.user.id
+            ? mapGetSenderMessageResponse(message)
+            : mapGetResponse(message)
+        ),
+      },
       results: messages.length,
       message: 'Messages are fetched successfully',
     });
