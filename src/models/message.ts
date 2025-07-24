@@ -39,7 +39,7 @@ const messageSchema = new Schema<Message>(
       contentType: {
         type: String,
         enum: {
-          values: ['Text', 'Image', 'Video', 'Audio', 'File'],
+          values: ['Text', 'Image', 'Video', 'Audio', 'Document'],
           message: 'Message type must be either Text, Image, Video, Audio or File',
         },
         required: [true, 'A message must have a type'],

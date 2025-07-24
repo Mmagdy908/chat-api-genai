@@ -13,6 +13,7 @@ export enum SocketEvents {
   Notification = 'notification',
   Mark_Notifications_As_Read = 'mark_notifications_as_read',
   Genai_Response_Append = 'genai_response_append',
+  Custom_Error = 'custom_error',
   Disconnecting = 'disconnecting',
   Disconnect = 'disconnect',
 }

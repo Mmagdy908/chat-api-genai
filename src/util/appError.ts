@@ -1,3 +1,4 @@
+import { ApiError } from '@google/genai';
 import { ZodError } from 'zod/v4';
 
 export class AppError extends Error {
@@ -32,6 +33,10 @@ export const handleError = (err: any) => {
         400,
         `(${JSON.parse(err.message)[0].path[0]}) ${JSON.parse(err.message)[0].message}`
       );
+    else if (err instanceof ApiError) {
+      const { code, message } = JSON.parse(err.message).error;
+      error = new AppError(code, message);
+    }
   } catch {}
 
   return error;
