@@ -2,7 +2,7 @@
   "name": "chat-app-api",
   "version": "1.0.0",
   "description": "A chat app API using Typescript, Express and Mongodb",
-  "main": "index.js",
+  "main": "src/server.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest tests --runInBand --coverage",
