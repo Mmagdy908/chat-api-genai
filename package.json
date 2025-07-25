@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "jest tests --runInBand --coverage",
     "test-specific": "jest tests/friendship --runInBand --detectOpenHandles",
-    "start": "SET NODE_ENV=production && pm2-runtime start  ecosystem.config.js --env production",
+    "start": "SET NODE_ENV=production && pm2-runtime start  ./dist/src/server.js -i 5",
     "dev": "nodemon src/server.ts",
     "prod": "SET NODE_ENV=production&&nodemon src/server.ts"
   },
