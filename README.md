@@ -124,6 +124,6 @@ For support or questions, open an issue or email: **\[[Email](mailto:ymmagdyfofo
 
 ## 📝 License
 
-MIT License © \[Mohamed Magdy]
+MIT License © Mmagdy908
 
 ---
