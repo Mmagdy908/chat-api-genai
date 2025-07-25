@@ -82,7 +82,8 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 
 ## 📄 API Documentation
 
-🔗 [Postman Collection](https://documenter.getpostman.com/view/41198842/2sB34oBxMZ)
+🔗 [Postman Collection](https://documenter.getpostman.com/view/41198842/2sB34oBxMZ).
+
 ---
 
 ## 🚀 Live Deployment
