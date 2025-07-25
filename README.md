@@ -50,12 +50,12 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 * Live conversation updates
 * Real-time friend request notifications
 
-### 🧠 GenAI Integration
-
-* Mention `@genai` in a message to activate AI assistant
-* Accepts text, images, videos, audio, PDFs
-* Returns intelligent, text-only responses
-* Supports immediate or streaming replies
+### 🤖 GenAI Integration (Google Gemini)
+- Integrated with **Google Gemini API**
+- Mention `@genai` in any message to activate the AI assistant
+- Accepts text, images, videos, audio, PDFs
+- Responds intelligently in text
+- Supports immediate or streaming replies
 
 ### 📁 Media & Infrastructure
 
