@@ -1,10 +1,6 @@
-Sure! Here's a cleaner version of your `README.md` without using the word "optional", and with a **catchy project name** suggestion:
+# Scalable Real-Time Chat API with GenAI Integration
 
----
-
-# 💬 **NovaChat API** – Scalable Real-Time Chat API with GenAI Integration
-
-NovaChat API is a powerful, scalable backend API for real-time chat applications built with **Node.js**, **TypeScript**, **Kafka**, **Redis**, **Socket.IO**, and **MongoDB**. It supports private/group messaging, live presence, friendship handling, and intelligent responses using GenAI.
+A comprehensive real-time chat application built with **Node.js**, **TypeScript**, **Kafka**, **Redis**, **Socket.IO**, and **MongoDB**. It supports private/group messaging, live presence, friendship handling, and intelligent responses using GenAI.
 
 ---
 
@@ -68,6 +64,7 @@ NovaChat API is a powerful, scalable backend API for real-time chat applications
 * Multi-device login synchronization
 * Input validation using Zod
 * Scalable architecture with PM2 + Socket.IO adapter
+* Unit & Integration Testing
 * 95% test coverage using Jest and Supertest
 
 ---
@@ -82,43 +79,24 @@ NovaChat API is a powerful, scalable backend API for real-time chat applications
 
 ---
 
-## 📂 Project Structure
-
-```bash
-src/
-├── config/
-├── controllers/
-├── middleware/
-├── models/
-├── repositories/
-├── routes/
-├── services/
-├── sockets/
-├── utils/
-└── tests/
-```
-
----
 
 ## 📄 API Documentation
 
-* **Postman Collection:** \[Insert Link Here]
-* **Socket.IO Events Doc:** \[Insert Link Here]
+* **Postman Collection:** \[https://documenter.getpostman.com/view/41198842/2sB34oBxMZ]
 
 ---
 
 ## 🚀 Live Deployment
 
 * **Backend URL:** \[Insert Deployment Link Here]
-* **API Docs (if Swagger or ReDoc):** \[Insert Link Here]
 
 ---
 
 ## 🧪 Running Locally
 
 ```bash
-git clone https://github.com/your-username/novachat-api.git
-cd novachat-api
+git clone https://github.com/Mmagdy908/chat-app-api.git
+cd chat-app-api
 npm install
 
 # Copy and fill environment variables
@@ -146,8 +124,6 @@ For support or questions, open an issue or email: **\[[your-email@example.com](m
 
 ## 📝 License
 
-MIT License © \[Your Name]
+MIT License © \[Mohamed Magdy]
 
 ---
-
-Would you like me to generate `.env.example` or give a stub for the Postman or socket event docs as well?
