@@ -41,6 +41,11 @@ const envSchema = z.object({
 
   GEMINI_API_KEY: z.string(),
   GENAI_MODEL: z.string(),
+
+  KAFKA_BROKER: z.string(),
+  KAFKA_MECHANISM: z.string(),
+  KAFKA_USERNAME: z.string(),
+  KAFKA_PASSWORD: z.string(),
 });
 
 export default envSchema.parse({
@@ -82,4 +87,9 @@ export default envSchema.parse({
 
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   GENAI_MODEL: process.env.GENAI_MODEL,
+
+  KAFKA_BROKER: process.env.KAFKA_BROKER,
+  KAFKA_MECHANISM: process.env.KAFKA_MECHANISM,
+  KAFKA_USERNAME: process.env.KAFKA_USERNAME,
+  KAFKA_PASSWORD: process.env.KAFKA_PASSWORD,
 });

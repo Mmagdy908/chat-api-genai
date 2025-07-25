@@ -1,5 +1,6 @@
 import { genaiProducer } from '../kafka/producer';
 import { GoogleGenAI, ContentListUnion } from '@google/genai';
+import ENV_VAR from '../config/envConfig';
 
 export const generateGenaiResponse = async (prompt: {
   text?: string;
@@ -29,7 +30,7 @@ export const generateGenaiResponse = async (prompt: {
 
     if (prompt.genaiStreaming) {
       const response = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: ENV_VAR.GENAI_MODEL,
         contents,
         config: {
           thinkingConfig: {
@@ -56,7 +57,7 @@ export const generateGenaiResponse = async (prompt: {
       });
     } else {
       const result = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: ENV_VAR.GENAI_MODEL,
         contents,
         config: {
           thinkingConfig: {
