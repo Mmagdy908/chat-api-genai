@@ -19,7 +19,7 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 
 * Retrieve and update user profile (name, avatar, status)
 * Search users by username
-* Online/offline status using Redis pub/sub
+* Online/Idle/offline status using Redis pub/sub
 * Cached status for fast lookup
 
 ### 💬 Conversations
