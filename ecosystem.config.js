@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'chat-app',
-      script: './dist/index.js',
+      script: './dist/server.js',
       instances: 5,
       exec_mode: 'fork',
       env_production: {
