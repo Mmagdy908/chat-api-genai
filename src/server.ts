@@ -1,8 +1,9 @@
-import { mongoConfig } from './config/mongo';
-import { redisConfig, clearRedis } from './config/redis';
-import app from './app';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { mongoConfig } from './config/mongo';
+import { redisConfig, clearRedis, pubClient, subClient } from './config/redis';
+import app from './app';
 import { setupSocket } from './socket/socket';
 import ENV_VAR from './config/envConfig';
 
@@ -23,6 +24,7 @@ const io = new Server(httpServer, {
     origin: '*', // Adjust for production (e.g., specific frontend URL)
     methods: ['GET', 'POST'],
   },
+  adapter: createAdapter(pubClient, subClient),
 });
 
 // Initialize Socket.IO event handlers

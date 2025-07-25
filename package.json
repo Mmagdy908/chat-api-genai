@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest tests --runInBand",
+    "test": "jest tests --runInBand --coverage",
     "test-specific": "jest tests/friendship --runInBand --detectOpenHandles",
     "start": "nodemon src/server.ts",
-    "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts"
+    "start:prod": "SET NODE_ENV=production&&nodemon src/server.ts",
+    "pm2": "SET NODE_ENV=production&&pm2 start  dist/src/server.js -i 5 "
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.10.0",
+    "@socket.io/redis-adapter": "^8.3.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",

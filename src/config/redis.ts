@@ -7,10 +7,19 @@ const client = createClient({
   socket: {
     host: ENV_VAR.REDIS_HOST,
     port: ENV_VAR.REDIS_PORT,
+
+    reconnectStrategy: (retries) => {
+      const delay = Math.min(retries * 100, 3000);
+      console.log(`Reconnecting attempt ${retries}, retrying in ${delay}ms`);
+      return delay;
+    },
   },
 });
 
 export const subscriber = client.duplicate();
+
+export const pubClient = client.duplicate();
+export const subClient = client.duplicate();
 
 client.on('error', (err) => console.log('Redis Client Error', err));
 
@@ -18,6 +27,8 @@ export const redisConfig = async () => {
   try {
     await client.connect();
     await subscriber.connect();
+    await pubClient.connect();
+    await subClient.connect();
 
     client.configSet('notify-keyspace-events', 'Ex');
 
