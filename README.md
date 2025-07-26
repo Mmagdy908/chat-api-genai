@@ -45,7 +45,7 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 ### ⚡ Real-Time Communication (Socket.IO)
 
 - Real-time message delivery
-- Presence updates (online/offline)
+- Presence updates (online/idel/offline)
 - Read and delivery receipts
 - Live conversation updates
 - Real-time friend request notifications
