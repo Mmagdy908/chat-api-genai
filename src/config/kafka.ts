@@ -10,4 +10,5 @@ export const kafka = new Kafka({
     password: ENV_VAR.KAFKA_PASSWORD,
   },
   ssl: true,
+  logCreator: () => () => {},
 } as KafkaConfig);

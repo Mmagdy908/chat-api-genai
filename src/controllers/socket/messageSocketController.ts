@@ -47,9 +47,9 @@ export const sendMessage =
       );
     } catch (err: any) {
       console.error('Kafka message processing error:', err);
-      const { status, statusCode, message, data } = handleError(err.error);
+      const { status, statusCode, message, data } = handleError(err.error || err);
       console.log(messageData);
-      io.to(`chat:${messageData.chat}`).emit(SocketEvents.Custom_Error, {
+      io.to(`user:${messageData.sender}`).emit(SocketEvents.Custom_Error, {
         status,
         statusCode,
         message,
