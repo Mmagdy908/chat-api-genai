@@ -95,7 +95,7 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 ## 🧪 Running Locally
 
 ```bash
-git clone https://github.com/Mmagdy908/chat-app-api.git
+git clone https://github.com/Mmagdy908/chat-api-genai.git
 cd chat-app-api
 npm install
 
