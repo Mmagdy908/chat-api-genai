@@ -88,7 +88,7 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 
 ## 🚀 Live Deployment
 
-* **Backend URL:** \[Insert Deployment Link Here]
+* **Backend URL:** \[https://chat-app-api-p97e.onrender.com]
 
 ---
 
