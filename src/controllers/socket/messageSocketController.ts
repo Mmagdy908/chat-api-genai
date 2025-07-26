@@ -31,15 +31,7 @@ export const produceMessage =
 export const sendMessage =
   (io: Server, socket?: Socket) => async (messageData: messageSchemas.SendMessageRequest) => {
     try {
-      // messageData.sender = socket.request.user.id;
       const message = await messageService.send(messageData);
-      // const response = {
-      //   status: 'success',
-      //   statusCode: 200,
-      //   message: 'Successfully sent message',
-      // };
-
-      // handleSocketResponse(callback, response);
 
       io.to(`chat:${message.chat.toString()}`).emit(
         SocketEvents.Message,
@@ -48,7 +40,7 @@ export const sendMessage =
     } catch (err: any) {
       console.error('Kafka message processing error:', err);
       const { status, statusCode, message, data } = handleError(err.error || err);
-      console.log(messageData);
+
       io.to(`user:${messageData.sender}`).emit(SocketEvents.Custom_Error, {
         status,
         statusCode,
@@ -56,8 +48,6 @@ export const sendMessage =
         data,
         messageId: err.messageId,
       });
-      // console.log(err);
-      // handleSocketResponse(callback, handleError(err));
     }
   };
 

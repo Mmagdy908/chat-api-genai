@@ -17,7 +17,7 @@ export class AppError extends Error {
 export const handleError = (err: any) => {
   err.status ??= 'error';
   err.statusCode ??= 500;
-  console.log('ERROR: ', err);
+
   let error = err;
   try {
     if (err.cause?.code === 11000) error = new AppError(400, err.message);

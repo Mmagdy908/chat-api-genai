@@ -39,7 +39,6 @@ describe('createGroup controller', () => {
     jest.mocked(chatService.createGroup).mockResolvedValue(chat);
     jest.mocked(chatSchemas.mapGetResponse).mockReturnValue(mappedChat);
 
-    console.log(mappedGroup);
     // Act
     await createGroup(req as Request, res as Response, next);
 

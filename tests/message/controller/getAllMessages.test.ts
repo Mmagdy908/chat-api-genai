@@ -48,7 +48,6 @@ describe('getAllMessages controller', () => {
 
     // Act
     await getAllMessages(req as Request, res as Response, next);
-    console.log(messages);
     // Assert
     expect(messageService.getAllByChat).toHaveBeenCalledWith('chat-id', undefined, undefined);
     expect(messageSchemas.mapGetResponse).toHaveBeenCalledTimes(messages.length);

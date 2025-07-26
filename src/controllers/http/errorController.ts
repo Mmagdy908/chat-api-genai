@@ -12,7 +12,6 @@ const sendProdError = (err: AppError, res: Response) => {
   if (err.isOperational)
     res.status(err.statusCode).json({ status: err.status, message: err.message });
   else {
-    console.log('Error: ', err);
     res.status(500).json({
       status: 'error',
       message: 'something went wrong',
