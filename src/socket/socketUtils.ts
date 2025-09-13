@@ -1,5 +1,5 @@
 import { SocketResponse } from '../interfaces/sockets/responses';
-import { Middleware } from '../types/middleware';
+import { Middleware } from '../types/middleware.types';
 
 export const wrap = (middleware: Middleware) => (socket: any, next: (err?: any) => void) => {
   middleware(socket.request, {} as any, next);
