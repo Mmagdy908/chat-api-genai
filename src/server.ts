@@ -42,6 +42,9 @@ async function startServer() {
 
   const apolloServer = new ApolloServer<TContext>({
     schema,
+    rootValue: {
+      user: { name: 'John Doe' },
+    },
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
 

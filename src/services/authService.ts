@@ -88,6 +88,26 @@ export const userLogin = async (
   };
 };
 
+export const isUserLoggedIn = async (token?: string): Promise<User> => {
+  // 1) get access token
+  if (!token || !token.startsWith('Bearer')) throw new AppError(401, 'You are not logged in');
+
+  const accessToken = token?.split(' ')[1] as string;
+
+  // 2) verify access token
+  const payload = await verifyToken(accessToken);
+
+  // 3) check if user exists
+  const user = await userRepository.getById(payload.userId);
+  if (!user) throw new AppError(401, 'User does not exist');
+
+  // 4) check if user changed password after token creation
+  if (user.passwordUpdatedAt && user.passwordUpdatedAt > payload.iat)
+    throw new AppError(401, 'Invalid access token ');
+
+  return user;
+};
+
 export const refreshToken = async (
   userId: string,
   refreshToken: string
