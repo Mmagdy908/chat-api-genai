@@ -46,6 +46,7 @@ async function startServer() {
       user: { name: 'John Doe' },
     },
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    includeStacktraceInErrorResponses: false,
   });
 
   await apolloServer.start();

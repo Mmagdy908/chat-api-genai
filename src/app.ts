@@ -21,7 +21,7 @@ import { AppError } from './util/appError';
 
 const app = express();
 
-export const configureApp = (apolloServer: ApolloServer) => {
+export const configureApp = (apolloServer?: ApolloServer) => {
   // MIDDLEWARES
 
   // applying cors
@@ -88,7 +88,7 @@ export const configureApp = (apolloServer: ApolloServer) => {
   app.use('/api/v1/uploads', uploadRouter);
 
   // graphql middleware
-  app.use('/api/v1/graphql', graphqlExpressMiddleware(apolloServer));
+  if (apolloServer) app.use('/api/v1/graphql', graphqlExpressMiddleware(apolloServer));
 
   // route not found
   app.use('/{*splat}', (req, res, next) => {
