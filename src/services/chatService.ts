@@ -6,6 +6,7 @@ import { AppError } from '../util/appError';
 import { CreateGroupChatRequest, GetChatResponse } from '../schemas/chatSchemas';
 import { Chat } from '../interfaces/models/chat';
 import user from '../models/user';
+import { Chat_Type } from '../enums/chatEnums';
 
 export const join = async (userId: string, chatId: string) => {
   const chat = await chatRepository.getById(chatId);
@@ -96,4 +97,28 @@ export const getAllChatsByMember = async (
       { path: 'lastMessage', populate: 'sender' },
     ],
   });
+};
+
+export const isGroupChatAdmin = async (chatId: string, userId: string) => {
+  const chat = await chatRepository.getById(chatId);
+
+  if (!chat) throw new AppError(404, 'Chat not found');
+
+  if (chat.type !== Chat_Type.Group) throw new AppError(400, 'This chat is not a group');
+
+  if (![chat.owner.toString(), ...chat.admins.map((admin) => admin.toString())].includes(userId))
+    throw new AppError(403, 'Logged In User is not an admin of this chat');
+
+  return chat;
+};
+
+export const isChatMember = async (chatId: string, userId: string) => {
+  const chat = await chatRepository.getById(chatId);
+
+  if (!chat) throw new AppError(404, 'Chat not found');
+
+  if (!chat.members.map((member) => member.toString()).includes(userId))
+    throw new AppError(403, 'Logged In User is not a member of this chat');
+
+  return chat;
 };
