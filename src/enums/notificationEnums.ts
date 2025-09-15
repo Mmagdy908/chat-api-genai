@@ -1,11 +1,11 @@
 export enum Notification_Type {
-  Received_Friend_Request = 'received_friend_request',
-  Accepted_Friend_Request = 'accepted_friend_request',
+  Received_Friend_Request = 'Received_Friend_Request',
+  Accepted_Friend_Request = 'Accepted_Friend_Request',
 }
 
 export enum Notification_Status {
-  Unread = 'unread',
-  Read = 'read',
+  Unread = 'Unread',
+  Read = 'Read',
 }
 
 export enum Reference_Type {

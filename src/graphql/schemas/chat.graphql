@@ -27,7 +27,7 @@ type Chat {
   admins: [String!]
   metaData: ChatMetaData
   type: ChatType!
-  members: [User!]!
+  members: [PopulatedUser!]!
   lastMessage: Message
   createdAt: String!
   updatedAt: String!
@@ -43,13 +43,6 @@ type ChatMetaData {
   name: String
   description: String
   image: String
-}
-
-type User {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  photo: String
 }
 
 enum ChatType {

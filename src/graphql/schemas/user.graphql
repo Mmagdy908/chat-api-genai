@@ -1,0 +1,6 @@
+type PopulatedUser {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  photo: String
+}

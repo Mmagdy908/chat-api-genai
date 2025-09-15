@@ -1,0 +1,34 @@
+type Query {
+  """
+  Fetch notifications for the authenticated user.
+  - limit: Maximum number of notifications to return (default: 20).
+  - before: Cursor for pagination to fetch notifications created before the specified ID.
+  """
+  notifications(limit: Int, before: String): [Notification!]
+  unreadNotificationsCount: Int
+}
+type Notification {
+  id: ID!
+  type: Notification_Type!
+  sender: PopulatedUser!
+  recipient: String!
+  reference: String!
+  referenceType: Reference_Type!
+  status: Notification_Status!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum Notification_Type {
+  Received_Friend_Request
+  Accepted_Friend_Request
+}
+
+enum Notification_Status {
+  Unread
+  Read
+}
+
+enum Reference_Type {
+  Friendship
+}

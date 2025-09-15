@@ -12,7 +12,7 @@ type Query {
 type Message {
   id: ID!
   chat: String!
-  sender: User
+  sender: PopulatedUser
   status: MessageStatus!
   content: MessageContent!
   deliveredTo: [String!]
