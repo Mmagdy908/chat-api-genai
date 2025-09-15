@@ -1,6 +1,7 @@
 # Scalable Real-Time Chat API with GenAI Integration
 
-A comprehensive real-time chat application built with **Node.js**, **TypeScript**, **Kafka**, **Redis**, **Socket.IO**, and **MongoDB**. It supports private/group messaging, live presence, friendship handling, and intelligent responses using GenAI.
+A comprehensive real-time chat application built with **Node.js**, **TypeScript**, **Kafka**, **Redis**, **Socket.IO**, **MongoDB**, and **GraphQL**.
+It supports private/group messaging, live presence, friendship handling, and intelligent responses using GenAI.
 
 ---
 
@@ -8,79 +9,83 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 
 ### 🔐 Authentication & Security
 
-- JWT-based registration and login
-- Access + refresh tokens (rotation & revocation)
-- Redis-based refresh token storage
-- Email verification
-- Bcrypt password hashing
-- Protected routes via middleware
+* JWT-based registration and login (**REST API**)
+* Access + refresh tokens (rotation & revocation)
+* Redis-based refresh token storage
+* Email verification
+* Bcrypt password hashing
+* Protected routes via middleware
 
-### 👤 User Management
+### 👤 User Management (**GraphQL API**)
 
-- Retrieve and update user profile (name, avatar, status)
-- Search users by username
-- Online/Idle/offline status using Redis pub/sub
-- Cached status for fast lookup
+* Retrieve and update user profile (name, avatar, status)
+* Search users by username
+* Online/Idle/offline status using Redis pub/sub
+* Cached status for fast lookup
 
-### 💬 Conversations
+### 💬 Conversations (**GraphQL API**)
 
-- One-on-one messaging
-- Group chat support with roles (admin/member)
-- Create/update conversations with metadata (name, avatar, description)
-- List all user conversations
-- Add/remove participants in group chats
+* One-on-one messaging
+* Group chat support with roles (admin/member)
+* Create/update conversations with metadata (name, avatar, description)
+* List all user conversations
+* Add/remove participants in group chats
 
-### 📨 Messaging
+### 📨 Messaging (**GraphQL API**)
 
-- Send text and media messages
-- Message history with pagination
-- Read/unread status tracking
-- Kafka message queue for reliable delivery
+* Send text and media messages
+* Message history with pagination
+* Read/unread status tracking
+* Kafka message queue for reliable delivery
 
-### 🤝 Friendships
+### 🤝 Friendships (**GraphQL API**)
 
-- Send and respond to friend requests
-- Receive real-time notifications for requests
+* Send and respond to friend requests
+* Receive real-time notifications for requests
 
-### ⚡ Real-Time Communication (Socket.IO)
+### ⚡ Real-Time Communication (**Socket.IO**)
 
-- Real-time message delivery
-- Presence updates (online/idel/offline)
-- Read and delivery receipts
-- Live conversation updates
-- Real-time friend request notifications
+* Real-time message delivery
+* Presence updates (online/idle/offline)
+* Read and delivery receipts
+* Live conversation updates
+* Real-time friend request notifications
 
 ### 🤖 GenAI Integration (Google Gemini)
 
-- Integrated with **Google Gemini API**
-- Mention `@genai` in any message to activate the AI assistant
-- Accepts text, images, videos, audio, PDFs
-- Responds intelligently in text
-- Supports immediate or streaming replies
+* Integrated with **Google Gemini API**
+* Mention `@genai` in any message to activate the AI assistant
+* Accepts text, images, videos, audio, PDFs
+* Responds intelligently in text
+* Supports immediate or streaming replies
 
 ### 📁 Media & Infrastructure
 
-- File/image upload via Multer + Cloudinary + CDN
-- Push notification support (mobile or PWA)
-- Multi-device login synchronization
-- Input validation using Zod
-- Scalable architecture with PM2 + Socket.IO adapter
-- Unit & Integration Testing
-- 95% test coverage using Jest and Supertest
+* File/image upload via Multer + Cloudinary + CDN (**REST API**)
+* Push notification support (mobile or PWA)
+* Multi-device login synchronization
+* Input validation using Zod
+* Scalable architecture with PM2 + Socket.IO adapter
+* Unit & Integration Testing
+* 95% test coverage using Jest and Supertest
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Node.js**, **TypeScript**, **Express**
-- **MongoDB**, **Redis**, **Kafka**
-- **Socket.IO**
-- **Cloudinary**, **Zod**
-- **PM2**, **Jest**, **Supertest**
+* **Node.js**, **TypeScript**, **Express**
+* **GraphQL (Apollo Server)**
+* **MongoDB**, **Redis**, **Kafka**
+* **Socket.IO**
+* **Cloudinary**, **Zod**
+* **PM2**, **Jest**, **Supertest**
 
 ---
 
 ## 📄 API Documentation
+
+* **REST API Docs:** Included in Postman Collection
+* **GraphQL Docs:** Schema & examples available in Postman Collection
 
 🔗 [Postman Collection](https://documenter.getpostman.com/view/41198842/2sB34oBxMZ)
 
@@ -88,7 +93,7 @@ A comprehensive real-time chat application built with **Node.js**, **TypeScript*
 
 ## 🚀 Live Deployment
 
-- **Backend URL:** [https://chat-app-api-p97e.onrender.com](https://chat-app-api-p97e.onrender.com)
+* **REST & GraphQL API URL:** [https://chat-app-api-p97e.onrender.com](https://chat-app-api-p97e.onrender.com)
 
 ---
 
@@ -118,12 +123,10 @@ npm run test
 
 ## 📬 Contact
 
-For support or questions, open an issue or email: **\[[Email](mailto:ymmagdyfofo@gmail.com)]**
+For support or questions, open an issue or email: **[Email](mailto:ymmagdyfofo@gmail.com)**
 
 ---
 
 ## 📝 License
 
 MIT License © Mmagdy908
-
----
