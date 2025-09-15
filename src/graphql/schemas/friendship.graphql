@@ -1,0 +1,19 @@
+type Mutation {
+  sendFriendRequest(recipientId: String!): Friendship
+  respondToFriendRequest(friendshipId: ID!, status: Friendship_Status!): Friendship
+}
+
+type Friendship {
+  id: ID!
+  sender: String!
+  recipient: String!
+  status: Friendship_Status
+  createdAt: String
+  updatedAt: String
+}
+
+enum Friendship_Status {
+  Accepted
+  Rejected
+  Pending
+}

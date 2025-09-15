@@ -5,8 +5,8 @@ type Query {
   limit: Maximum number of messages to fetch.
   before: Fetch messages created before this message id (objectId).
   """
-  messages(chatId: String!, limit: Int, before: String): [Message!]!
-  unreadMessagesCount(chatId: String!): Int!
+  messages(chatId: String!, limit: Int, before: String): [Message!]
+  unreadMessagesCount(chatId: String!): Int
 }
 
 type Message {

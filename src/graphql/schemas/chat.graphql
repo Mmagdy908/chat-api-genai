@@ -4,7 +4,7 @@ type Query {
   before: Fetch chats created before this timestamp (in milliseconds).
   limit: Maximum number of chats to fetch.
   """
-  userChats(before: String, limit: Int): [Chat!]!
+  userChats(before: String, limit: Int): [Chat!]
 }
 
 type Mutation {
@@ -15,10 +15,10 @@ type Mutation {
   metaData: Metadata for the group chat (name, description, image).
   members: List of user IDs who will be members of the group.
   """
-  createGroup(metaData: ChatMetaDataInput!, members: [String!]!): Chat!
-  addGroupChatMember(memberId: String!, chatId: String!): Chat!
-  addGroupChatAdmin(adminId: String!, chatId: String!): Chat!
-  removeGroupChatAdmin(adminId: String!, chatId: String!): Chat!
+  createGroup(metaData: ChatMetaDataInput!, members: [String!]!): Chat
+  addGroupChatMember(memberId: String!, chatId: String!): Chat
+  addGroupChatAdmin(adminId: String!, chatId: String!): Chat
+  removeGroupChatAdmin(adminId: String!, chatId: String!): Chat
 }
 
 type Chat {

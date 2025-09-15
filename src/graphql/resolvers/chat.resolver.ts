@@ -4,7 +4,6 @@ import { GetChatResponse, mapGetResponse, mapCreateGroupRequest } from '../../sc
 
 import * as authGaurd from '../gaurds/authGaurd';
 import * as chatGaurd from '../gaurds/chatGaurd';
-import { addGroupChatMember } from '../../repositories/chatRepository';
 
 export default {
   Query: {
