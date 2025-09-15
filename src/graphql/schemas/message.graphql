@@ -6,6 +6,7 @@ type Query {
   before: Fetch messages created before this message id (objectId).
   """
   messages(chatId: String!, limit: Int, before: String): [Message!]!
+  unreadMessagesCount(chatId: String!): Int!
 }
 
 type Message {

@@ -18,5 +18,11 @@ export default {
           : mapGetResponse(message)
       );
     }),
+
+    unreadMessagesCount: chatGuard.isChatMember(async (_: TObj, args: TArg, context: TContext) => {
+      const count = await messageService.getUnreadMessagesCount(context.user.id, args.chatId);
+
+      return count;
+    }),
   },
 };
