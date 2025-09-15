@@ -1,0 +1,29 @@
+type Query {
+  """
+  Fetch a user by their unique ID.
+  """
+  user(id: ID!): User
+
+  """
+  Search for users by their username.
+  Returns a list of users matching the search criteria.
+  """
+  searchedUsers(username: String!): [User!]!
+}
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  fullName: String!
+  username: String!
+  email: String!
+  photo: String!
+}
+
+type PopulatedUser {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  photo: String
+}

@@ -1,4 +1,5 @@
 import express from 'express';
+import { ApolloServer } from '@apollo/server';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -14,69 +15,87 @@ import friendshipRouter from './routes/friendshipRoutes';
 import chatRouter from './routes/chatRoutes';
 import notificationRouter from './routes/notificationRoutes';
 import uploadRouter from './routes/uploadRoutes';
+import { graphqlExpressMiddleware } from './middlewares/graphqlMiddleware';
 import globalErrorHandler from './controllers/http/errorController';
 import { AppError } from './util/appError';
 
 const app = express();
-// MIDDLEWARES
 
-// applying cors
-app.use(cors());
-// for non simple requests
-app.options('/{*splat}', cors());
+export const configureApp = (apolloServer?: ApolloServer) => {
+  // MIDDLEWARES
 
-//set security http header
-app.use(helmet());
+  // applying cors
+  app.use(cors());
+  // for non simple requests
+  app.options('/{*splat}', cors());
 
-// rate limiting
-const limiter = rateLimiter({
-  limit: 100, //customize according to your app
-  windowMs: 60 * 60 * 1000,
-  message: 'too many requests, please try again in an hour',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+  //set security http header
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
+          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+          manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
+          frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
+        },
+      },
+    })
+  );
+  // rate limiting
+  const limiter = rateLimiter({
+    limit: 100, //customize according to your app
+    windowMs: 60 * 60 * 1000,
+    message: 'too many requests, please try again in an hour',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
 
-app.use('/api', limiter);
+  app.use('/api', limiter);
 
-//body-parser to parse req.body
-app.use(
-  express.json({
-    limit: '10kb',
-  })
-);
+  //body-parser to parse req.body
+  app.use(
+    express.json({
+      limit: '10kb',
+    })
+  );
 
-// compress text sent in responses
-app.use(compression());
+  // compress text sent in responses
+  app.use(compression());
 
-// cookie parser
-app.use(cookieParser());
+  // cookie parser
+  app.use(cookieParser());
 
-//sanitize data against nosql injections
-// if (ENV_VAR.NODE_ENV !== 'test') app.use(mongoSanitizer());
+  //sanitize data against nosql injections
+  // if (ENV_VAR.NODE_ENV !== 'test') app.use(mongoSanitizer());
 
-//prevent parameter pollution
-app.use(hpp());
+  //prevent parameter pollution
+  app.use(hpp());
 
-// trust proxy
-app.set('trust proxy', 1);
+  // trust proxy
+  app.set('trust proxy', 1);
 
-//development loggings
-if (ENV_VAR.NODE_ENV === 'development') app.use(morgan('dev'));
+  //development loggings
+  if (ENV_VAR.NODE_ENV === 'development') app.use(morgan('dev'));
 
-// routers
-app.use('/api/v1', authRouter);
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/friendships', friendshipRouter);
-app.use('/api/v1/chats', chatRouter);
-app.use('/api/v1/notifications', notificationRouter);
-app.use('/api/v1/uploads', uploadRouter);
+  // routers
+  app.use('/api/v1', authRouter);
+  app.use('/api/v1/users', userRouter);
+  app.use('/api/v1/friendships', friendshipRouter);
+  app.use('/api/v1/chats', chatRouter);
+  app.use('/api/v1/notifications', notificationRouter);
+  app.use('/api/v1/uploads', uploadRouter);
 
-//route not found
-app.use('/{*splat}', (req, res, next) => {
-  next(new AppError(404, `can't find ${req.originalUrl} on this server`));
-});
+  // graphql middleware
+  if (apolloServer) app.use('/api/v1/graphql', graphqlExpressMiddleware(apolloServer));
 
-app.use(globalErrorHandler);
+  // route not found
+  app.use('/{*splat}', (req, res, next) => {
+    next(new AppError(404, `can't find ${req.originalUrl} on this server`));
+  });
+
+  app.use(globalErrorHandler);
+};
 
 export default app;

@@ -1,0 +1,43 @@
+type Query {
+  """
+  Fetch messages of a specific chat.
+  chatId: ID of the chat to fetch messages from.
+  limit: Maximum number of messages to fetch.
+  before: Fetch messages created before this message id (objectId).
+  """
+  messages(chatId: String!, limit: Int, before: String): [Message!]
+  unreadMessagesCount(chatId: String!): Int
+}
+
+type Message {
+  id: ID!
+  chat: String!
+  sender: PopulatedUser
+  status: MessageStatus!
+  content: MessageContent!
+  deliveredTo: [String!]
+  seenBy: [String!]
+  genai: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MessageContent {
+  contentType: MessageType!
+  text: String
+  mediaUrl: String
+}
+
+enum MessageStatus {
+  Sent
+  Delivered
+  Seen
+}
+
+enum MessageType {
+  Text
+  Image
+  Video
+  Audio
+  Document
+}

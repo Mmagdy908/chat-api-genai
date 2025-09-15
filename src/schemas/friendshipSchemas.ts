@@ -27,6 +27,8 @@ const sendFriendshipResponseSchema = z.object({
     message: 'Invalid id format',
   }),
   status: z.enum(Friendship_Status),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 const respondToFriendshipResponseSchema = sendFriendshipResponseSchema;
@@ -50,6 +52,8 @@ export const mapSendResponse = (friendship: Friendship) =>
     sender: friendship.sender,
     recipient: friendship.recipient,
     status: friendship.status,
+    createdAt: friendship.createdAt,
+    updatedAt: friendship.updatedAt,
   });
 
 export const mapRespondResponse = mapSendResponse;

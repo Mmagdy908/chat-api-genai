@@ -5,8 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest tests --runInBand --coverage",
-    "test-specific": "jest tests/friendship --runInBand --detectOpenHandles",
+    "test": "jest ./tests --runInBand --coverage",
+    "test-specific": "jest tests/user/integration/getUser.test.ts --runInBand --detectOpenHandles",
     "start": "pm2-runtime start  ./dist/src/server.js -i 5",
     "dev": "nodemon src/server.ts",
     "prod": "SET NODE_ENV=production&&nodemon src/server.ts"
@@ -50,7 +50,11 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
     "@google/genai": "^1.10.0",
+    "@graphql-tools/load-files": "^7.0.1",
+    "@graphql-tools/schema": "^10.0.25",
     "@socket.io/redis-adapter": "^8.3.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -62,6 +66,7 @@
     "express": "^5.1.0",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^8.0.1",
+    "graphql": "^16.11.0",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
     "html-to-text": "^9.0.5",

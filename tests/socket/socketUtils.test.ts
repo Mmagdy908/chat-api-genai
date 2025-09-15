@@ -2,7 +2,7 @@ import { jest, describe, expect, test, beforeEach } from '@jest/globals';
 import { wrap, handleSocketResponse } from '../../src/socket/socketUtils';
 import { SocketResponse } from '../../src/interfaces/sockets/responses';
 import { Request, Response, NextFunction } from 'express';
-import { Middleware } from '../../src/types/middleware';
+import { Middleware } from '../../src/types/middleware.types';
 
 describe('socketUtils', () => {
   beforeEach(() => {

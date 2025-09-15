@@ -1,0 +1,51 @@
+type Query {
+  """
+  Fetch all chats of the logged-in user.
+  before: Fetch chats created before this timestamp (in milliseconds).
+  limit: Maximum number of chats to fetch.
+  """
+  userChats(before: String, limit: Int): [Chat!]
+}
+
+type Mutation {
+  """
+  Create a new group chat.
+  owner: ID of the user creating the group (automatically set to the logged-in user).
+  admins: List of user IDs who will be admins of the group.
+  metaData: Metadata for the group chat (name, description, image).
+  members: List of user IDs who will be members of the group.
+  """
+  createGroup(metaData: ChatMetaDataInput!, members: [String!]!): Chat
+  addGroupChatMember(memberId: String!, chatId: String!): Chat
+  addGroupChatAdmin(adminId: String!, chatId: String!): Chat
+  removeGroupChatAdmin(adminId: String!, chatId: String!): Chat
+}
+
+type Chat {
+  id: ID!
+  owner: String
+  admins: [String!]
+  metaData: ChatMetaData
+  type: ChatType!
+  members: [PopulatedUser!]!
+  lastMessage: Message
+  createdAt: String!
+  updatedAt: String!
+}
+
+input ChatMetaDataInput {
+  name: String!
+  description: String
+  image: String
+}
+
+type ChatMetaData {
+  name: String
+  description: String
+  image: String
+}
+
+enum ChatType {
+  Private
+  Group
+}
