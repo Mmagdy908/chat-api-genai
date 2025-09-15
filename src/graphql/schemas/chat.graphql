@@ -16,6 +16,9 @@ type Mutation {
   members: List of user IDs who will be members of the group.
   """
   createGroup(metaData: ChatMetaDataInput!, members: [String!]!): Chat!
+  addGroupChatMember(memberId: String!, chatId: String!): Chat!
+  addGroupChatAdmin(adminId: String!, chatId: String!): Chat!
+  removeGroupChatAdmin(adminId: String!, chatId: String!): Chat!
 }
 
 type Chat {

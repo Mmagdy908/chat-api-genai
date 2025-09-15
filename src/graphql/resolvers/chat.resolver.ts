@@ -3,6 +3,8 @@ import * as chatService from '../../services/chatService';
 import { GetChatResponse, mapGetResponse, mapCreateGroupRequest } from '../../schemas/chatSchemas';
 
 import * as authGaurd from '../gaurds/authGaurd';
+import * as chatGaurd from '../gaurds/chatGaurd';
+import { addGroupChatMember } from '../../repositories/chatRepository';
 
 export default {
   Query: {
@@ -27,5 +29,31 @@ export default {
       const chat = await chatService.createGroup(body);
       return mapGetResponse(chat as GetChatResponse);
     }),
+
+    addGroupChatMember: chatGaurd.isGroupChatAdmin(
+      async (_: TObj, args: TArg, context: TContext) => {
+        const chat = await chatService.addGroupMember(args.memberId, context.chat);
+        return mapGetResponse(chat as GetChatResponse);
+      }
+    ),
+
+    addGroupChatAdmin: chatGaurd.isGroupChatAdmin(
+      async (_: TObj, args: TArg, context: TContext) => {
+        const chat = await chatService.addGroupAdmin(args.adminId, context.chat);
+        return mapGetResponse(chat as GetChatResponse);
+      }
+    ),
+
+    removeGroupChatAdmin: chatGaurd.isGroupChatAdmin(
+      async (_: TObj, args: TArg, context: TContext) => {
+        const chat = await chatService.removeGroupAdmin(
+          context.user.id,
+          args.adminId,
+          context.chat
+        );
+
+        return mapGetResponse(chat as GetChatResponse);
+      }
+    ),
   },
 };
