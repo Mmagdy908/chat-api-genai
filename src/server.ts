@@ -3,6 +3,8 @@ import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schemas/index';
 import { resolvers } from './graphql/resolvers/index';
@@ -45,7 +47,10 @@ async function startServer() {
     rootValue: {
       user: { name: 'John Doe' },
     },
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginLandingPageLocalDefault({ embed: true }), // force Sandbox
+    ],
     includeStacktraceInErrorResponses: false,
   });
 
