@@ -52,6 +52,7 @@ async function startServer() {
       ApolloServerPluginLandingPageLocalDefault({ embed: true }), // force Sandbox
     ],
     includeStacktraceInErrorResponses: false,
+    introspection: true,
   });
 
   await apolloServer.start();
