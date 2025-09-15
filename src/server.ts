@@ -4,8 +4,8 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { typeDefs } from './graphql/schemas/index.ts';
-import { resolvers } from './graphql/resolvers/index.ts';
+import { typeDefs } from './graphql/schemas/index';
+import { resolvers } from './graphql/resolvers/index';
 import { TContext } from './types/graphql.types';
 
 import { mongoConfig } from './config/mongo';
